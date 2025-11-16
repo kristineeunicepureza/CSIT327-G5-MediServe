@@ -125,10 +125,47 @@ def delete_medicine(request, id):
 
 #Medicine info list
 def medicine_list(request):
-    """Public Browse Medicines page."""
+    """Public Browse Medicines page with filtering."""
     medicines = Medicine.objects.all().order_by('name')
-    return render(request, 'medicine_list.html', {'medicines': medicines})
 
+    # Get filter parameters
+    search_query = request.GET.get('search', '')
+    category_filter = request.GET.get('category', '')
+    stock_filter = request.GET.get('stock', '')
+
+    # Apply search filter
+    if search_query:
+        medicines = medicines.filter(
+            Q(name__icontains=search_query) |
+            Q(brand__icontains=search_query) |
+            Q(category__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+
+    # Apply category filter
+    if category_filter:
+        medicines = medicines.filter(category__iexact=category_filter)
+
+    # Apply stock filter
+    if stock_filter:
+        if stock_filter == 'in-stock':
+            medicines = medicines.filter(stock_quantity__gt=10)
+        elif stock_filter == 'low-stock':
+            medicines = medicines.filter(stock_quantity__gt=0, stock_quantity__lte=10)
+        elif stock_filter == 'out-of-stock':
+            medicines = medicines.filter(stock_quantity=0)
+
+    # Get unique categories for filter options
+    categories = Medicine.objects.values_list('category', flat=True).distinct().order_by('category')
+    categories = [cat for cat in categories if cat]  # Remove None values
+
+    return render(request, 'medicine_list.html', {
+        'medicines': medicines,
+        'categories': categories,
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'stock_filter': stock_filter,
+    })
 
 # -------------------------------------------------------------------
 # Medicine Info Page

@@ -121,7 +121,7 @@ USE_TZ = True
 
 # Static files (WhiteNoise)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'MediServe' / 'static']  # Point to MediServe/static
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # For production
 
 # WhiteNoise configuration
@@ -138,7 +138,14 @@ SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 AUTH_USER_MODEL = 'accounts.Account'
 
 # Security settings for production
-if os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "True").lower() == "true":
+if os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "False").lower() == "true":
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+# Disable SSL redirect and secure cookies in local development
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+

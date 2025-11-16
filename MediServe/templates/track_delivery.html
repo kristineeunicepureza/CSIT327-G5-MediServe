@@ -5,68 +5,70 @@
 
 {% block content %}
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf5 100%);
-        min-height: 100vh;
-        padding-bottom: 30px;
-    }
-
     .delivery-container {
         width: 100%;
-        max-width: 1000px;
-        margin: 30px auto;
-        background-color: #FFFFFF;
+        max-width: 1400px;
+        margin: 40px auto;
+        animation: fadeInUp 0.6s ease-out;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(54, 72, 158, 0.12);
         overflow: hidden;
-        max-height: calc(100vh - 60px);
-        display: flex;
-        flex-direction: column;
+        background: #ffffff;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .delivery-header {
-        padding: 25px 35px;
         background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        padding: 30px 40px;
         display: flex;
         align-items: center;
-        gap: 15px;
+        box-shadow: 0 4px 20px rgba(54, 72, 158, 0.2);
         position: relative;
         overflow: hidden;
-        flex-shrink: 0;
     }
 
     .delivery-header::before {
         content: '';
         position: absolute;
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 50%;
-        top: -150px;
-        right: -100px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+        z-index: 1;
     }
 
     .btn-back {
+        padding: 12px;
         background-color: rgba(255, 255, 255, 0.2);
-        color: #FFFFFF;
-        border-radius: 10px;
-        width: 42px;
-        height: 42px;
+        color: #ffffff;
+        border-radius: 12px;
+        width: 48px;
+        height: 48px;
         display: flex;
         justify-content: center;
         align-items: center;
-        border: none;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         transition: all 0.3s ease;
         text-decoration: none;
-        cursor: pointer;
-        z-index: 1;
     }
 
     .btn-back:hover {
@@ -75,62 +77,60 @@
     }
 
     .delivery-title {
-        font-size: 1.5em;
-        color: #FFFFFF;
-        font-weight: 600;
-        z-index: 1;
+        font-size: 1.8em;
+        color: #ffffff;
+        margin: 0;
+        font-weight: 700;
     }
 
     .delivery-main {
-        padding: 35px 40px 40px;
+        padding: 30px 40px 40px;
+        background: #f8f9fa;
+        max-height: 70vh;
         overflow-y: auto;
-        flex: 1;
+        overflow-x: hidden;
     }
 
-    .delivery-main::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .delivery-main::-webkit-scrollbar-track {
-        background: #f1f1f1;
+    .intro-text {
+        color: #6c757d;
+        margin-bottom: 30px;
+        font-size: 1.05em;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
         border-radius: 10px;
-    }
-
-    .delivery-main::-webkit-scrollbar-thumb {
-        background: #36489e;
-        border-radius: 10px;
+        border-left: 4px solid #36489e;
     }
 
     .orders-list {
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 25px;
     }
 
     .order-card {
-        background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
-        padding: 25px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
         border-radius: 16px;
-        border: 2px solid #e5e7eb;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-left: 6px solid #36489e;
         transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        animation: scaleIn 0.4s ease-out;
     }
 
-    .order-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #36489e 0%, #5c74e3 100%);
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 
     .order-card:hover {
-        border-color: #36489e;
-        box-shadow: 0 8px 24px rgba(54, 72, 158, 0.12);
-        transform: translateY(-2px);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(54, 72, 158, 0.15);
     }
 
     .order-header {
@@ -139,18 +139,20 @@
         align-items: center;
         margin-bottom: 20px;
         padding-bottom: 15px;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid #e8ecf4;
     }
 
     .order-id {
-        font-size: 1.15em;
+        font-size: 1.3em;
         font-weight: 700;
-        color: #1a202c;
+        color: #36489e;
+        margin: 0 0 5px 0;
     }
 
     .order-date {
         font-size: 0.85em;
-        color: #6b7280;
+        color: #7c8db5;
+        font-style: italic;
         display: flex;
         align-items: center;
         gap: 6px;
@@ -172,7 +174,7 @@
         left: 20px;
         right: 20px;
         height: 3px;
-        background-color: #e5e7eb;
+        background-color: #e8ecf4;
         z-index: 0;
     }
 
@@ -186,15 +188,15 @@
     }
 
     .status-icon {
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
-        background-color: #e5e7eb;
+        background-color: #e8ecf4;
         color: #9ca3af;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1em;
+        font-size: 1.1em;
         border: 3px solid #ffffff;
         transition: all 0.3s ease;
     }
@@ -202,43 +204,46 @@
     .status-step.active .status-icon {
         background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
         color: #ffffff;
-        box-shadow: 0 4px 12px rgba(54, 72, 158, 0.3);
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.4);
         animation: pulse 2s ease-in-out infinite;
     }
 
     @keyframes pulse {
         0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+        50% { transform: scale(1.08); }
     }
 
     .status-step.completed .status-icon {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         color: #ffffff;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
     }
 
     .status-label {
-        font-size: 0.75em;
-        color: #6b7280;
+        font-size: 0.8em;
+        color: #6c757d;
         font-weight: 600;
         text-align: center;
-        max-width: 80px;
+        max-width: 90px;
     }
 
     .status-step.active .status-label,
     .status-step.completed .status-label {
-        color: #1a202c;
+        color: #2c3e50;
         font-weight: 700;
     }
 
     .order-items {
         margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #e8ecf4;
     }
 
     .items-header {
-        font-size: 0.95em;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 12px;
+        font-size: 1em;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -249,21 +254,28 @@
         justify-content: space-between;
         align-items: center;
         padding: 12px 15px;
-        background-color: #f9fafb;
+        background-color: #f8f9fa;
         border-radius: 10px;
         margin-bottom: 8px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e8ecf4;
+        transition: all 0.2s ease;
+    }
+
+    .item-row:hover {
+        background-color: #e7f3ff;
+        border-color: #36489e;
     }
 
     .item-name {
         font-weight: 600;
-        color: #1a202c;
+        color: #2c3e50;
         font-size: 0.95em;
     }
 
     .item-quantity {
         font-size: 0.9em;
-        color: #6b7280;
+        color: #7c8db5;
+        font-weight: 600;
     }
 
     .status-badge {
@@ -271,33 +283,30 @@
         align-items: center;
         gap: 6px;
         padding: 8px 14px;
-        border-radius: 8px;
+        border-radius: 20px;
         font-size: 0.85em;
-        font-weight: 600;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .status-pending {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-        color: #856404;
-        border: 1px solid #ffd93d;
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        color: #333;
     }
 
     .status-processing {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        color: #155724;
-        border: 1px solid #b1dfbb;
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: #ffffff;
     }
 
     .status-outfordelivery {
-        background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
-        color: #004085;
-        border: 1px solid #99ccff;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        color: #ffffff;
     }
 
     .status-completed {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        color: #065f46;
-        border: 1px solid #6ee7b7;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #ffffff;
         display: none;
     }
 
@@ -313,27 +322,28 @@
 
     .empty-state {
         text-align: center;
-        padding: 80px 20px;
-        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-        border-radius: 16px;
-        border: 2px dashed #d1d5db;
+        padding: 80px 40px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
 
-    .empty-state i {
-        font-size: 5em;
-        color: #d1d5db;
-        margin-bottom: 25px;
+    .empty-icon {
+        font-size: 4em;
+        color: #dee2e6;
+        margin-bottom: 20px;
     }
 
-    .empty-state h3 {
+    .empty-title {
         font-size: 1.5em;
-        color: #374151;
+        color: #2c3e50;
         margin-bottom: 12px;
+        font-weight: 700;
     }
 
-    .empty-state p {
+    .empty-text {
         font-size: 1em;
-        color: #6b7280;
+        color: #6c757d;
         margin-bottom: 25px;
     }
 
@@ -341,31 +351,101 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 12px 24px;
+        padding: 14px 28px;
         background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
         color: #ffffff;
         text-decoration: none;
-        border-radius: 10px;
+        border-radius: 12px;
         font-weight: 600;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.3);
     }
 
     .empty-state a:hover {
-        background: linear-gradient(135deg, #2d3a82 0%, #36489e 100%);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.3);
+        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.4);
+    }
+
+    /* Scrollbar Styling */
+    .delivery-main::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .delivery-main::-webkit-scrollbar-track {
+        background: #f1f3f5;
+        border-radius: 10px;
+    }
+
+    .delivery-main::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        border-radius: 10px;
+    }
+
+    .delivery-main::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5c74e3 0%, #7a8ee8 100%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .delivery-container {
+            margin: 20px auto;
+        }
+
+        .delivery-header {
+            padding: 20px 25px;
+        }
+
+        .delivery-title {
+            font-size: 1.4em;
+        }
+
+        .delivery-main {
+            padding: 20px 25px;
+        }
+
+        .order-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .status-timeline {
+            padding: 0 10px;
+        }
+
+        .status-timeline::before {
+            left: 10px;
+            right: 10px;
+        }
+
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1em;
+        }
+
+        .status-label {
+            font-size: 0.7em;
+            max-width: 70px;
+        }
     }
 </style>
 
 <div class="delivery-container">
     <div class="delivery-header">
-        <a href="{% url 'main_menu' %}" class="btn-back">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1 class="delivery-title">Track Delivery</h1>
+        <div class="header-left">
+            <a href="{% url 'main_menu' %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="delivery-title">Track Delivery</h1>
+        </div>
     </div>
 
     <div class="delivery-main">
+        <div class="intro-text">
+            <i class="fas fa-shipping-fast"></i> Monitor the status of your medicine orders in real-time.
+        </div>
+
         <div class="orders-list">
             {% for order in orders %}
             <div class="order-card {% if order.status == 'Completed' %}completed{% endif %}" data-order-id="{{ order.id }}" data-status="{{ order.status }}">
@@ -373,7 +453,7 @@
                     <div>
                         <h3 class="order-id">Order #{{ order.id }}</h3>
                         <p class="order-date">
-                            <i class="fas fa-calendar-alt"></i>
+                            <i class="far fa-calendar-alt"></i>
                             {{ order.created_at|date:"F d, Y" }}
                         </p>
                     </div>
@@ -424,9 +504,9 @@
             </div>
             {% empty %}
             <div class="empty-state">
-                <i class="fas fa-box-open"></i>
-                <h3>No Orders Yet</h3>
-                <p>You haven't placed any orders. Start browsing medicines!</p>
+                <i class="fas fa-box-open empty-icon"></i>
+                <h3 class="empty-title">No Orders Yet</h3>
+                <p class="empty-text">You haven't placed any orders. Start browsing medicines!</p>
                 <a href="{% url 'medicine_list' %}">
                     <i class="fas fa-pills"></i> Browse Medicines
                 </a>
@@ -449,9 +529,9 @@
             const ordersList = document.querySelector('.orders-list');
             ordersList.innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-box-open"></i>
-                    <h3>No Active Orders</h3>
-                    <p>All your orders have been completed. Start browsing medicines!</p>
+                    <i class="fas fa-box-open empty-icon"></i>
+                    <h3 class="empty-title">No Active Orders</h3>
+                    <p class="empty-text">All your orders have been completed. Start browsing medicines!</p>
                     <a href="{% url 'medicine_list' %}">
                         <i class="fas fa-pills"></i> Browse Medicines
                     </a>

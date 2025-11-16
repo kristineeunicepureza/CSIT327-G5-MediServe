@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -57,7 +56,7 @@
                             <div style="flex-grow: 1;">
                                 <strong style="font-size: 1.4em; color: #36489e;">Order #{{ order.id }}</strong>
                                 <p style="font-size: 0.9em; color: #777; margin: 0;">Customer: {{ order.user.username }}</p>
-                                <strong style="font-size: 1.1em; color: #dc3545;">Total: ₱{{ order.total_price|floatformat:2 }}</strong>
+                                <strong style="font-size: 1.1em; color: #dc3545;">Total: â‚±{{ order.total_price|floatformat:2 }}</strong>
                             </div>
 
                             {# STATUS BADGE #}
