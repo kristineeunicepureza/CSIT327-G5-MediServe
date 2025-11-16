@@ -6,54 +6,79 @@
 {% block content %}
 <style>
     .medicine-container {
-        width: 90%;
-        max-width: 1200px;
+        width: 100%;
+        max-width: 1400px;
         margin: 40px auto;
-        background-color: #FFFFFF;
+        animation: fadeInUp 0.6s ease-out;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(54, 72, 158, 0.12);
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .medicine-header {
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
         padding: 30px 40px;
-        border-bottom: 2px solid #E3EBEE;
-        background: linear-gradient(135deg, #FFFFFF 0%, #f8f9fc 100%);
-        border-radius: 20px 20px 0 0;
+        box-shadow: 0 4px 20px rgba(54, 72, 158, 0.2);
+        position: relative;
+        overflow: visible;
+    }
+
+    .medicine-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
     }
 
     .header-top {
         display: flex;
         align-items: center;
         margin-bottom: 25px;
+        position: relative;
+        z-index: 1;
     }
 
     .btn-back {
-        padding: 10px;
+        padding: 12px;
         margin-right: 15px;
-        background-color: #E3EBEE;
-        color: #36489e;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
         border-radius: 12px;
-        width: 45px;
-        height: 45px;
+        width: 48px;
+        height: 48px;
         display: flex;
         justify-content: center;
         align-items: center;
-        border: none;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         transition: all 0.3s ease;
         text-decoration: none;
-        box-shadow: 0 2px 8px rgba(54, 72, 158, 0.1);
     }
 
     .btn-back:hover {
-        background-color: #BFB9FA;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(191, 185, 250, 0.3);
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(-3px);
     }
 
     .medicine-header h1 {
-        font-size: 2em;
+        font-size: 1.8em;
         font-weight: 700;
-        color: #36489e;
+        color: #ffffff;
         margin: 0;
         letter-spacing: 0.5px;
     }
@@ -61,27 +86,40 @@
     .search-filter-bar {
         display: flex;
         gap: 15px;
+        position: relative;
+        z-index: 100;
+    }
+
+    .filter-wrapper {
+        position: relative;
     }
 
     .search-wrapper {
         position: relative;
-        flex-grow: 1;
+        flex: 1;
+        max-width: 600px;
     }
 
     .search-input {
         width: 100%;
         padding: 14px 45px 14px 18px;
-        border: 2px solid #E3EBEE;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 12px;
         font-size: 1em;
         transition: all 0.3s ease;
-        background-color: #FFFFFF;
+        background-color: rgba(255, 255, 255, 0.95);
+        box-sizing: border-box;
+    }
+
+    .search-input::placeholder {
+        color: #6c757d;
     }
 
     .search-input:focus {
         outline: none;
-        border-color: #36489e;
-        box-shadow: 0 0 0 3px rgba(54, 72, 158, 0.1);
+        border-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        background-color: #ffffff;
     }
 
     .search-icon {
@@ -91,12 +129,19 @@
         transform: translateY(-50%);
         color: #36489e;
         font-size: 1.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .search-icon:hover {
+        color: #5c74e3;
+        transform: translateY(-50%) scale(1.1);
     }
 
     .btn-filter {
-        background-color: #FFFFFF;
-        color: #36489e;
-        border: 2px solid #36489e;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         padding: 14px 28px;
         border-radius: 12px;
         font-weight: 600;
@@ -106,56 +151,235 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        position: relative;
     }
 
     .btn-filter:hover {
-        background-color: #36489e;
-        color: #FFFFFF;
+        background-color: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(54, 72, 158, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-filter.active {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-color: #ffffff;
+    }
+
+    .filter-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75em;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Filter Modal */
+    .filter-modal {
+        display: none;
+        position: absolute;
+        top: 110%;
+        right: 0;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border: 2px solid #e8ecf4;
+        border-radius: 15px;
+        padding: 25px;
+        width: 350px;
+        box-shadow: 0 10px 40px rgba(54, 72, 158, 0.25);
+        z-index: 9999;
+        animation: slideDown 0.3s ease;
+    }
+
+    .filter-modal.active {
+        display: block;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .filter-section {
+        margin-bottom: 20px;
+    }
+
+    .filter-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .filter-section h3 {
+        font-size: 0.9em;
+        font-weight: 700;
+        color: #36489e;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .filter-option:hover {
+        background-color: #e7f3ff;
+    }
+
+    .filter-option input[type="checkbox"],
+    .filter-option input[type="radio"] {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #36489e;
+    }
+
+    .filter-option label {
+        cursor: pointer;
+        flex-grow: 1;
+        font-size: 0.95em;
+        color: #2c3e50;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #e8ecf4;
+    }
+
+    .btn-clear-filter {
+        flex: 1;
+        padding: 12px;
+        background-color: #e8ecf4;
+        color: #2c3e50;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-clear-filter:hover {
+        background-color: #d5dae0;
+    }
+
+    .btn-apply-filter {
+        flex: 1;
+        padding: 12px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-apply-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .filter-tag {
+        background-color: rgba(255, 255, 255, 0.95);
+        color: #36489e;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .filter-tag i {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .filter-tag i:hover {
+        transform: scale(1.2);
     }
 
     .medicine-main {
-        padding: 40px;
+        padding: 30px 40px 40px;
+        background: #f8f9fa;
+    }
+
+    .intro-text {
+        color: #6c757d;
+        margin-bottom: 30px;
+        font-size: 1.05em;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
+        border-radius: 10px;
+        border-left: 4px solid #36489e;
     }
 
     .medicine-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 25px;
+        max-height: 65vh;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .medicine-card {
-        background-color: #FFFFFF;
-        border: 2px solid #E3EBEE;
-        border-radius: 15px;
-        padding: 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-left: 6px solid #36489e;
         transition: all 0.3s ease;
-        cursor: pointer;
+        animation: scaleIn 0.4s ease-out;
         position: relative;
-        overflow: hidden;
     }
 
-    .medicine-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #36489e 0%, #BFB9FA 100%);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 
     .medicine-card:hover {
-        border-color: #BFB9FA;
         transform: translateY(-5px);
-        box-shadow: 0 12px 30px rgba(54, 72, 158, 0.15);
-    }
-
-    .medicine-card:hover::before {
-        transform: scaleX(1);
+        box-shadow: 0 8px 30px rgba(54, 72, 158, 0.15);
     }
 
     .card-header {
@@ -167,30 +391,34 @@
     }
 
     .medicine-name {
-        font-size: 1.15em;
+        font-size: 1.2em;
         font-weight: 700;
-        color: #333;
+        color: #36489e;
         margin-bottom: 5px;
         line-height: 1.4;
     }
 
     .medicine-category {
         font-size: 0.85em;
-        color: #777;
+        color: #7c8db5;
         margin: 0;
+        font-style: italic;
     }
 
     .card-middle {
         display: flex;
         align-items: center;
         margin: 15px 0;
+        padding: 15px 0;
+        border-top: 2px solid #e8ecf4;
+        border-bottom: 2px solid #e8ecf4;
     }
 
     .medicine-icon {
-        height: 40px;
-        width: 40px;
+        height: 45px;
+        width: 45px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #BFB9FA 0%, #E3EBEE 100%);
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -198,31 +426,32 @@
     }
 
     .medicine-icon i {
-        font-size: 1.2em;
+        font-size: 1.3em;
         color: #36489e;
     }
 
     .stock-badge {
-        padding: 6px 12px;
-        border-radius: 8px;
+        padding: 8px 14px;
+        border-radius: 20px;
         font-size: 0.8em;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .stock-in {
-        background-color: #28a745;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         color: #FFFFFF;
     }
 
     .stock-low {
-        background-color: #ffc107;
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
         color: #333;
     }
 
     .stock-out {
-        background-color: #d93025;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         color: #FFFFFF;
     }
 
@@ -242,42 +471,89 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
-        box-shadow: 0 4px 12px rgba(54, 72, 158, 0.2);
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.3);
         text-decoration: none;
     }
 
     .btn-view-medicine:hover:not(:disabled) {
-        background: linear-gradient(135deg, #2d3a82 0%, #36489e 100%);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(54, 72, 158, 0.3);
+        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.4);
     }
 
     .btn-view-medicine:disabled {
         opacity: 0.5;
         cursor: not-allowed;
-        background: #ccc;
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
     }
 
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
-        color: #777;
+        padding: 80px 40px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        grid-column: 1 / -1;
     }
 
-    .empty-state i {
+    .empty-icon {
         font-size: 4em;
-        color: #E3EBEE;
+        color: #dee2e6;
         margin-bottom: 20px;
     }
 
-    .empty-state p {
-        font-size: 1.2em;
-        margin: 0;
+    .empty-title {
+        font-size: 1.3em;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .empty-state button {
+        margin-top: 20px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.3);
+    }
+
+    .empty-state button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.4);
+    }
+
+    /* Scrollbar Styling */
+    .medicine-grid::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .medicine-grid::-webkit-scrollbar-track {
+        background: #f1f3f5;
+        border-radius: 10px;
+    }
+
+    .medicine-grid::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        border-radius: 10px;
+    }
+
+    .medicine-grid::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5c74e3 0%, #7a8ee8 100%);
+    }
+
+    @media (max-width: 1024px) {
+        .medicine-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            overflow-x: hidden;
+        }
     }
 
     @media (max-width: 768px) {
         .medicine-container {
-            width: 95%;
             margin: 20px auto;
         }
 
@@ -286,7 +562,7 @@
         }
 
         .medicine-header h1 {
-            font-size: 1.5em;
+            font-size: 1.4em;
         }
 
         .search-filter-bar {
@@ -298,8 +574,13 @@
             justify-content: center;
         }
 
+        .filter-modal {
+            width: calc(100% - 20px);
+            right: 10px;
+        }
+
         .medicine-main {
-            padding: 25px;
+            padding: 20px 25px;
         }
 
         .medicine-grid {
@@ -321,29 +602,120 @@
         </div>
 
         <!-- Search and Filter Section -->
-        <div class="search-filter-bar">
-            <div class="search-wrapper">
-                <input type="text" id="search-input" onkeyup="filterMedicines(this.value)" placeholder="Search medicines..." class="search-input" />
-                <i class="fas fa-search search-icon"></i>
+        <form method="GET" id="filter-form">
+            <div class="search-filter-bar">
+                <div class="search-wrapper">
+                    <input type="text"
+                           name="search"
+                           value="{{ search_query }}"
+                           placeholder="Search medicines..."
+                           class="search-input"
+                           id="search-input" />
+                    <i class="fas fa-search search-icon" id="search-icon"></i>
+                </div>
+
+                <div class="filter-wrapper">
+                    <button type="button" class="btn-filter" id="filter-toggle">
+                        <i class="fas fa-filter"></i> Filter
+                        {% if category_filter or stock_filter %}
+                            <span class="filter-badge">
+                                {% if category_filter and stock_filter %}2{% else %}1{% endif %}
+                            </span>
+                        {% endif %}
+                    </button>
+
+                    <!-- Filter Modal -->
+                    <div class="filter-modal" id="filter-modal">
+                        <div class="filter-section">
+                            <h3>Category</h3>
+                            {% for category in categories %}
+                                <div class="filter-option">
+                                    <input type="radio"
+                                           name="category"
+                                           value="{{ category }}"
+                                           id="cat-{{ forloop.counter }}"
+                                           {% if category_filter == category %}checked{% endif %}>
+                                    <label for="cat-{{ forloop.counter }}">{{ category }}</label>
+                                </div>
+                            {% empty %}
+                                <p style="color: #999; font-size: 0.9em;">No categories available</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="filter-section">
+                            <h3>Stock Status</h3>
+                            <div class="filter-option">
+                                <input type="radio"
+                                       name="stock"
+                                       value="in-stock"
+                                       id="stock-in"
+                                       {% if stock_filter == 'in-stock' %}checked{% endif %}>
+                                <label for="stock-in">In Stock (10+)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio"
+                                       name="stock"
+                                       value="low-stock"
+                                       id="stock-low"
+                                       {% if stock_filter == 'low-stock' %}checked{% endif %}>
+                                <label for="stock-low">Low Stock (1-10)</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio"
+                                       name="stock"
+                                       value="out-of-stock"
+                                       id="stock-out"
+                                       {% if stock_filter == 'out-of-stock' %}checked{% endif %}>
+                                <label for="stock-out">Out of Stock</label>
+                            </div>
+                        </div>
+
+                        <div class="filter-actions">
+                            <button type="button" class="btn-clear-filter" onclick="clearFilters()">
+                                Clear All
+                            </button>
+                            <button type="submit" class="btn-apply-filter">
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <button class="btn-filter">
-                <i class="fas fa-filter"></i> Filter
-            </button>
-        </div>
+            <!-- Active Filters Display -->
+            {% if category_filter or stock_filter %}
+                <div class="active-filters">
+                    {% if category_filter %}
+                        <span class="filter-tag">
+                            Category: {{ category_filter }}
+                            <i class="fas fa-times" onclick="removeFilter('category')"></i>
+                        </span>
+                    {% endif %}
+                    {% if stock_filter %}
+                        <span class="filter-tag">
+                            Stock: {{ stock_filter|title }}
+                            <i class="fas fa-times" onclick="removeFilter('stock')"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </form>
     </header>
 
     <!-- Product Grid -->
     <main class="medicine-main">
-        <div id="medicine-grid" class="medicine-grid">
+        <div class="intro-text">
+            <i class="fas fa-pills"></i> Browse available medicines and check stock status.
+        </div>
+
+        <div class="medicine-grid">
             {% for medicine in medicines %}
-                <div class="medicine-card" data-name="{{ medicine.name|lower }}">
+                <div class="medicine-card">
                     <div class="card-header">
                         <div class="card-info">
                             <h3 class="medicine-name">
                                 {{ medicine.name }}
                                 {% if medicine.brand %} ({{ medicine.brand }}){% endif %}
-                                {% if medicine.dosage %} - {{ medicine.dosage }}{% endif %}
                             </h3>
 
                             {% if medicine.category %}
@@ -366,14 +738,21 @@
                         {% endwith %}
                     </div>
 
-                    <a href="{% url 'medicine_info' medicine_id=medicine.id %}" class="btn-view-medicine" {% if medicine.stock_quantity == 0 %}style="pointer-events: none;"{% endif %}>
+                    <a href="{% url 'medicine_info' medicine_id=medicine.id %}"
+                       class="btn-view-medicine"
+                       {% if medicine.stock_quantity == 0 %}style="pointer-events: none;" disabled{% endif %}>
                         <i class="fas fa-info-circle"></i> View Medicine
                     </a>
                 </div>
             {% empty %}
                 <div class="empty-state">
-                    <i class="fas fa-pills"></i>
-                    <p>The catalog is currently empty. No medicines are available.</p>
+                    <i class="fas fa-pills empty-icon"></i>
+                    <p class="empty-title">No medicines found matching your criteria.</p>
+                    {% if category_filter or stock_filter %}
+                        <button onclick="clearFilters()">
+                            Clear Filters
+                        </button>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -381,17 +760,53 @@
 </div>
 
 <script>
-function filterMedicines(query) {
-    const searchQuery = query.toLowerCase();
-    const cards = document.querySelectorAll('.medicine-card');
-    cards.forEach(card => {
-        const medicineName = card.getAttribute('data-name');
-        if (medicineName && medicineName.includes(searchQuery)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
+    // Toggle filter modal
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterModal = document.getElementById('filter-modal');
+
+    filterToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterModal.classList.toggle('active');
+        filterToggle.classList.toggle('active');
+    });
+
+    // Close modal when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!filterModal.contains(e.target) && !filterToggle.contains(e.target)) {
+            filterModal.classList.remove('active');
+            filterToggle.classList.remove('active');
         }
     });
-}
+
+    // Prevent modal from closing when clicking inside
+    filterModal.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    // Clear all filters
+    function clearFilters() {
+        const form = document.getElementById('filter-form');
+        const inputs = form.querySelectorAll('input[type="radio"]');
+        inputs.forEach(input => input.checked = false);
+        form.querySelector('input[name="search"]').value = '';
+        form.submit();
+    }
+
+    // Remove individual filter
+    function removeFilter(filterType) {
+        const form = document.getElementById('filter-form');
+        const inputs = form.querySelectorAll(`input[name="${filterType}"]`);
+        inputs.forEach(input => input.checked = false);
+        form.submit();
+    }
+
+    // Submit form on Enter key in search input
+    const searchInput = document.querySelector('input[name="search"]');
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('filter-form').submit();
+        }
+    });
 </script>
 {% endblock %}

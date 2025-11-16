@@ -8,125 +8,597 @@
 <!-- SweetAlert2 (for confirmation modals) -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<div style="width: 100%; max-width: 900px; margin: 40px auto; background-color: #FFFFFF; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+<style>
+    .announcements-container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 40px auto;
+        animation: fadeInUp 0.6s ease-out;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+        background: #ffffff;
+    }
 
-    <!-- HEADER BAR -->
-    <header style="padding: 15px 30px; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center;">
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
+    .announcements-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        padding: 30px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .announcements-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .back-button {
+        padding: 12px;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border-radius: 12px;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .back-button:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(-3px);
+    }
+
+    .header-title {
+        font-size: 1.8em;
+        color: #ffffff;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .add-post-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #ffffff;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        position: relative;
+        z-index: 1;
+    }
+
+    .add-post-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .message-alert {
+        margin: 20px 40px;
+        padding: 16px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-align: center;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 2px solid #28a745;
+    }
+
+    .message-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 2px solid #dc3545;
+    }
+
+    .announcements-main {
+        padding: 30px 40px 40px;
+        background: #f8f9fa;
+    }
+
+    .intro-text {
+        color: #6c757d;
+        margin-bottom: 30px;
+        font-size: 1.05em;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
+        border-radius: 10px;
+        border-left: 4px solid #007bff;
+    }
+
+    .announcements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+        gap: 25px;
+        max-height: 65vh;
+        overflow-y: auto;
+    }
+
+    .announcement-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-left: 6px solid #dc3545;
+        transition: all 0.3s ease;
+        animation: scaleIn 0.4s ease-out;
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .announcement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.15);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        gap: 15px;
+    }
+
+    .announcement-title {
+        font-size: 1.3em;
+        color: #dc3545;
+        font-weight: 700;
+        margin: 0;
+        flex: 1;
+    }
+
+    .date-badge {
+        background-color: #e8ecf4;
+        color: #2c3e50;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .announcement-content {
+        color: #2c3e50;
+        line-height: 1.6;
+        margin: 15px 0;
+        font-size: 1em;
+    }
+
+    .card-footer {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #e8ecf4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .time-ago {
+        color: #7c8db5;
+        font-size: 0.85em;
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        color: #333;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: #ffffff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+        font-size: 4em;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+
+    .empty-title {
+        font-size: 1.3em;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        padding: 35px;
+        border-radius: 20px;
+        width: 500px;
+        max-width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        position: relative;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: scaleIn 0.3s ease-out;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e8ecf4;
+    }
+
+    .modal-title {
+        font-size: 1.5em;
+        color: #dc3545;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.8em;
+        color: #6c757d;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+        background-color: #f8f9fa;
+        color: #dc3545;
+        transform: rotate(90deg);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.9em;
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e8ecf4;
+        border-radius: 10px;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #dc3545;
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px solid #e8ecf4;
+    }
+
+    .btn-cancel {
+        background-color: #e8ecf4;
+        border: none;
+        color: #2c3e50;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 0.95em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background-color: #d5dae0;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: #ffffff;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 0.95em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    /* Scrollbar Styling */
+    .announcements-grid::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .announcements-grid::-webkit-scrollbar-track {
+        background: #f1f3f5;
+        border-radius: 10px;
+    }
+
+    .announcements-grid::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border-radius: 10px;
+    }
+
+    .announcements-grid::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .announcements-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .announcements-header {
+            padding: 20px 25px;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .header-title {
+            font-size: 1.4em;
+        }
+
+        .add-post-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .announcements-main {
+            padding: 20px 25px;
+        }
+
+        .modal-content {
+            width: 95%;
+            padding: 25px;
+        }
+
+        .card-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-footer {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .card-actions {
+            width: 100%;
+        }
+
+        .btn-edit, .btn-delete {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="announcements-container">
+    <!-- HEADER -->
+    <header class="announcements-header">
+        <div class="header-left">
             {% if is_admin %}
-                <a href="{% url 'admin_menu' %}" class="btn" style="
-                    padding: 8px 10px;
-                    margin-right: 15px;
-                    background-color: #fff;
-                    color: #dc3545;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    border: 1px solid #dc3545;
-                    box-shadow: none;
-                ">
+                <a href="{% url 'admin_menu' %}" class="back-button">
                     <i class="fas fa-arrow-left"></i>
                 </a>
             {% else %}
-                <a href="{% url 'main_menu' %}" class="btn" style="
-                    padding: 8px 10px;
-                    margin-right: 15px;
-                    background-color: #fff;
-                    color: #dc3545;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    border: 1px solid #dc3545;
-                    box-shadow: none;
-                ">
+                <a href="{% url 'main_menu' %}" class="back-button">
                     <i class="fas fa-arrow-left"></i>
                 </a>
             {% endif %}
-
-            <h1 style="font-size: 1.5em; color: #dc3545; font-weight: 600;">Official Announcements</h1>
+            <h1 class="header-title">Official Announcements</h1>
         </div>
 
         {% if is_admin %}
-        <button onclick="document.getElementById('add-post-form').style.display='block'"
-                class="btn"
-                style="background-color: #28a745; color: #FFFFFF; padding: 10px 15px; border-radius: 5px;">
-            <i class="fas fa-plus"></i> Add New Post
+        <button onclick="document.getElementById('addPostModal').style.display='flex'" class="add-post-btn">
+            <i class="fas fa-plus-circle"></i> Add New Post
         </button>
         {% endif %}
     </header>
 
-    <!-- MESSAGES SECTION -->
+    <!-- MESSAGES -->
     {% if messages %}
-    <div style="padding: 15px 30px;">
         {% for message in messages %}
-        <div style="
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            {% if message.tags == 'success' %}
-                background-color: #d4edda;
-                color: #155724;
-                border: 1px solid #c3e6cb;
-            {% elif message.tags == 'error' %}
-                background-color: #f8d7da;
-                color: #721c24;
-                border: 1px solid #f5c6cb;
-            {% else %}
-                background-color: #d1ecf1;
-                color: #0c5460;
-                border: 1px solid #bee5eb;
-            {% endif %}
-        ">
-            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-            {{ message }}
-        </div>
+            <div class="message-alert {% if 'success' in message.tags %}message-success{% elif 'error' in message.tags %}message-error{% endif %}">
+                <i class="fas {% if 'success' in message.tags %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                {{ message }}
+            </div>
         {% endfor %}
-    </div>
     {% endif %}
 
     <!-- MAIN CONTENT -->
-    <main style="padding: 30px;">
-        <p style="color: #555; margin-bottom: 30px;">Important notices from the Barangay and MediServe.</p>
+    <main class="announcements-main">
+        <div class="intro-text">
+            <i class="fas fa-bullhorn"></i> Important notices from the Barangay and MediServe.
+        </div>
 
-        <div class="announcement-list-view" style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
-
+        <div class="announcements-grid">
             {% for post in announcements %}
-                <div class="announcement-card" style="
-                    background-color: #f7f9fa;
-                    padding: 20px;
-                    border-radius: 8px;
-                    border: 1px solid #e0e0e0;
-                    position: relative;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                ">
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <strong style="font-size: 1.2em; color: #dc3545;">{{ post.title }}</strong>
-                        <small style="color: #777;">Posted: {{ post.date_posted|date:"F j, Y, g:i a" }}</small>
+                <div class="announcement-card">
+                    <div class="card-header">
+                        <h3 class="announcement-title">{{ post.title }}</h3>
+                        <span class="date-badge">
+                            <i class="far fa-calendar-alt"></i>
+                            {{ post.date_posted|date:"M j, Y" }}
+                        </span>
                     </div>
 
-                    <p style="margin: 0; color: #333;">{{ post.content }}</p>
+                    <p class="announcement-content">{{ post.content }}</p>
 
-                    {% if is_admin %}
-                        <div style="margin-top: 10px; display: flex; gap: 8px;">
-                            <!-- EDIT BUTTON -->
-                            <button onclick="confirmEdit('{{ post.id }}')"
-                                    class="btn-secondary"
-                                    style="background-color: #ffc107; color: #333; padding: 5px 10px; font-size: 0.8em; border: none; border-radius: 4px; cursor: pointer;">
+                    <div class="card-footer">
+                        <span class="time-ago">
+                            <i class="far fa-clock"></i>
+                            Posted {{ post.date_posted|timesince }} ago
+                        </span>
+
+                        {% if is_admin %}
+                        <div class="card-actions">
+                            <button onclick="confirmEdit('{{ post.id }}')" class="btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-
-                            <!-- DELETE BUTTON -->
-                            <button onclick="confirmDelete('{{ post.id }}')"
-                                    class="btn-danger"
-                                    style="background-color: #dc3545; color: #fff; padding: 5px 10px; font-size: 0.8em; border: none; border-radius: 4px; cursor: pointer;">
+                            <button onclick="confirmDelete('{{ post.id }}')" class="btn-delete">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
@@ -135,76 +607,98 @@
                         <form id="delete-form-{{ post.id }}" action="{% url 'delete_post' post.id %}" method="post" style="display:none;">
                             {% csrf_token %}
                         </form>
-
                         <form id="edit-form-{{ post.id }}" action="{% url 'edit_post' post.id %}" method="get" style="display:none;"></form>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             {% empty %}
-                <p style="text-align: center; padding: 30px; border: 1px solid #ddd; border-radius: 8px;">
-                    No announcements posted yet.
-                </p>
+                <div class="empty-state">
+                    <i class="fas fa-inbox empty-icon"></i>
+                    <p class="empty-title">No announcements posted yet.</p>
+                </div>
             {% endfor %}
         </div>
     </main>
-
-    {% if is_admin %}
-        <!-- ADD POST MODAL -->
-        <div id="add-post-form" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 50;">
-            <div style="background-color: #fff; padding: 30px; border-radius: 10px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-                <form action="{% url 'add_post' %}" method="post">
-                    {% csrf_token %}
-                    <h3 style="color: #dc3545; margin-bottom: 20px;">New Announcement Post</h3>
-
-                    <label for="post-title" style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Title:</label>
-                    <input type="text" id="post-title" name="title" placeholder="Enter announcement title" required style="margin-bottom: 15px; width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 5px; box-sizing: border-box;">
-
-                    <label for="post-content" style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Content:</label>
-                    <textarea id="post-content" name="content" placeholder="Enter announcement content" rows="7" required style="margin-bottom: 25px; width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 5px; box-sizing: border-box; resize: vertical;"></textarea>
-
-                    <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn" style="background-color: #dc3545; color: #FFFFFF; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; flex: 1;">Submit Post</button>
-                        <button type="button" onclick="document.getElementById('add-post-form').style.display='none'" class="btn-secondary" style="background-color: #6c757d; color: #fff; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; flex: 1;">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    {% endif %}
-
 </div>
+
+<!-- ADD POST MODAL -->
+{% if is_admin %}
+<div id="addPostModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">New Announcement Post</h2>
+            <button type="button" onclick="document.getElementById('addPostModal').style.display='none'" class="modal-close">
+                ×
+            </button>
+        </div>
+
+        <form action="{% url 'add_post' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" name="title" placeholder="Enter announcement title" required class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Content</label>
+                <textarea name="content" placeholder="Enter announcement content" required class="form-textarea"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" onclick="document.getElementById('addPostModal').style.display='none'" class="btn-cancel">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i> Submit Post
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 <!-- SweetAlert2 Confirmation Logic -->
 <script>
-  function confirmDelete(postId) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "This will permanently delete the announcement.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#dc3545',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, delete it'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        document.getElementById('delete-form-' + postId).submit();
-      }
-    });
-  }
+window.onclick = function(event) {
+    const modal = document.getElementById('addPostModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+};
 
-  function confirmEdit(postId) {
+function confirmDelete(postId) {
     Swal.fire({
-      title: 'Edit this post?',
-      text: "You will be redirected to the edit form.",
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#28a745',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, edit'
+        title: 'Delete Announcement?',
+        text: "This will permanently delete the announcement. This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-trash"></i> Yes, delete it',
+        cancelButtonText: 'Cancel'
     }).then((result) => {
-      if (result.isConfirmed) {
-        document.getElementById('edit-form-' + postId).submit();
-      }
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + postId).submit();
+        }
     });
-  }
+}
+
+function confirmEdit(postId) {
+    Swal.fire({
+        title: 'Edit Announcement?',
+        text: "You will be redirected to the edit form.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-edit"></i> Yes, edit',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('edit-form-' + postId).submit();
+        }
+    });
+}
 </script>
 
 {% endblock %}

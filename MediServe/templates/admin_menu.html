@@ -6,182 +6,451 @@
 {% block content %}
 <style>
     body {
-        background: linear-gradient(135deg, #E3EBEE 0%, #FFFFFF 100%);
+        background: #f8f9fa;
         min-height: 100vh;
     }
-    
+
     .admin-container {
         width: 100%;
-        max-width: 1000px;
+        max-width: 1400px;
         margin: 40px auto;
-        background-color: #FFFFFF;
+        animation: fadeInUp 0.6s ease-out;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(217, 48, 37, 0.12);
         overflow: hidden;
+        background: #ffffff;
     }
-    
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .admin-header {
-        padding: 20px 40px;
-        background: linear-gradient(135deg, #d93025 0%, #f44336 100%);
-        border-bottom: 3px solid #b71c1c;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        padding: 30px 40px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.2);
+        position: relative;
+        overflow: hidden;
     }
-    
+
+    .admin-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .header-left {
+        position: relative;
+        z-index: 1;
+    }
+
     .admin-header h1 {
         font-size: 1.8em;
         color: #FFFFFF;
-        margin: 0;
+        margin: 0 0 5px 0;
         font-weight: 700;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
     }
-    
+
+    .admin-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95em;
+        margin: 0;
+        font-weight: 400;
+    }
+
     .btn-admin-logout {
-        background-color: #FFFFFF;
-        color: #d93025;
-        border: 2px solid #FFFFFF;
-        padding: 10px 20px;
-        font-weight: 700;
-        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #FFFFFF;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 12px 24px;
+        font-weight: 600;
+        border-radius: 12px;
         text-decoration: none;
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        position: relative;
+        z-index: 1;
     }
-    
+
     .btn-admin-logout:hover {
-        background-color: #BFB9FA;
-        color: #36489e;
-        border-color: #BFB9FA;
+        background-color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
         transform: translateY(-2px);
     }
-    
+
     .admin-content {
         padding: 40px;
-        background-color: #FFFFFF;
+        background: #f8f9fa;
     }
-    
-    .welcome-section h2 {
-        color: #36489e;
-        font-size: 2em;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-    
-    .welcome-section p {
-        color: #666;
-        font-size: 1.15em;
+
+    .welcome-section {
         margin-bottom: 30px;
     }
-    
+
+    .welcome-section h2 {
+        color: #2c3e50;
+        font-size: 1.6em;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .welcome-section p {
+        color: #6c757d;
+        font-size: 1.05em;
+        margin: 0;
+    }
+
     .announcement-banner {
-        border: 3px solid #ffc107;
-        padding: 20px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #fff9e6 0%, #FFFFFF 100%);
+        border: none;
+        padding: 25px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
         margin-bottom: 40px;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 123, 255, 0.15);
+        border-left: 6px solid #007bff;
+        animation: slideIn 0.5s ease-out;
     }
-    
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .announcement-banner-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .announcement-icon {
+        color: #007bff;
+        font-size: 1.3em;
+    }
+
     .announcement-banner strong {
-        color: #d93025;
-        font-size: 1.1em;
-        display: block;
-        margin-bottom: 10px;
+        color: #007bff;
+        font-size: 1.15em;
+        font-weight: 700;
+        margin: 0;
     }
-    
+
     .announcement-banner p {
         font-size: 0.95em;
-        color: #555;
+        color: #2c3e50;
         margin: 0;
         line-height: 1.6;
+        padding-left: 34px;
     }
-    
+
     .admin-menu-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        max-width: 100%;
+    }
+
+    .admin-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        padding: 30px 25px;
+        border-radius: 16px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+        animation: scaleIn 0.4s ease-out;
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .admin-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, currentColor, transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .admin-card:hover::before {
+        opacity: 1;
+    }
+
+    .admin-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .admin-card-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2em;
+        transition: all 0.3s ease;
+    }
+
+    .admin-card:hover .admin-card-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .admin-card-title {
+        font-size: 1.1em;
+        font-weight: 700;
+        margin: 0;
+        transition: all 0.3s ease;
+    }
+
+    .admin-card-description {
+        font-size: 0.85em;
+        opacity: 0.8;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Stock Card - Yellow Theme */
+    .card-stock {
+        border-left: 6px solid #ffc107;
+    }
+
+    .card-stock .admin-card-icon {
+        background: linear-gradient(135deg, #fff9e6 0%, #ffecb3 100%);
+        color: #ff8f00;
+    }
+
+    .card-stock .admin-card-title {
+        color: #f57c00;
+    }
+
+    .card-stock .admin-card-description {
+        color: #6c757d;
+    }
+
+    .card-stock:hover {
+        border-color: #ffc107;
+        box-shadow: 0 8px 30px rgba(255, 193, 7, 0.2);
+    }
+
+    /* Delivery Card - Green Theme */
+    .card-delivery {
+        border-left: 6px solid #28a745;
+    }
+
+    .card-delivery .admin-card-icon {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        color: #2e7d32;
+    }
+
+    .card-delivery .admin-card-title {
+        color: #1b5e20;
+    }
+
+    .card-delivery .admin-card-description {
+        color: #6c757d;
+    }
+
+    .card-delivery:hover {
+        border-color: #28a745;
+        box-shadow: 0 8px 30px rgba(40, 167, 69, 0.2);
+    }
+
+    /* Announcements Card - Blue Theme */
+    .card-announcements {
+        border-left: 6px solid #007bff;
+    }
+
+    .card-announcements .admin-card-icon {
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
+        color: #0056b3;
+    }
+
+    .card-announcements .admin-card-title {
+        color: #004085;
+    }
+
+    .card-announcements .admin-card-description {
+        color: #6c757d;
+    }
+
+    .card-announcements:hover {
+        border-color: #007bff;
+        box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
+    }
+
+    /* Profile Card - Red Theme */
+    .card-profile {
+        border-left: 6px solid #dc3545;
+    }
+
+    .card-profile .admin-card-icon {
+        background: linear-gradient(135deg, #ffe6e6 0%, #ffcdd2 100%);
+        color: #c82333;
+    }
+
+    .card-profile .admin-card-title {
+        color: #bd2130;
+    }
+
+    .card-profile .admin-card-description {
+        color: #6c757d;
+    }
+
+    .card-profile:hover {
+        border-color: #dc3545;
+        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.2);
+    }
+
+    /* Stats Section */
+    .stats-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 20px;
-        max-width: 600px;
-        margin: 0 auto;
+        margin-bottom: 40px;
     }
-    
-    .admin-btn-primary {
-        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
-        color: #333;
-        padding: 25px 15px;
-        font-size: 1em;
-        font-weight: 700;
+
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        padding: 20px;
         border-radius: 12px;
-        text-decoration: none;
-        text-align: center;
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid;
+        animation: slideIn 0.5s ease-out;
     }
-    
-    .admin-btn-primary:hover {
-        background: linear-gradient(135deg, #ffa000 0%, #ff8f00 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+
+    .stat-card h4 {
+        font-size: 0.85em;
+        color: #6c757d;
+        margin: 0 0 8px 0;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    
-    .admin-btn-primary i {
+
+    .stat-card .stat-value {
         font-size: 2em;
-    }
-    
-    .admin-btn-secondary {
-        background: linear-gradient(135deg, #d93025 0%, #f44336 100%);
-        color: #FFFFFF;
-        padding: 25px 15px;
-        font-size: 1em;
         font-weight: 700;
-        border-radius: 12px;
-        text-decoration: none;
-        text-align: center;
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        box-shadow: 0 4px 15px rgba(217, 48, 37, 0.3);
+        margin: 0;
     }
-    
-    .admin-btn-secondary:hover {
-        background: linear-gradient(135deg, #b71c1c 0%, #d93025 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(217, 48, 37, 0.4);
+
+    .stat-card.stat-primary {
+        border-left-color: #007bff;
     }
-    
-    .admin-btn-secondary i {
-        font-size: 2em;
+
+    .stat-card.stat-primary .stat-value {
+        color: #007bff;
     }
-    
+
+    .stat-card.stat-success {
+        border-left-color: #28a745;
+    }
+
+    .stat-card.stat-success .stat-value {
+        color: #28a745;
+    }
+
+    .stat-card.stat-warning {
+        border-left-color: #ffc107;
+    }
+
+    .stat-card.stat-warning .stat-value {
+        color: #f57c00;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .admin-menu-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
     @media (max-width: 768px) {
         .admin-menu-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .admin-content {
             padding: 25px;
         }
-        
+
         .admin-header {
-            padding: 15px 25px;
+            padding: 20px 25px;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .admin-header h1 {
+            font-size: 1.4em;
+        }
+
+        .btn-admin-logout {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .announcement-banner p {
+            padding-left: 0;
+        }
+
+        .stats-section {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 
 <div class="admin-container">
-    <!-- HEADER BAR (Admin Red Theme) -->
+    <!-- HEADER BAR -->
     <header class="admin-header">
-        <h1>ADMIN DASHBOARD</h1>
+        <div class="header-left">
+            <h1>ADMIN DASHBOARD</h1>
+            <p class="admin-subtitle">Manage your pharmacy operations</p>
+        </div>
 
         <!-- LOGOUT BUTTON -->
         <a href="{% url 'logout' %}" class="btn-admin-logout">
@@ -190,41 +459,75 @@
     </header>
 
     <div class="admin-content">
+        <!-- WELCOME SECTION -->
         <div class="welcome-section">
             <h2>Welcome, Administrator</h2>
-            <p>Manage inventory, orders, and announcements.</p>
+            <p>Monitor and manage your pharmacy system efficiently.</p>
         </div>
 
         <!-- ANNOUNCEMENT BANNER -->
         <div class="announcement-banner">
-            <strong>Latest Announcement:</strong>
+            <div class="announcement-banner-header">
+                <i class="fas fa-bullhorn announcement-icon"></i>
+                <strong>Latest Announcement</strong>
+            </div>
             <p>{{ recent_announcement }}</p>
         </div>
+
+        <!-- OPTIONAL: Quick Stats Section -->
+        <!-- Uncomment if you want to add statistics
+        <div class="stats-section">
+            <div class="stat-card stat-primary">
+                <h4>Total Orders</h4>
+                <p class="stat-value">{{ total_orders|default:"0" }}</p>
+            </div>
+            <div class="stat-card stat-success">
+                <h4>Completed</h4>
+                <p class="stat-value">{{ completed_orders|default:"0" }}</p>
+            </div>
+            <div class="stat-card stat-warning">
+                <h4>Low Stock Items</h4>
+                <p class="stat-value">{{ low_stock|default:"0" }}</p>
+            </div>
+        </div>
+        -->
 
         <!-- ADMIN MENU GRID -->
         <div class="admin-menu-grid">
             <!-- 1. Manage Stock -->
-            <a href="{% url 'medicine_stock' %}" class="admin-btn-primary">
-                <i class="fas fa-box"></i>
-                <span>Manage Stock</span>
+            <a href="{% url 'medicine_stock' %}" class="admin-card card-stock">
+                <div class="admin-card-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <h3 class="admin-card-title">Manage Stock</h3>
+                <p class="admin-card-description">Update inventory and track medicine stock levels</p>
             </a>
 
             <!-- 2. Orders for Delivery -->
-            <a href="{% url 'delivery_page' %}" class="admin-btn-primary">
-                <i class="fas fa-truck"></i>
-                <span>Fulfill Orders</span>
+            <a href="{% url 'delivery_page' %}" class="admin-card card-delivery">
+                <div class="admin-card-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3 class="admin-card-title">Fulfill Orders</h3>
+                <p class="admin-card-description">Process and manage delivery requests</p>
             </a>
 
             <!-- 3. Manage Announcements -->
-            <a href="{% url 'announcements' %}" class="admin-btn-primary">
-                <i class="fas fa-bullhorn"></i>
-                <span>Announcements</span>
+            <a href="{% url 'announcements' %}" class="admin-card card-announcements">
+                <div class="admin-card-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <h3 class="admin-card-title">Announcements</h3>
+                <p class="admin-card-description">Create and manage public announcements</p>
             </a>
 
             <!-- 4. Admin Profile -->
-            <a href="{% url 'profile_view' %}" class="admin-btn-secondary">
-                <i class="fas fa-user-shield"></i>
-                <span>Admin Profile</span>
+            <a href="{% url 'profile_view' %}" class="admin-card card-profile">
+                <div class="admin-card-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3 class="admin-card-title">Admin Profile</h3>
+                <p class="admin-card-description">View and update your account settings</p>
             </a>
         </div>
     </div>
