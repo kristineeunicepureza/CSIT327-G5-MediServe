@@ -351,9 +351,16 @@
         </div>
 
         <div style="padding: 20px 30px 30px;">
-            <a href="{% url 'main_menu' %}" class="btn-secondary" style="margin-bottom: 10px;">
-                <i class="fas fa-arrow-left"></i> Back to Menu
-            </a>
+            {# Dynamic Back Button - Routes to Admin Dashboard if staff, Main Menu if regular user #}
+            {% if user.is_staff %}
+                <a href="{% url 'admin_menu' %}" class="btn-secondary" style="margin-bottom: 10px;">
+                    <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'main_menu' %}" class="btn-secondary" style="margin-bottom: 10px;">
+                    <i class="fas fa-arrow-left"></i> Back to Menu
+                </a>
+            {% endif %}
             <a href="{% url 'settings' %}" class="btn-secondary">
                 <i class="fas fa-cog"></i> More Account Options
             </a>
