@@ -20,45 +20,61 @@
         overflow: hidden;
     }
 
+    /* UPDATED HEADER - BLUE GRADIENT STYLE */
     .top-header {
         padding: 20px 40px;
-        background: linear-gradient(135deg, #FFFFFF 0%, #E3EBEE 100%);
-        border-bottom: 2px solid #E3EBEE;
+        background: linear-gradient(135deg, #36489e 0%, #4a5fb8 100%);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        box-shadow: 0 4px 20px rgba(54, 72, 158, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .top-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
     }
 
     .logo-section {
         display: flex;
         align-items: center;
         gap: 12px;
+        position: relative;
+        z-index: 1;
     }
 
     .logo-section img {
         width: 110px;
         height: auto;
-        filter: drop-shadow(0 2px 8px rgba(54, 72, 158, 0.15));
+        filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
     }
 
     .logo-text h1 {
         font-size: 1.5em;
-        color: #36489e;
+        color: #ffffff;
         margin: 0;
         font-weight: 700;
     }
 
     .logo-text p {
         font-size: 0.8em;
-        color: #666;
+        color: rgba(255, 255, 255, 0.9);
         margin: 0;
         line-height: 1;
     }
 
     .btn-logout {
-        background-color: #FFFFFF;
-        color: #36489e;
-        border: 2px solid #E3EBEE;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         padding: 10px 20px;
         font-weight: 600;
         border-radius: 10px;
@@ -67,13 +83,16 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        position: relative;
+        z-index: 1;
     }
 
     .btn-logout:hover {
-        background-color: #BFB9FA;
-        border-color: #BFB9FA;
+        background-color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
         transform: translateY(-2px);
     }
+    /* END OF HEADER UPDATES */
 
     .content-area {
         padding: 40px;
