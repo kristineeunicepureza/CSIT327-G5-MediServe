@@ -474,24 +474,6 @@
             <p>{{ recent_announcement }}</p>
         </div>
 
-        <!-- OPTIONAL: Quick Stats Section -->
-        <!-- Uncomment if you want to add statistics
-        <div class="stats-section">
-            <div class="stat-card stat-primary">
-                <h4>Total Orders</h4>
-                <p class="stat-value">{{ total_orders|default:"0" }}</p>
-            </div>
-            <div class="stat-card stat-success">
-                <h4>Completed</h4>
-                <p class="stat-value">{{ completed_orders|default:"0" }}</p>
-            </div>
-            <div class="stat-card stat-warning">
-                <h4>Low Stock Items</h4>
-                <p class="stat-value">{{ low_stock|default:"0" }}</p>
-            </div>
-        </div>
-        -->
-
         <!-- ADMIN MENU GRID -->
         <div class="admin-menu-grid">
             <!-- 1. Manage Stock -->
@@ -521,8 +503,8 @@
                 <p class="admin-card-description">Create and manage public announcements</p>
             </a>
 
-            <!-- 4. Admin Profile -->
-            <a href="{% url 'profile_view' %}" class="admin-card card-profile">
+            <!-- 4. Admin Profile - UPDATED LINK -->
+            <a href="{% url 'admin_profile' %}" class="admin-card card-profile">
                 <div class="admin-card-icon">
                     <i class="fas fa-user-shield"></i>
                 </div>
