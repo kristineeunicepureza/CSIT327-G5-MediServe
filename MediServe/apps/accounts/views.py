@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from .forms import SignupForm, LoginForm
 from .models import Account
 from apps.announcements.models import Announcement
+from apps.medicine.models import Medicine
+from apps.orders.models import Order
 
 
 def home_redirect(request):
@@ -100,18 +102,57 @@ def main_menu_view(request):
 
 @login_required
 def profile_view(request):
-    profile = request.user  # since your custom user model is Account
+    """Profile view for regular users"""
+    profile = request.user
     if request.method == 'POST':
         # Update logic if you allow saving form data
         profile.first_name = request.POST.get('first_name')
         profile.last_name = request.POST.get('last_name')
-        profile.middle_name = request.POST.get('middle_initial', '')
+        profile.middle_name = request.POST.get('middle_name', '')
         profile.date_of_birth = request.POST.get('date_of_birth')
         profile.gender = request.POST.get('sex')
         profile.save()
+        messages.success(request, 'Profile updated successfully!')
         return redirect('profile_view')
 
     return render(request, 'profile_view.html', {'profile': profile})
+
+
+@login_required
+def admin_profile_view(request):
+    """Profile view specifically for administrators"""
+    # Check if user is admin
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, 'Access denied. Admins only.')
+        return redirect('main_menu')
+
+    # Get statistics for the profile page
+    total_orders = Order.objects.count()
+    total_medicines = Medicine.objects.count()
+    total_users = Account.objects.filter(is_staff=False).count()
+    pending_orders = Order.objects.filter(status='Pending').count()
+
+    if request.method == 'POST':
+        # Update admin profile
+        user = request.user
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.middle_name = request.POST.get('middle_name', '')
+        user.date_of_birth = request.POST.get('date_of_birth')
+        user.gender = request.POST.get('gender')
+        user.save()
+        messages.success(request, 'Admin profile updated successfully!')
+        return redirect('admin_profile')
+
+    context = {
+        'user': request.user,
+        'total_orders': total_orders,
+        'total_medicines': total_medicines,
+        'total_users': total_users,
+        'pending_orders': pending_orders,
+    }
+
+    return render(request, 'admin_profile.html', context)
 
 
 @login_required
