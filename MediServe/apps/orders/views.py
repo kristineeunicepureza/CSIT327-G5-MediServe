@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.db import transaction
-from apps.medicine.models import Medicine
+from apps.medicine.models import Medicine, MedicineBatch
 from .models import Order, OrderItem
 
 User = get_user_model()
@@ -19,8 +19,9 @@ def add_to_order(request, medicine_id):
         quantity = int(request.POST.get("quantity", 1))
         special_request = request.POST.get("special_request", "")
 
-        if quantity > medicine.stock_quantity:
-            messages.warning(request, f"⚠️ Only {medicine.stock_quantity} available in stock.")
+        # ✅ USE total_stock PROPERTY INSTEAD OF stock_quantity
+        if quantity > medicine.total_stock:
+            messages.warning(request, f"⚠️ Only {medicine.total_stock} available in stock.")
             return redirect("medicine_info", medicine_id=medicine.id)
 
         # Get or create pending order (cart)
@@ -43,119 +44,158 @@ def add_to_order(request, medicine_id):
             item.save()
 
         messages.success(request, f"✅ Added {quantity} × {medicine.name} to your order.")
+
+        # 🔧 Redirect to order_list (Current Orders) to review cart
         return redirect("order_list")
 
+    # GET request - just show the medicine info page
     return redirect("medicine_info", medicine_id=medicine.id)
 
 
-# 🟢 View cart/order list - FIXED
 @login_required
 def order_list(request):
-    # Get pending orders (cart) for the user
+    """Display current orders (cart) for the user."""
+    # Get pending orders for the user
     orders = Order.objects.filter(user=request.user, status="Pending")
 
-    # Keep items as a QuerySet, don't convert to list
+    # Get all items from pending orders
     items = OrderItem.objects.filter(order__in=orders) if orders.exists() else OrderItem.objects.none()
 
+    # Calculate total quantity for modal display
     total_quantity = sum(item.quantity for item in items)
 
     context = {
         "items": items,
         "total_quantity": total_quantity,
-        "has_items": items.exists()  # Now this works because items is a QuerySet
+        "has_items": items.exists()
     }
+
     return render(request, "order_list.html", context)
 
 
-# 🟢 Admin: Manage delivery
 @login_required
+@user_passes_test(lambda u: u.is_staff)
 def delivery_page(request):
-    # Check if user is staff/admin
-    if not request.user.is_staff:
-        messages.error(request, "⚠️ Access denied. Admin privileges required.")
-        return redirect('admin_menu')
-
-    if request.method == "POST":
-        order_id = request.POST.get("order_id")
-        action = request.POST.get("action")
+    """Admin page to manage order deliveries."""
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        action = request.POST.get('action')
 
         try:
             order = Order.objects.get(id=order_id)
 
-            # Process order status changes
-            if action == "process":
-                order.status = "Processing"
-                order.save()
-                messages.success(request, f"🔄 Order #{order.id} is now being processed.")
-
-            elif action == "ship":
-                # Check stock availability for all items
-                can_ship = True
-                insufficient_stock_items = []
-
-                for item in order.items.all():
-                    if item.medicine.stock_quantity < item.quantity:
-                        can_ship = False
-                        insufficient_stock_items.append(
-                            f"{item.medicine.name} (Available: {item.medicine.stock_quantity}, Needed: {item.quantity})"
-                        )
-
-                if not can_ship:
-                    messages.error(
-                        request,
-                        f"⚠️ Cannot ship Order #{order.id}. Insufficient stock for: " +
-                        "; ".join(insufficient_stock_items)
-                    )
+            # Handle different actions
+            if action == 'assign_driver':
+                driver_id = request.POST.get('driver_id')
+                if driver_id:
+                    driver = User.objects.get(id=driver_id)
+                    order.driver = driver
+                    order.save()
+                    messages.success(request, f"✅ Driver {driver.username} assigned to Order #{order_id}.")
                 else:
-                    # Deduct stock using transaction to ensure data consistency
+                    order.driver = None
+                    order.save()
+                    messages.success(request, f"✅ Driver removed from Order #{order_id}.")
+
+            elif action == 'process':
+                if order.status == 'Pending':
+                    order.status = 'Processing'
+                    order.save()
+                    messages.success(request, f"✅ Order #{order_id} is now being processed.")
+                else:
+                    messages.warning(request, f"⚠️ Order #{order_id} cannot be processed from {order.status} status.")
+
+            elif action == 'ship':
+                if order.status == 'Processing':
+                    # FEFO Dispensing Logic
                     with transaction.atomic():
                         for item in order.items.all():
                             medicine = item.medicine
-                            medicine.stock_quantity -= item.quantity
-                            medicine.save()
+                            quantity_needed = item.quantity
 
-                    order.status = "Shipped"
+                            # Get batches ordered by expiry date (FEFO)
+                            batches = MedicineBatch.objects.filter(
+                                medicine=medicine,
+                                quantity_available__gt=0
+                            ).order_by('expiry_date', 'batch_id')
+
+                            total_available = sum(batch.quantity_available for batch in batches)
+
+                            if total_available < quantity_needed:
+                                raise Exception(
+                                    f"Insufficient stock for {medicine.name}. "
+                                    f"Available: {total_available}, Needed: {quantity_needed}"
+                                )
+
+                            # Dispense from batches (FEFO)
+                            remaining = quantity_needed
+                            for batch in batches:
+                                if remaining <= 0:
+                                    break
+
+                                take = min(batch.quantity_available, remaining)
+                                batch.quantity_available -= take
+                                batch.quantity_dispensed += take
+                                batch.save()
+                                remaining -= take
+
+                        # Update order status to Shipped
+                        order.status = 'Shipped'
+                        order.save()
+
+                    messages.success(request, f"✅ Order #{order_id} is out for delivery!")
+                else:
+                    messages.warning(request, f"⚠️ Order #{order_id} must be in Processing status to ship.")
+
+            elif action == 'complete':
+                if order.status == 'Shipped':
+                    order.status = 'Completed'
+                    order.completed_at = timezone.now()
                     order.save()
-                    messages.success(request, f"🚚 Order #{order.id} marked as Out for Delivery!")
+                    messages.success(request, f"✅ Order #{order_id} has been marked as completed!")
+                else:
+                    messages.warning(request, f"⚠️ Order #{order_id} must be shipped before marking as completed.")
 
-            elif action == "complete":
-                order.status = "Completed"
-                order.save()
-                messages.success(request, f"✅ Order #{order.id} marked as completed!")
+            elif action == 'cancel':
+                if order.status in ['Pending', 'Processing']:
+                    order.status = 'Cancelled'
+                    order.save()
+                    messages.success(request, f"✅ Order #{order_id} has been cancelled.")
+                else:
+                    messages.warning(request, f"⚠️ Order #{order_id} cannot be cancelled from {order.status} status.")
 
-            elif action == "cancel":
-                order.status = "Cancelled"
-                order.save()
-                messages.warning(request, f"❌ Order #{order.id} cancelled.")
-
-            elif action == "reopen":
-                order.status = "Pending"
-                order.save()
-                messages.info(request, f"🔄 Order #{order.id} reopened.")
+            elif action == 'reopen':
+                if order.status in ['Completed', 'Cancelled']:
+                    order.status = 'Pending'
+                    order.save()
+                    messages.success(request, f"✅ Order #{order_id} has been reopened.")
 
         except Order.DoesNotExist:
-            messages.error(request, "⚠️ Order not found.")
+            messages.error(request, f"❌ Order #{order_id} not found.")
+        except User.DoesNotExist:
+            messages.error(request, "❌ Driver not found.")
         except Exception as e:
-            messages.error(request, f"⚠️ Error processing order: {str(e)}")
+            messages.error(request, f"❌ Error: {str(e)}")
 
-        return redirect("delivery_page")
+        return redirect('delivery_page')
 
-    # Show orders that are in active delivery states (excluding Completed and Cancelled)
-    orders = Order.objects.exclude(
-        status__in=["Completed", "Cancelled"]
-    ).select_related('user').prefetch_related('items__medicine').order_by("-created_at")
+    # GET request - display all orders except Completed
+    orders = Order.objects.exclude(status='Completed').order_by('-created_at')
+    drivers = User.objects.filter(groups__name='Driver')  # Assuming you have a Driver group
 
-    return render(request, "delivery_page.html", {"orders": orders})
+    context = {
+        'orders': orders,
+        'drivers': drivers,
+    }
 
+    return render(request, 'delivery_page.html', context)
 
-# 🟢 Remove item from order
 @login_required
 def remove_order_item(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
     medicine_name = item.medicine.name
     item.delete()
 
-    # Check if order has no more items and delete empty order
     if item.order.items.count() == 0:
         item.order.delete()
 
@@ -163,18 +203,19 @@ def remove_order_item(request, item_id):
     return redirect("order_list")
 
 
-# 🟢 Update item quantity
 @login_required
 def update_order_item(request, item_id):
     if request.method == "POST":
         item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
         quantity = int(request.POST.get("quantity", 1))
 
+        total_available = item.medicine.total_stock
+
         if quantity <= 0:
             item.delete()
             messages.success(request, f"🗑️ {item.medicine.name} removed from your order.")
-        elif quantity > item.medicine.stock_quantity:
-            messages.warning(request, f"⚠️ Only {item.medicine.stock_quantity} available in stock.")
+        elif quantity > total_available:
+            messages.warning(request, f"⚠️ Only {total_available} available in stock.")
         else:
             item.quantity = quantity
             item.save()
@@ -190,15 +231,15 @@ def order_checkout(request):
         # Get the user's pending order (cart)
         order = Order.objects.get(user=request.user, status="Pending")
 
-        # Check stock availability before checkout
+        # Check stock availability using total_stock property
         can_checkout = True
         for item in order.items.all():
-            if item.quantity > item.medicine.stock_quantity:
+            if item.quantity > item.medicine.total_stock:  # ✅ USE total_stock
                 can_checkout = False
                 messages.warning(
                     request,
                     f"⚠️ Not enough stock for {item.medicine.name}. "
-                    f"Available: {item.medicine.stock_quantity}, In cart: {item.quantity}"
+                    f"Available: {item.medicine.total_stock}, In cart: {item.quantity}"
                 )
 
         if not can_checkout:
@@ -207,29 +248,58 @@ def order_checkout(request):
         # Change status from Pending (cart) to Processing (checked out)
         order.status = "Processing"
         order.save()
-        messages.success(request, "✅ Your order has been placed successfully! It's now awaiting confirmation.")
+        messages.success(request, "✅ Your order has been submitted successfully! Track your delivery below.")
+
+        # 🔧 Redirect to track_delivery after submitting order
+        return redirect("track_delivery")
 
     except Order.DoesNotExist:
         messages.warning(request, "⚠️ No items in your cart.")
+        return redirect("order_list")
 
-    return redirect("order_list")
 
-
-# 🟢 Track delivery
 @login_required
 def track_delivery(request):
     orders = Order.objects.filter(user=request.user).exclude(status="Pending").order_by("-created_at")
     return render(request, "track_delivery.html", {"orders": orders})
 
 
-# 🟢 Order history
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user).exclude(status="Pending").order_by("-created_at")
-    return render(request, "order_history.html", {"orders": orders})
+    """Display order history - only completed orders."""
+    # Only show orders with status "Completed"
+    orders = Order.objects.filter(
+        user=request.user,
+        status='Completed'
+    ).order_by('-created_at')
+
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'order_history.html', context)
 
 
-# 🟢 Order details
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def mark_order_completed(request, order_id):
+    """Mark an order as completed after delivery."""
+    if request.method == 'POST':
+        try:
+            order = Order.objects.get(id=order_id)
+
+            # Only allow completion if order is shipped
+            if order.status == 'Shipped':
+                order.status = 'Completed'
+                order.save()
+                messages.success(request, f"✅ Order #{order_id} marked as completed!")
+            else:
+                messages.warning(request, f"⚠️ Order #{order_id} must be shipped before marking as completed.")
+
+        except Order.DoesNotExist:
+            messages.error(request, "Order not found.")
+
+    return redirect('delivery_page')
+
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
