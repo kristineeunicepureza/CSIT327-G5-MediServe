@@ -335,6 +335,13 @@
         font-weight: 600;
     }
 
+    .completion-date {
+        font-size: 0.85em;
+        color: #065f46;
+        font-weight: 500;
+        margin-top: 5px;
+    }
+
     /* Empty State */
     .empty-state {
         text-align: center;
@@ -448,84 +455,92 @@
 
     <main class="history-main">
         <div class="intro-text">
-            <i class="fas fa-history"></i> View your completed orders and delivery status.
+            <i class="fas fa-history"></i>
+            View your completed orders and delivery status.
         </div>
 
         <div class="orders-list">
             {% for order in orders %}
-            <div class="order-card">
-                <div class="order-header">
-                    <div class="order-info">
-                        <h3 class="order-id">Order #{{ order.id }}</h3>
-                        <p class="order-date">
-                            <i class="fas fa-calendar-alt"></i>
-                            {{ order.created_at|date:"F d, Y" }}
-                        </p>
-                    </div>
-                    <span class="completed-badge">
-                        <i class="fas fa-check-circle"></i> Completed
-                    </span>
-                </div>
-
-                <!-- Completed Timeline -->
-                <div class="completed-timeline">
-                    <div class="status-step">
-                        <div class="status-icon">
-                            <i class="fas fa-check"></i>
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <h3 class="order-id">Order #{{ order.id }}</h3>
+                            <p class="order-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                Ordered: {{ order.created_at|date:"F d, Y" }}
+                            </p>
                         </div>
-                        <span class="status-label">Order Placed</span>
+                        <span class="completed-badge">
+                            <i class="fas fa-check-circle"></i>
+                            Completed
+                        </span>
                     </div>
 
-                    <div class="status-step">
-                        <div class="status-icon">
-                            <i class="fas fa-check"></i>
+                    <!-- Completed Timeline -->
+                    <div class="completed-timeline">
+                        <div class="status-step">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span class="status-label">Order Placed</span>
                         </div>
-                        <span class="status-label">Processed</span>
+                        <div class="status-step">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span class="status-label">Processing</span>
+                        </div>
+                        <div class="status-step">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span class="status-label">Shipped</span>
+                        </div>
+                        <div class="status-step">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span class="status-label">Delivered</span>
+                        </div>
                     </div>
 
-                    <div class="status-step">
-                        <div class="status-icon">
-                            <i class="fas fa-check"></i>
+                    <!-- Order Items -->
+                    <div class="order-items">
+                        <div class="items-header">
+                            <i class="fas fa-list"></i>
+                            Order Items
                         </div>
-                        <span class="status-label">Shipped</span>
+                        {% for item in order.items.all %}
+                            <div class="item-row">
+                                <span class="item-name">{{ item.medicine.name }}</span>
+                                <span class="item-quantity">Qty: {{ item.quantity }}</span>
+                            </div>
+                        {% endfor %}
                     </div>
 
-                    <div class="status-step">
-                        <div class="status-icon">
-                            <i class="fas fa-check"></i>
+                    <!-- Completion Info -->
+                    <div class="completion-info">
+                        <i class="fas fa-box-check"></i>
+                        <div>
+                            <span class="completion-text">This order has been successfully delivered and completed.</span>
+                            {% if order.updated_at %}
+                                <div class="completion-date">
+                                    Completed on: {{ order.updated_at|date:"F d, Y - h:i A" }}
+                                </div>
+                            {% endif %}
                         </div>
-                        <span class="status-label">Delivered</span>
                     </div>
                 </div>
-
-                <!-- Order Items -->
-                <div class="order-items">
-                    <div class="items-header">
-                        <i class="fas fa-list"></i> Order Items
-                    </div>
-                    {% for item in order.items.all %}
-                    <div class="item-row">
-                        <span class="item-name">{{ item.medicine.name }}</span>
-                        <span class="item-quantity">Qty: {{ item.quantity }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Completion Info -->
-                <div class="completion-info">
-                    <i class="fas fa-box-check"></i>
-                    <span class="completion-text">This order has been successfully delivered and completed.</span>
-                </div>
-            </div>
             {% empty %}
-            <div class="empty-state">
-                <i class="fas fa-history empty-icon"></i>
-                <h3 class="empty-title">No Order History</h3>
-                <p class="empty-text">You don't have any completed orders yet.</p>
-                <a href="{% url 'medicine_list' %}">
-                    <i class="fas fa-pills"></i> Browse Medicines
-                </a>
-            </div>
+                <div class="empty-state">
+                    <i class="fas fa-history empty-icon"></i>
+                    <h3 class="empty-title">No Order History</h3>
+                    <p class="empty-text">You don't have any completed orders yet.</p>
+                    <a href="{% url 'medicine_list' %}">
+                        <i class="fas fa-pills"></i>
+                        Browse Medicines
+                    </a>
+                </div>
             {% endfor %}
         </div>
     </main>

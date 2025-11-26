@@ -354,6 +354,191 @@
         box-shadow: 0 6px 20px rgba(54, 72, 158, 0.35);
     }
 
+    /* Confirmation Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .confirmation-modal {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 20px;
+        padding: 35px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+        position: relative;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+    }
+
+    .modal-icon i {
+        font-size: 2.5em;
+        color: #ff9800;
+    }
+
+    .modal-title {
+        font-size: 1.6em;
+        font-weight: 700;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .modal-message {
+        font-size: 1em;
+        color: #6c757d;
+        text-align: center;
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+
+    .modal-order-summary {
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 2px solid #b3d4f5;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .modal-order-summary::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-order-summary::-webkit-scrollbar-track {
+        background: #e7f3ff;
+        border-radius: 10px;
+    }
+
+    .modal-order-summary::-webkit-scrollbar-thumb {
+        background: #36489e;
+        border-radius: 10px;
+    }
+
+    .summary-title {
+        font-size: 0.9em;
+        font-weight: 700;
+        color: #36489e;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #b3d4f5;
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+        padding-top: 12px;
+        margin-top: 8px;
+        border-top: 2px solid #36489e;
+        font-weight: 700;
+        font-size: 1.05em;
+    }
+
+    .summary-item-name {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .summary-item-qty {
+        color: #36489e;
+        font-weight: 700;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-modal {
+        flex: 1;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-cancel-modal {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-cancel-modal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn-confirm-modal {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-confirm-modal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
     @media (max-width: 768px) {
         .orders-container {
             margin: 15px;
@@ -378,8 +563,62 @@
             left: 15px;
             top: 15px;
         }
+
+        .confirmation-modal {
+            padding: 25px;
+            width: 95%;
+        }
+
+        .modal-title {
+            font-size: 1.3em;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
     }
 </style>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="confirmation-modal">
+        <div class="modal-icon">
+            <i class="fas fa-question-circle"></i>
+        </div>
+        <h2 class="modal-title">Confirm Your Order</h2>
+        <p class="modal-message">
+            Are you sure you want to submit this order? Once submitted, your order will be processed by our team.
+        </p>
+
+        <!-- Order Summary -->
+        <div class="modal-order-summary">
+            <div class="summary-title">
+                <i class="fas fa-list"></i> Order Summary
+            </div>
+            {% for item in items %}
+            <div class="summary-item">
+                <span class="summary-item-name">{{ item.medicine.name }}</span>
+                <span class="summary-item-qty">× {{ item.quantity }}</span>
+            </div>
+            {% endfor %}
+            <div class="summary-item">
+                <span class="summary-item-name">Total Items:</span>
+                <span class="summary-item-qty">{{ total_quantity }}</span>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal btn-cancel-modal" onclick="closeConfirmModal()">
+                <i class="fas fa-times"></i>
+                Cancel
+            </button>
+            <button type="button" class="btn-modal btn-confirm-modal" onclick="confirmSubmitOrder()">
+                <i class="fas fa-check"></i>
+                Confirm Order
+            </button>
+        </div>
+    </div>
+</div>
 
 <div class="orders-container">
     <div class="orders-header">
@@ -408,7 +647,6 @@
                                 <span class="info-label">Quantity:</span>
                                 <span>{{ item.quantity }}</span>
                             </div>
-
                             <div class="info-row">
                                 <i class="fas fa-info-circle"></i>
                                 <span class="info-label">Status:</span>
@@ -421,7 +659,8 @@
 
                         {% if item.special_request %}
                         <div class="special-note">
-                            <i class="fas fa-comment-dots"></i> {{ item.special_request }}
+                            <i class="fas fa-comment-dots"></i>
+                            {{ item.special_request }}
                         </div>
                         {% endif %}
                     </div>
@@ -439,7 +678,8 @@
                 <i class="fas fa-clipboard-list"></i>
                 <p>No items in your current order.</p>
                 <a href="{% url 'medicine_list' %}">
-                    <i class="fas fa-pills"></i> Start browsing medicines
+                    <i class="fas fa-pills"></i>
+                    Start browsing medicines
                 </a>
             </div>
             {% endfor %}
@@ -447,10 +687,14 @@
 
         {% if items|length > 0 %}
         <div class="orders-footer">
-            <form action="{% url 'order_checkout' %}" method="get">
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-paper-plane"></i> Submit Order
-                </button>
+            <button type="button" class="btn-submit" onclick="showConfirmModal()">
+                <i class="fas fa-paper-plane"></i>
+                Submit Order
+            </button>
+
+            <!-- Hidden form for actual submission -->
+            <form action="{% url 'order_checkout' %}" method="POST" id="submitOrderForm" style="display: none;">
+                {% csrf_token %}
             </form>
         </div>
         {% endif %}
@@ -459,22 +703,57 @@
 
 <!-- Toast Notification -->
 {% if messages %}
-    {% for message in messages %}
-    <div class="toast-notification {% if message.tags %}{{ message.tags }}{% endif %}" id="toast-{{ forloop.counter }}">
-        <i class="fas fa-check-circle"></i>
-        <span>{{ message }}</span>
-    </div>
-    <script>
-        setTimeout(function() {
-            var toast = document.getElementById('toast-{{ forloop.counter }}');
-            if (toast) {
-                setTimeout(function() {
-                    toast.remove();
-                }, 300);
-            }
-        }, 3000);
-    </script>
-    {% endfor %}
+{% for message in messages %}
+<div class="toast-notification {% if message.tags %}{{ message.tags }}{% endif %}" id="toast-{{ forloop.counter }}">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ message }}</span>
+</div>
+<script>
+    setTimeout(function() {
+        var toast = document.getElementById('toast-{{ forloop.counter }}');
+        if (toast) {
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }
+    }, 3000);
+</script>
+{% endfor %}
 {% endif %}
+
+<script>
+    // Show confirmation modal
+    function showConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    // Close confirmation modal
+    function closeConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+
+    // Confirm and submit order
+    function confirmSubmitOrder() {
+        document.getElementById('submitOrderForm').submit();
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeConfirmModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeConfirmModal();
+        }
+    });
+</script>
 
 {% endblock %}

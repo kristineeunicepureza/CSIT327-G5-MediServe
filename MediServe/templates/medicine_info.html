@@ -369,7 +369,8 @@
                 {% endif %}
             </div>
 
-            {% with stock=medicine.stock_quantity %}
+            {% comment %} ✅ CHANGED: Use total_stock instead of stock_quantity {% endcomment %}
+            {% with stock=medicine.total_stock %}
                 <div class="stock-status {% if stock == 0 %}stock-unavailable{% elif stock <= 10 %}stock-warning{% else %}stock-available{% endif %}">
                     {% if stock == 0 %}
                         <i class="fas fa-times-circle"></i> Out of Stock
@@ -412,17 +413,20 @@
                 <div class="form-row">
                     <div class="form-field">
                         <label for="quantity"><i class="fas fa-sort-numeric-up"></i> Quantity</label>
-                        <input type="number" id="quantity" name="quantity" min="1" max="{{ medicine.stock_quantity }}" value="1" class="form-input" {% if medicine.stock_quantity == 0 %}disabled{% endif %} required>
+                        {% comment %} ✅ CHANGED: Use total_stock instead of stock_quantity {% endcomment %}
+                        <input type="number" id="quantity" name="quantity" min="1" max="{{ medicine.total_stock }}" value="1" class="form-input" {% if medicine.total_stock == 0 %}disabled{% endif %} required>
                     </div>
 
                     <div class="form-field">
                         <label for="specialRequest"><i class="fas fa-comment-dots"></i> Special Request (Optional)</label>
-                        <textarea id="specialRequest" name="special_request" class="form-input form-textarea" placeholder="e.g., Request specific brand or add any special notes" {% if medicine.stock_quantity == 0 %}disabled{% endif %}></textarea>
+                        {% comment %} ✅ CHANGED: Use total_stock instead of stock_quantity {% endcomment %}
+                        <textarea id="specialRequest" name="special_request" class="form-input form-textarea" placeholder="e.g., Request specific brand or add any special notes" {% if medicine.total_stock == 0 %}disabled{% endif %}></textarea>
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn" {% if medicine.stock_quantity == 0 %}disabled{% endif %}>
-                    {% if medicine.stock_quantity == 0 %}
+                {% comment %} ✅ CHANGED: Use total_stock instead of stock_quantity {% endcomment %}
+                <button type="submit" class="submit-btn" {% if medicine.total_stock == 0 %}disabled{% endif %}>
+                    {% if medicine.total_stock == 0 %}
                         <i class="fas fa-ban"></i> Out of Stock
                     {% else %}
                         <i class="fas fa-paper-plane"></i> Submit Request

@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Medicine Stock Management{% endblock %}
+{% block title %}Medicine Stock Management (FEFO){% endblock %}
 
 {% block content %}
 <style>
     .medicine-container {
         width: 100%;
-        max-width: 1400px;
+        max-width: 1600px;
         margin: 40px auto;
         animation: fadeInUp 0.6s ease-out;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
@@ -233,205 +233,117 @@
         transform: translateY(-2px);
     }
 
-    .results-badge {
-        margin-top: 20px;
-        padding: 12px 16px;
-        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
-        border-radius: 10px;
-        border-left: 4px solid #007bff;
-        animation: fadeIn 0.5s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .results-text {
-        font-size: 0.95em;
-        color: #004085;
-        font-weight: 600;
-    }
-
-    .medicine-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-        gap: 25px;
+    /* Stock Table Styles */
+    .stock-table-container {
         padding: 30px 40px 40px;
+        background: #f8f9fa;
         max-height: 60vh;
         overflow-y: auto;
-        background: #f8f9fa;
     }
 
-    .medicine-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        border-radius: 16px;
-        padding: 25px;
+    .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        border-left: 6px solid #dc3545;
-        transition: all 0.3s ease;
-        animation: scaleIn 0.4s ease-out;
     }
 
-    @keyframes scaleIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
+    .stock-table thead {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
     }
 
-    .medicine-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.15);
-    }
-
-    .medicine-header-card {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 15px;
-    }
-
-    .medicine-name {
-        font-size: 1.3em;
-        color: #dc3545;
+    .stock-table thead th {
+        padding: 18px 15px;
+        text-align: left;
         font-weight: 700;
-        margin: 0 0 8px 0;
-    }
-
-    .medicine-meta {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-    }
-
-    .meta-badge {
-        background-color: #e8ecf4;
-        color: #2c3e50;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.85em;
-        font-weight: 600;
-    }
-
-    .medicine-info {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 2px solid #e8ecf4;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .info-label {
-        font-size: 0.8em;
-        color: #7c8db5;
-        font-weight: 600;
+        font-size: 0.9em;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
-    .info-value {
-        font-size: 1em;
+    .stock-table tbody tr {
+        border-bottom: 1px solid #e8ecf4;
+        transition: all 0.2s ease;
+    }
+
+    .stock-table tbody tr:hover {
+        background-color: #f8f9ff;
+    }
+
+    .stock-table tbody td {
+        padding: 16px 15px;
+        font-size: 0.95em;
         color: #2c3e50;
+    }
+
+    .batch-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        background: linear-gradient(135deg, #e8ecf5 0%, #d9e2ec 100%);
+        color: #36489e;
+    }
+
+    .expiry-warning {
+        color: #dc3545;
         font-weight: 700;
     }
 
-    .medicine-actions {
+    .expiry-normal {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .action-buttons {
         display: flex;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 8px;
     }
 
     .btn-edit {
-        flex: 1;
         background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
         color: #333;
         border: none;
-        padding: 12px;
-        border-radius: 10px;
+        padding: 8px 12px;
+        border-radius: 8px;
         cursor: pointer;
-        font-size: 0.9em;
+        font-size: 0.85em;
         font-weight: 600;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
+        gap: 6px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
     }
 
     .btn-edit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
     }
 
     .btn-delete {
-        flex: 1;
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         color: #ffffff;
         border: none;
-        padding: 12px;
-        border-radius: 10px;
+        padding: 8px 12px;
+        border-radius: 8px;
         cursor: pointer;
-        font-size: 0.9em;
+        font-size: 0.85em;
         font-weight: 600;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
+        gap: 6px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
     }
 
     .btn-delete:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 80px 40px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        border-radius: 20px;
-        margin: 30px 40px 40px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .empty-icon {
-        font-size: 4em;
-        color: #dee2e6;
-        margin-bottom: 20px;
-    }
-
-    .empty-title {
-        font-size: 1.3em;
-        color: #6c757d;
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
-
-    .empty-link {
-        color: #007bff;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .empty-link:hover {
-        color: #0056b3;
-        text-decoration: underline;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
     }
 
     /* Modal Styles */
@@ -453,13 +365,29 @@
         background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
         padding: 35px;
         border-radius: 20px;
-        width: 500px;
-        max-width: 90%;
+        width: 900px;
+        max-width: 95%;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         position: relative;
         max-height: 90vh;
         overflow-y: auto;
         animation: scaleIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 
     .modal-header {
@@ -499,11 +427,28 @@
         transform: rotate(90deg);
     }
 
+    .batch-header-fields {
+        background: linear-gradient(135deg, #fff9e6 0%, #ffecb3 100%);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 2px solid #ffc107;
+    }
+
+    .batch-header-fields h3 {
+        color: #f57c00;
+        margin: 0 0 15px 0;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
     .form-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 15px;
-        margin-bottom: 15px;
+        margin-bottom: 0;
     }
 
     .form-group {
@@ -518,24 +463,107 @@
         font-weight: 600;
     }
 
-    .form-input, .form-textarea, .form-select {
+    .form-input, .form-select, .form-textarea {
         padding: 12px 16px;
         border: 2px solid #e8ecf4;
         border-radius: 10px;
         font-size: 0.95em;
         transition: all 0.3s ease;
         background-color: #ffffff;
+        font-family: inherit;
     }
 
-    .form-input:focus, .form-textarea:focus, .form-select:focus {
+    .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
         outline: none;
         border-color: #dc3545;
         box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
     }
 
-    .form-textarea {
-        resize: vertical;
-        min-height: 80px;
+    .items-section {
+        margin-top: 25px;
+    }
+
+    .items-section h3 {
+        color: #2c3e50;
+        margin: 0 0 15px 0;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .items-list {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 2px solid #e8ecf4;
+        border-radius: 12px;
+        padding: 15px;
+        background-color: #f8f9fa;
+    }
+
+    .item-row {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr 2fr 1fr 40px;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 12px;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e8ecf4;
+        align-items: start;
+    }
+
+    .item-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .btn-remove-item {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 22px;
+    }
+
+    .btn-remove-item:hover {
+        background-color: #dc2626;
+        color: #ffffff;
+    }
+
+    .btn-add-item {
+        width: 100%;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.95em;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-add-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
     }
 
     .modal-actions {
@@ -581,68 +609,40 @@
         box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
     }
 
-    /* Confirmation Modal */
-    .confirm-icon {
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 25px;
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    .confirm-icon i {
-        font-size: 3em;
-    }
-
-    .confirm-title {
-        margin: 0 0 15px 0;
-        color: #2c3e50;
-        font-size: 1.5em;
-        font-weight: 700;
-    }
-
-    .confirm-message {
-        margin: 0 0 30px 0;
-        color: #6c757d;
-        font-size: 1em;
-        line-height: 1.6;
-    }
-
-    .confirm-actions {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-    }
-
     /* Scrollbar Styling */
-    .medicine-grid::-webkit-scrollbar {
+    .stock-table-container::-webkit-scrollbar,
+    .items-list::-webkit-scrollbar {
         width: 10px;
     }
 
-    .medicine-grid::-webkit-scrollbar-track {
+    .stock-table-container::-webkit-scrollbar-track,
+    .items-list::-webkit-scrollbar-track {
         background: #f1f3f5;
         border-radius: 10px;
     }
 
-    .medicine-grid::-webkit-scrollbar-thumb {
+    .stock-table-container::-webkit-scrollbar-thumb,
+    .items-list::-webkit-scrollbar-thumb {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         border-radius: 10px;
     }
 
-    .medicine-grid::-webkit-scrollbar-thumb:hover {
+    .stock-table-container::-webkit-scrollbar-thumb:hover,
+    .items-list::-webkit-scrollbar-thumb:hover {
         background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
     }
 
     /* Responsive Design */
     @media (max-width: 1024px) {
-        .medicine-grid {
+        .filter-form {
             grid-template-columns: 1fr;
         }
 
-        .filter-form {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .item-row {
             grid-template-columns: 1fr;
         }
     }
@@ -665,17 +665,13 @@
         }
 
         .filter-section,
-        .medicine-grid {
+        .stock-table-container {
             padding: 20px 25px;
         }
 
         .modal-content {
             width: 95%;
             padding: 25px;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -687,11 +683,11 @@
             <a href="{% url 'admin_menu' %}" class="back-button">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <h1 class="header-title">Medicine Stock Management</h1>
+            <h1 class="header-title">Medicine Stock Management (FEFO)</h1>
         </div>
 
-        <button onclick="document.getElementById('addMedicineModal').style.display='flex'" class="add-medicine-btn">
-            <i class="fas fa-plus-circle"></i> Add New Medicine
+        <button onclick="document.getElementById('addBatchModal').style.display='flex'" class="add-medicine-btn">
+            <i class="fas fa-shipping-fast"></i> Add New Batch
         </button>
     </header>
 
@@ -750,239 +746,231 @@
                 </a>
             </div>
         </form>
-
-        {% if search_query or category_filter or stock_filter %}
-        <div class="results-badge">
-            <span class="results-text">
-                <i class="fas fa-check-circle"></i>
-                <strong>{{ medicines.count }}</strong> medicine(s) found
-                {% if search_query %} matching "{{ search_query }}"{% endif %}
-                {% if category_filter %} in category "{{ category_filter }}"{% endif %}
-                {% if stock_filter %} with {{ stock_filter }} stock{% endif %}
-            </span>
-        </div>
-        {% endif %}
     </div>
 
-    <!-- MEDICINE GRID -->
-    <div class="medicine-grid">
-        {% for medicine in medicines %}
-            <div class="medicine-card">
-                <div class="medicine-header-card">
-                    <h3 class="medicine-name">{{ medicine.name }}</h3>
-                </div>
-
-                <div class="medicine-meta">
-                    <span class="meta-badge">
-                        <i class="fas fa-building"></i> {{ medicine.brand }}
-                    </span>
-                    <span class="meta-badge">
-                        <i class="fas fa-tag"></i> {{ medicine.category }}
-                    </span>
-                </div>
-
-                <div class="medicine-info">
-                    <div class="info-item">
-                        <span class="info-label">Stock Quantity</span>
-                        <span class="info-value">{{ medicine.stock_quantity }} units</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Expiry Date</span>
-                        <span class="info-value">{{ medicine.expiry_date|date:"M d, Y" }}</span>
-                    </div>
-                </div>
-
-                <div class="medicine-actions">
-                    <button onclick="openConfirmModal('edit', '{{ medicine.name }}', '{% url 'edit_medicine' medicine.id %}')" class="btn-edit">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button onclick="openConfirmModal('delete', '{{ medicine.name }}', '{% url 'delete_medicine' medicine.id %}')" class="btn-delete">
-                        <i class="fas fa-trash-alt"></i> Delete
-                    </button>
-                </div>
-            </div>
-        {% empty %}
-            <div class="empty-state">
-                <i class="fas fa-pills empty-icon"></i>
-                <p class="empty-title">
-                    {% if search_query or category_filter or stock_filter %}
-                        No medicines found matching your criteria
-                    {% else %}
-                        No medicines in inventory
-                    {% endif %}
-                </p>
-                {% if search_query or category_filter or stock_filter %}
-                    <a href="{% url 'medicine_stock' %}" class="empty-link">
-                        <i class="fas fa-arrow-left"></i> Clear filters to view all medicines
-                    </a>
-                {% endif %}
-            </div>
-        {% endfor %}
+    <!-- STOCK TABLE (Sorted by Expiry Date - Ascending) -->
+    <div class="stock-table-container">
+        <table class="stock-table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-barcode"></i> Batch ID</th>
+                    <th><i class="fas fa-pills"></i> Medicine Name</th>
+                    <th><i class="fas fa-building"></i> Brand</th>
+                    <th><i class="fas fa-tag"></i> Category</th>
+                    <th><i class="fas fa-calendar-times"></i> Expiry Date</th>
+                    <th><i class="fas fa-boxes"></i> Quantity</th>
+                    <th><i class="fas fa-calendar-alt"></i> Date Received</th>
+                    <th><i class="fas fa-cog"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for batch in batches %}
+                    <tr>
+                        <td><span class="batch-badge">{{ batch.batch_id }}</span></td>
+                        <td><strong>{{ batch.medicine.name }}</strong></td>
+                        <td>{{ batch.medicine.brand }}</td>
+                        <td>{{ batch.medicine.category }}</td>
+                        <td class="{% if batch.is_expiring_soon %}expiry-warning{% else %}expiry-normal{% endif %}">
+                            {{ batch.expiry_date|date:"M d, Y" }}
+                        </td>
+                        <td><strong>{{ batch.quantity_available }} units</strong></td>
+                        <td>{{ batch.date_received|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button onclick="openEditModal('{{ batch.batch_id }}')" class="btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button onclick="openDeleteModal('{{ batch.id }}', '{{ batch.medicine.name }}', '{{ batch.batch_id }}')" class="btn-delete">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            <div style="font-size: 3em; color: #dee2e6;"><i class="fas fa-pills"></i></div>
+                            <div style="font-size: 1.2em; color: #6c757d; margin-top: 15px;">No medicine batches in inventory</div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- ADD MEDICINE MODAL -->
-<div id="addMedicineModal" class="modal-overlay">
+<!-- ADD NEW BATCH MODAL WITH DESCRIPTIONS -->
+<div id="addBatchModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 class="modal-title">Add New Medicine</h2>
-            <button type="button" onclick="document.getElementById('addMedicineModal').style.display='none'" class="modal-close">
+            <h2 class="modal-title">Add New Batch</h2>
+            <button type="button" onclick="closeBatchModal()" class="modal-close">
                 ×
             </button>
         </div>
 
-        <form method="POST">
+        <form method="POST" id="addBatchForm">
             {% csrf_token %}
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Medicine Name</label>
-                    {{ form.name }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Brand</label>
-                    {{ form.brand }}
+
+            <!-- Batch Header Fields (Uniform for all items) -->
+            <div class="batch-header-fields">
+                <h3><i class="fas fa-info-circle"></i> Batch Information (Same for All Items)</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Batch ID</label>
+                        <input type="text" name="batch_id" required class="form-input" placeholder="e.g., BATCH-001">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expiry Date (Uniform)</label>
+                        <input type="date" name="expiry_date" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date Received</label>
+                        <input type="date" name="date_received" required class="form-input">
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Category</label>
-                {{ form.category }}
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Description</label>
-                {{ form.description }}
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Stock Quantity</label>
-                    {{ form.stock_quantity }}
+            <!-- Items Section (Multiple medicines with descriptions) -->
+            <div class="items-section">
+                <h3><i class="fas fa-list"></i> Batch Items (20-30 different medicines)</h3>
+                <div class="items-list" id="itemsList">
+                    <!-- Initial item row -->
+                    <div class="item-row">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Medicine Name</label>
+                                <input type="text" name="medicine_name[]" required class="form-input" placeholder="e.g., Paracetamol">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Brand</label>
+                                <input type="text" name="brand[]" class="form-input" placeholder="e.g., Biogesic">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select name="category[]" class="form-select">
+                                <option value="">Select Category</option>
+                                <option value="Analgesic">Analgesic (Pain Relief)</option>
+                                <option value="Antibiotic">Antibiotic</option>
+                                <option value="Antiviral">Antiviral</option>
+                                <option value="Antihistamine">Antihistamine (Allergy)</option>
+                                <option value="Vitamin">Vitamin/Supplement</option>
+                                <option value="Antipyretic">Antipyretic (Fever)</option>
+                                <option value="Antiseptic">Antiseptic</option>
+                                <option value="Antacid">Antacid</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description (Optional)</label>
+                            <textarea name="description[]" class="form-textarea" placeholder="Medicine description, usage, side effects..." rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" name="quantity[]" min="1" required class="form-input" placeholder="0">
+                        </div>
+                        <button type="button" class="btn-remove-item" onclick="removeItem(this)" disabled>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Expiry Date</label>
-                    {{ form.expiry_date }}
-                </div>
+                <button type="button" class="btn-add-item" onclick="addNewItem()">
+                    <i class="fas fa-plus"></i> Add New Medicine
+                </button>
             </div>
 
             <div class="modal-actions">
-                <button type="button" onclick="document.getElementById('addMedicineModal').style.display='none'" class="btn-cancel">
+                <button type="button" onclick="closeBatchModal()" class="btn-cancel">
                     Cancel
                 </button>
                 <button type="submit" class="btn-submit">
-                    <i class="fas fa-save"></i> Save Medicine
+                    <i class="fas fa-save"></i> Add Batch
                 </button>
             </div>
-        </form>
-    </div>
-</div>
-
-<!-- CONFIRMATION MODAL -->
-<div id="confirmModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 450px; text-align: center;">
-        <div id="confirmIcon" class="confirm-icon">
-            <i id="confirmIconClass" class="fas fa-question"></i>
-        </div>
-
-        <h3 id="confirmTitle" class="confirm-title">Confirm Action</h3>
-        <p id="confirmMessage" class="confirm-message">Are you sure?</p>
-
-        <div class="confirm-actions">
-            <button id="confirmYesBtn" class="btn-submit" style="min-width: 120px;">
-                Yes
-            </button>
-            <button onclick="closeConfirmModal()" class="btn-cancel" style="min-width: 120px;">
-                Cancel
-            </button>
-        </div>
-
-        <form id="deleteForm" method="POST" style="display: none;">
-            {% csrf_token %}
         </form>
     </div>
 </div>
 
 <script>
-let currentActionUrl = '';
-let currentActionType = '';
+function addNewItem() {
+    const itemsList = document.getElementById('itemsList');
+    const firstRow = itemsList.querySelector('.item-row');
+    const newRow = firstRow.cloneNode(true);
+
+    const inputs = newRow.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        if (input.type === 'number') {
+            input.value = '';
+        } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+        } else {
+            input.value = '';
+        }
+    });
+
+    const removeBtn = newRow.querySelector('.btn-remove-item');
+    removeBtn.disabled = false;
+
+    itemsList.appendChild(newRow);
+}
+
+function removeItem(button) {
+    const itemRow = button.closest('.item-row');
+    const itemsList = document.getElementById('itemsList');
+
+    if (itemsList.querySelectorAll('.item-row').length > 1) {
+        itemRow.remove();
+    }
+}
+
+function closeBatchModal() {
+    document.getElementById('addBatchModal').style.display = 'none';
+}
+
+function openEditModal(batchId) {
+    window.location.href = `/medicine/edit-batch/${batchId}/`;
+}
+
+function openDeleteModal(batchId, medicineName, batchNumber) {
+    if (confirm(`Are you sure you want to delete ${medicineName} from ${batchNumber}?`)) {
+        window.location.href = `/medicine/delete/${batchId}/`;
+    }
+}
 
 window.onclick = function(event) {
-    const modal = document.getElementById('addMedicineModal');
-    const confirmModal = document.getElementById('confirmModal');
-    if (event.target === modal) modal.style.display = 'none';
-    if (event.target === confirmModal) confirmModal.style.display = 'none';
+    const modal = document.getElementById('addBatchModal');
+    if (event.target === modal) {
+        closeBatchModal();
+    }
 };
 
-function openConfirmModal(type, name, url) {
-    const modal = document.getElementById('confirmModal');
-    const title = document.getElementById('confirmTitle');
-    const message = document.getElementById('confirmMessage');
-    const confirmBtn = document.getElementById('confirmYesBtn');
-    const icon = document.getElementById('confirmIcon');
-    const iconClass = document.getElementById('confirmIconClass');
+document.getElementById('addBatchForm').addEventListener('submit', function(e) {
+    const itemRows = document.querySelectorAll('#itemsList .item-row');
 
-    currentActionUrl = url;
-    currentActionType = type;
-
-    if (type === 'edit') {
-        icon.style.border = '4px solid #ffc107';
-        icon.style.backgroundColor = '#fffbf0';
-        iconClass.className = 'fas fa-edit';
-        iconClass.style.color = '#ffc107';
-
-        title.textContent = 'Edit Medicine?';
-        message.textContent = `You will be redirected to edit "${name}". Continue?`;
-        confirmBtn.innerHTML = '<i class="fas fa-edit"></i> Yes, edit';
-        confirmBtn.style.background = 'linear-gradient(135deg, #ffc107 0%, #ffb300 100%)';
-        confirmBtn.style.color = '#333';
-
-    } else if (type === 'delete') {
-        icon.style.border = '4px solid #dc3545';
-        icon.style.backgroundColor = '#fff5f5';
-        iconClass.className = 'fas fa-trash-alt';
-        iconClass.style.color = '#dc3545';
-
-        title.textContent = 'Delete Medicine?';
-        message.textContent = `Are you sure you want to delete "${name}"? This action cannot be undone.`;
-        confirmBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Yes, delete';
-        confirmBtn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-        confirmBtn.style.color = '#fff';
+    if (itemRows.length === 0) {
+        e.preventDefault();
+        alert('Please add at least one medicine to the batch.');
+        return false;
     }
 
-    confirmBtn.onclick = function() {
-        if (currentActionType === 'edit') {
-            window.location.href = currentActionUrl;
-        } else if (currentActionType === 'delete') {
-            const submitForm = document.createElement('form');
-            submitForm.method = 'POST';
-            submitForm.action = currentActionUrl;
-            submitForm.style.display = 'none';
+    const medicineNames = [];
+    let hasDuplicates = false;
 
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            const csrfInput = document.createElement('input');
-            csrfInput.name = 'csrfmiddlewaretoken';
-            csrfInput.value = csrfToken;
-            csrfInput.type = 'hidden';
-            submitForm.appendChild(csrfInput);
-
-            document.body.appendChild(submitForm);
-            submitForm.submit();
+    itemRows.forEach(row => {
+        const medicineName = row.querySelector('input[name="medicine_name[]"]').value.trim().toLowerCase();
+        if (medicineName && medicineNames.includes(medicineName)) {
+            hasDuplicates = true;
         }
-    };
+        if (medicineName) {
+            medicineNames.push(medicineName);
+        }
+    });
 
-    modal.style.display = 'flex';
-}
-
-function closeConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-    currentActionUrl = '';
-    currentActionType = '';
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.querySelector('input[name="search"]');
-    if (searchInput && !searchInput.value) {
-        searchInput.focus();
+    if (hasDuplicates) {
+        e.preventDefault();
+        alert('You cannot add the same medicine twice in one batch. Please remove duplicates.');
+        return false;
     }
 });
 </script>

@@ -407,7 +407,7 @@
 
     .card-middle {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         margin: 15px 0;
         padding: 15px 0;
         border-top: 2px solid #e8ecf4;
@@ -417,6 +417,7 @@
     .medicine-icon {
         height: 45px;
         width: 45px;
+        min-width: 45px;
         border-radius: 50%;
         background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
         display: flex;
@@ -430,6 +431,10 @@
         color: #36489e;
     }
 
+    .stock-info-wrapper {
+        flex-grow: 1;
+    }
+
     .stock-badge {
         padding: 8px 14px;
         border-radius: 20px;
@@ -438,6 +443,7 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: inline-block;
     }
 
     .stock-in {
@@ -453,6 +459,37 @@
     .stock-out {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         color: #FFFFFF;
+    }
+
+    .batch-display {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .batch-tag {
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
+        color: #36489e;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75em;
+        font-weight: 600;
+        border: 1px solid #b3d4f5;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .batch-tag i {
+        font-size: 0.85em;
+    }
+
+    .no-batch-info {
+        margin-top: 10px;
+        font-size: 0.8em;
+        color: #6c757d;
+        font-style: italic;
     }
 
     .btn-view-medicine {
@@ -597,7 +634,6 @@
             <a href="{% url 'main_menu' %}" class="btn-back">
                 <i class="fas fa-arrow-left"></i>
             </a>
-
             <h1>Browse Medicine</h1>
         </div>
 
@@ -605,22 +641,18 @@
         <form method="GET" id="filter-form">
             <div class="search-filter-bar">
                 <div class="search-wrapper">
-                    <input type="text"
-                           name="search"
-                           value="{{ search_query }}"
-                           placeholder="Search medicines..."
-                           class="search-input"
-                           id="search-input" />
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search medicines..." class="search-input" id="search-input" />
                     <i class="fas fa-search search-icon" id="search-icon"></i>
                 </div>
 
                 <div class="filter-wrapper">
                     <button type="button" class="btn-filter" id="filter-toggle">
-                        <i class="fas fa-filter"></i> Filter
+                        <i class="fas fa-filter"></i>
+                        Filter
                         {% if category_filter or stock_filter %}
-                            <span class="filter-badge">
-                                {% if category_filter and stock_filter %}2{% else %}1{% endif %}
-                            </span>
+                        <span class="filter-badge">
+                            {% if category_filter and stock_filter %}2{% else %}1{% endif %}
+                        </span>
                         {% endif %}
                     </button>
 
@@ -629,43 +661,27 @@
                         <div class="filter-section">
                             <h3>Category</h3>
                             {% for category in categories %}
-                                <div class="filter-option">
-                                    <input type="radio"
-                                           name="category"
-                                           value="{{ category }}"
-                                           id="cat-{{ forloop.counter }}"
-                                           {% if category_filter == category %}checked{% endif %}>
-                                    <label for="cat-{{ forloop.counter }}">{{ category }}</label>
-                                </div>
+                            <div class="filter-option">
+                                <input type="radio" name="category" value="{{ category }}" id="cat-{{ forloop.counter }}" {% if category_filter == category %}checked{% endif %}>
+                                <label for="cat-{{ forloop.counter }}">{{ category }}</label>
+                            </div>
                             {% empty %}
-                                <p style="color: #999; font-size: 0.9em;">No categories available</p>
+                            <p style="color: #999; font-size: 0.9em;">No categories available</p>
                             {% endfor %}
                         </div>
 
                         <div class="filter-section">
                             <h3>Stock Status</h3>
                             <div class="filter-option">
-                                <input type="radio"
-                                       name="stock"
-                                       value="in-stock"
-                                       id="stock-in"
-                                       {% if stock_filter == 'in-stock' %}checked{% endif %}>
+                                <input type="radio" name="stock" value="in-stock" id="stock-in" {% if stock_filter == 'in-stock' %}checked{% endif %}>
                                 <label for="stock-in">In Stock (10+)</label>
                             </div>
                             <div class="filter-option">
-                                <input type="radio"
-                                       name="stock"
-                                       value="low-stock"
-                                       id="stock-low"
-                                       {% if stock_filter == 'low-stock' %}checked{% endif %}>
+                                <input type="radio" name="stock" value="low-stock" id="stock-low" {% if stock_filter == 'low-stock' %}checked{% endif %}>
                                 <label for="stock-low">Low Stock (1-10)</label>
                             </div>
                             <div class="filter-option">
-                                <input type="radio"
-                                       name="stock"
-                                       value="out-of-stock"
-                                       id="stock-out"
-                                       {% if stock_filter == 'out-of-stock' %}checked{% endif %}>
+                                <input type="radio" name="stock" value="out-of-stock" id="stock-out" {% if stock_filter == 'out-of-stock' %}checked{% endif %}>
                                 <label for="stock-out">Out of Stock</label>
                             </div>
                         </div>
@@ -684,20 +700,20 @@
 
             <!-- Active Filters Display -->
             {% if category_filter or stock_filter %}
-                <div class="active-filters">
-                    {% if category_filter %}
-                        <span class="filter-tag">
-                            Category: {{ category_filter }}
-                            <i class="fas fa-times" onclick="removeFilter('category')"></i>
-                        </span>
-                    {% endif %}
-                    {% if stock_filter %}
-                        <span class="filter-tag">
-                            Stock: {{ stock_filter|title }}
-                            <i class="fas fa-times" onclick="removeFilter('stock')"></i>
-                        </span>
-                    {% endif %}
-                </div>
+            <div class="active-filters">
+                {% if category_filter %}
+                <span class="filter-tag">
+                    Category: {{ category_filter }}
+                    <i class="fas fa-times" onclick="removeFilter('category')"></i>
+                </span>
+                {% endif %}
+                {% if stock_filter %}
+                <span class="filter-tag">
+                    Stock: {{ stock_filter|title }}
+                    <i class="fas fa-times" onclick="removeFilter('stock')"></i>
+                </span>
+                {% endif %}
+            </div>
             {% endif %}
         </form>
     </header>
@@ -705,55 +721,74 @@
     <!-- Product Grid -->
     <main class="medicine-main">
         <div class="intro-text">
-            <i class="fas fa-pills"></i> Browse available medicines and check stock status.
+            <i class="fas fa-pills"></i>
+            Browse available medicines and check stock status.
         </div>
 
         <div class="medicine-grid">
             {% for medicine in medicines %}
-                <div class="medicine-card">
-                    <div class="card-header">
-                        <div class="card-info">
-                            <h3 class="medicine-name">
-                                {{ medicine.name }}
-                                {% if medicine.brand %} ({{ medicine.brand }}){% endif %}
-                            </h3>
+            <div class="medicine-card">
+                <div class="card-header">
+                    <div class="card-info">
+                        <h3 class="medicine-name">
+                            {{ medicine.name }}
+                            {% if medicine.brand %}
+                            ({{ medicine.brand }}){% endif %}
+                        </h3>
+                        {% if medicine.category %}
+                        <p class="medicine-category">{{ medicine.category }}</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-                            {% if medicine.category %}
-                                <p class="medicine-category">{{ medicine.category }}</p>
-                            {% endif %}
-                        </div>
+                <div class="card-middle">
+                    <!-- Icon -->
+                    <div class="medicine-icon">
+                        <i class="fas fa-prescription-bottle"></i>
                     </div>
 
-                    <div class="card-middle">
-                        <!-- Icon -->
-                        <div class="medicine-icon">
-                            <i class="fas fa-prescription-bottle"></i>
-                        </div>
-
+                    <!-- Stock Info with Batches -->
+                    <div class="stock-info-wrapper">
                         <!-- Stock Status Badge -->
-                        {% with stock=medicine.stock_quantity %}
-                            <span class="stock-badge {% if stock > 10 %}stock-in{% elif stock > 0 %}stock-low{% else %}stock-out{% endif %}">
-                                {% if stock > 10 %}In Stock{% elif stock > 0 %}Low Stock{% else %}Out of Stock{% endif %}
-                            </span>
+                        {% with stock=medicine.total_stock %}
+                        <span class="stock-badge {% if stock > 10 %}stock-in{% elif stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+                            {% if stock > 10 %}In Stock ({{ stock }} available){% elif stock > 0 %}Low Stock ({{ stock }} left){% else %}Out of Stock{% endif %}
+                        </span>
                         {% endwith %}
-                    </div>
 
-                    <a href="{% url 'medicine_info' medicine_id=medicine.id %}"
-                       class="btn-view-medicine"
-                       {% if medicine.stock_quantity == 0 %}style="pointer-events: none;" disabled{% endif %}>
-                        <i class="fas fa-info-circle"></i> View Medicine
-                    </a>
+                        <!-- Batch Display -->
+                        {% if medicine.batch_list %}
+                        <div class="batch-display">
+                            {% for batch_id in medicine.batch_list %}
+                            <span class="batch-tag">
+                                <i class="fas fa-box"></i>
+                                {{ batch_id }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="no-batch-info">
+                            <i class="fas fa-info-circle"></i> No active batches
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
+
+                <a href="{% url 'medicine_info' medicine_id=medicine.id %}" class="btn-view-medicine" {% if medicine.total_stock == 0 %}style="pointer-events: none;" disabled{% endif %}>
+                    <i class="fas fa-info-circle"></i>
+                    View Medicine
+                </a>
+            </div>
             {% empty %}
-                <div class="empty-state">
-                    <i class="fas fa-pills empty-icon"></i>
-                    <p class="empty-title">No medicines found matching your criteria.</p>
-                    {% if category_filter or stock_filter %}
-                        <button onclick="clearFilters()">
-                            Clear Filters
-                        </button>
-                    {% endif %}
-                </div>
+            <div class="empty-state">
+                <i class="fas fa-pills empty-icon"></i>
+                <p class="empty-title">No medicines found matching your criteria.</p>
+                {% if category_filter or stock_filter %}
+                <button onclick="clearFilters()">
+                    Clear Filters
+                </button>
+                {% endif %}
+            </div>
             {% endfor %}
         </div>
     </main>
@@ -809,4 +844,5 @@
         }
     });
 </script>
+
 {% endblock %}

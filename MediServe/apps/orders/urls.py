@@ -9,5 +9,6 @@ urlpatterns = [
     path('checkout/', views.order_checkout, name='order_checkout'),
     path('track-delivery/', views.track_delivery, name='track_delivery'),
     path('order-history/', views.order_history, name='order_history'),
-
+    path('mark-completed/<int:order_id>/', views.mark_order_completed, name='mark_order_completed'),
 ]
+
