@@ -114,16 +114,16 @@ python manage.py runserver
 ```
 
 Then open this link in your browser:
-👉 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+👉 https://csit327-g5-mediserve.onrender.com/accounts/login/
 
 ---
 
 ## 👨‍💻👩‍💻 Team Members
 
-| Name                         | Role           | Email                                                                     |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------- |
-| **Vein Carmell Pangilinan**  | Lead Developer | [veincarmell.pangilinan@cit.edu](mailto:veincarmell.pangilinan@cit.edu)   |
-| **Franklyn John Panugaling** | Developer      | [franklynjohn.panugaling@cit.edu](mailto:franklynjohn.panugaling@cit.edu) |
-| **Kristine Eunice Pureza**   | Developer      | [kristineeunice.pureza@cit.edu](mailto:kristineeunice.pureza@cit.edu)     |
-| **USER 3**                   | Developer      | [kristineeunice.pureza@cit.edu](mailto:kristineeunice.pureza@cit.edu)     |
+| Name                         | Role           | Email                                                                     | Github Usernames      |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------- | ----------------------|
+| **Vein Carmell Pangilinan**  | Lead Developer | [veincarmell.pangilinan@cit.edu](mailto:veincarmell.pangilinan@cit.edu)   | veinP                 |  
+| **Franklyn John Panugaling** | Developer      | [franklynjohn.panugaling@cit.edu](mailto:franklynjohn.panugaling@cit.edu) | frnks1                |
+| **Kristine Eunice Pureza**   | Developer      | [kristineeunice.pureza@cit.edu](mailto:kristineeunice.pureza@cit.edu)     | kristineeunicepureza  |                |
+| **USER 3**                   | Developer      | [kristineeunice.pureza@cit.edu](mailto:kristineeunice.pureza@cit.edu)     |                       |
 
