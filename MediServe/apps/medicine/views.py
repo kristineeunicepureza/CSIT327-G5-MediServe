@@ -188,23 +188,25 @@ def edit_batch(request, batch_id):
         quantities = request.POST.getlist('quantity[]')
 
         added_count = 0
+        error_count = 0
 
-        with transaction.atomic():
-            for i in range(len(medicine_names)):
-                medicine_name = medicine_names[i].strip()
-                brand = brands[i].strip() if brands[i] else ''
-                category = categories_list[i].strip() if categories_list[i] else ''
-                description = descriptions[i].strip() if descriptions[i] else ''
+        for i in range(len(medicine_names)):
+            medicine_name = medicine_names[i].strip()
+            brand = brands[i].strip() if i < len(brands) and brands[i] else ''
+            category = categories_list[i].strip() if i < len(categories_list) and categories_list[i] else ''
+            description = descriptions[i].strip() if i < len(descriptions) and descriptions[i] else ''
 
-                try:
-                    quantity = int(quantities[i])
-                except (ValueError, IndexError):
-                    quantity = 0
+            try:
+                quantity = int(quantities[i])
+            except (ValueError, IndexError):
+                quantity = 0
 
-                if not medicine_name or quantity <= 0:
-                    continue
+            if not medicine_name or quantity <= 0:
+                continue
 
-                try:
+            # Process each medicine in its own transaction
+            try:
+                with transaction.atomic():
                     # Check if medicine already exists (case-insensitive)
                     medicine = Medicine.objects.filter(name__iexact=medicine_name).first()
 
@@ -233,7 +235,7 @@ def edit_batch(request, batch_id):
                     ).first()
 
                     if existing_batch:
-                        messages.warning(request, f"{medicine_name} already exists in batch {batch_id}. Skipped.")
+                        messages.warning(request, f"⚠️ {medicine_name} already exists in batch {batch_id}. Skipped.")
                         continue
 
                     # Create new batch entry
@@ -249,12 +251,16 @@ def edit_batch(request, batch_id):
 
                     added_count += 1
 
-                except Exception as e:
-                    messages.error(request, f"Error adding {medicine_name}: {str(e)}")
-                    continue
+            except Exception as e:
+                error_count += 1
+                messages.error(request, f"❌ Error adding {medicine_name}: {str(e)}")
+                continue
 
         if added_count > 0:
             messages.success(request, f"✅ Added {added_count} medicine(s) to batch {batch_id}.")
+
+        if error_count > 0 and added_count == 0:
+            messages.error(request, f"❌ Failed to add any medicines. Please check the errors above.")
 
         return redirect('medicine_stock')
 
@@ -357,6 +363,105 @@ def add_to_order(request, medicine_id):
 
     # GET request - just show the medicine info page
     return redirect("medicine_info", medicine_id=medicine.id)
+
+
+# UPDATED VIEW FUNCTION - Excludes admin users from medicine distribution history
+# Add this function to apps/medicine/views.py
+
+@login_required
+def medicine_distribution_history(request):
+    """View medicine distribution history - Admin only"""
+    from apps.orders.models import Order, OrderItem
+    from apps.accounts.models import Account
+    from django.db.models import Q, Sum
+    from datetime import datetime, timedelta
+
+    # Check if user is admin
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, 'Access denied. Admins only.')
+        return redirect('main_menu')
+
+    # Get all completed orders - EXCLUDE orders from admin users
+    completed_orders = Order.objects.filter(
+        status='Completed',
+        user__is_staff=False,
+        user__is_superuser=False
+    ).select_related('user').prefetch_related('items__medicine').order_by('-completed_at')
+
+    # Apply filters
+    search_query = request.GET.get('search', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    medicine_filter = request.GET.get('medicine', '')
+    user_filter = request.GET.get('user', '')
+
+    # Search by user name, email, or medicine name
+    if search_query:
+        completed_orders = completed_orders.filter(
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(user__email__icontains=search_query) |
+            Q(items__medicine__name__icontains=search_query)
+        ).distinct()
+
+    # Date range filter
+    if date_from:
+        completed_orders = completed_orders.filter(completed_at__gte=date_from)
+    if date_to:
+        # Add one day to include the entire end date
+        date_to_obj = datetime.strptime(date_to, '%Y-%m-%d') + timedelta(days=1)
+        completed_orders = completed_orders.filter(completed_at__lt=date_to_obj)
+
+    # Medicine filter
+    if medicine_filter:
+        completed_orders = completed_orders.filter(items__medicine__id=medicine_filter).distinct()
+
+    # User filter
+    if user_filter:
+        completed_orders = completed_orders.filter(user__id=user_filter)
+
+    # Get statistics - ONLY for non-admin users
+    total_distributions = completed_orders.count()
+    total_medicines_distributed = OrderItem.objects.filter(
+        order__status='Completed',
+        order__user__is_staff=False,
+        order__user__is_superuser=False
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+
+    unique_recipients = completed_orders.values('user').distinct().count()
+
+    # Get most distributed medicines - ONLY for non-admin users
+    top_medicines = OrderItem.objects.filter(
+        order__status='Completed',
+        order__user__is_staff=False,
+        order__user__is_superuser=False
+    ).values('medicine__name').annotate(
+        total_qty=Sum('quantity')
+    ).order_by('-total_qty')[:5]
+
+    # Get all medicines and ONLY non-admin users for filter dropdowns
+    all_medicines = Medicine.objects.all().order_by('name')
+    all_users = Account.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).order_by('first_name', 'last_name')
+
+    context = {
+        'completed_orders': completed_orders,
+        'total_distributions': total_distributions,
+        'total_medicines_distributed': total_medicines_distributed,
+        'unique_recipients': unique_recipients,
+        'top_medicines': top_medicines,
+        'all_medicines': all_medicines,
+        'all_users': all_users,
+        'search_query': search_query,
+        'date_from': date_from,
+        'date_to': date_to,
+        'medicine_filter': medicine_filter,
+        'user_filter': user_filter,
+    }
+
+    return render(request, 'medicine_distribution_history.html', context)
 
 # -------------------------------------------------------------------
 # Medicine List (Public Browse)

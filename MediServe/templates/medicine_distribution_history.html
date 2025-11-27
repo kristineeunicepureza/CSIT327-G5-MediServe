@@ -1,0 +1,559 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Medicine Distribution History{% endblock %}
+
+{% block content %}
+<style>
+    .history-container {
+        width: 100%;
+        max-width: 1600px;
+        margin: 40px auto;
+        animation: fadeInUp 0.6s ease-out;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .history-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        padding: 30px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .history-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .back-button {
+        padding: 12px;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border-radius: 12px;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .back-button:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(-3px);
+    }
+
+    .header-title {
+        font-size: 1.8em;
+        color: #ffffff;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    /* Statistics Cards */
+    .stats-section {
+        padding: 30px 40px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        border-bottom: 2px solid #e8ecf4;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #ffe6e6 0%, #ffcdd2 100%);
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        border-left: 4px solid #dc3545;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
+    }
+
+    .stat-value {
+        font-size: 2.5em;
+        font-weight: 700;
+        color: #dc3545;
+        margin: 0;
+    }
+
+    .stat-label {
+        font-size: 0.9em;
+        color: #c82333;
+        margin-top: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        padding: 30px 40px;
+        background: #f8f9fa;
+        border-bottom: 2px solid #e8ecf4;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+        gap: 15px;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .filter-label i {
+        color: #dc3545;
+    }
+
+    .filter-input, .filter-select {
+        padding: 12px 16px;
+        border: 2px solid #e8ecf4;
+        border-radius: 10px;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    .filter-input:focus, .filter-select:focus {
+        outline: none;
+        border-color: #dc3545;
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-apply {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.95em;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-reset {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.95em;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-reset:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    /* History Table */
+    .history-table-container {
+        padding: 30px 40px 40px;
+        background: #f8f9fa;
+        max-height: 55vh;
+        overflow-y: auto;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .history-table thead {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .history-table thead th {
+        padding: 18px 15px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .history-table tbody tr {
+        border-bottom: 1px solid #e8ecf4;
+        transition: all 0.2s ease;
+    }
+
+    .history-table tbody tr:hover {
+        background-color: #f8f9ff;
+    }
+
+    .history-table tbody td {
+        padding: 16px 15px;
+        font-size: 0.95em;
+        color: #2c3e50;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .user-email {
+        font-size: 0.85em;
+        color: #7c8db5;
+    }
+
+    .medicine-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .medicine-item {
+        padding: 4px 0;
+        font-size: 0.9em;
+    }
+
+    .medicine-item strong {
+        color: #dc3545;
+    }
+
+    .date-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        background: linear-gradient(135deg, #ffe6e6 0%, #ffcdd2 100%);
+        color: #dc3545;
+        border: 1px solid #f8d7da;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-icon {
+        font-size: 4em;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+
+    .empty-title {
+        font-size: 1.3em;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .empty-text {
+        font-size: 1em;
+        color: #6c757d;
+    }
+
+    /* Scrollbar Styling */
+    .history-table-container::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .history-table-container::-webkit-scrollbar-track {
+        background: #f1f3f5;
+        border-radius: 10px;
+    }
+
+    .history-table-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border-radius: 10px;
+    }
+
+    .history-table-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1400px) {
+        .filter-form {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .filter-actions {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .history-container {
+            margin: 20px auto;
+        }
+
+        .history-header {
+            padding: 20px 25px;
+        }
+
+        .header-title {
+            font-size: 1.4em;
+        }
+
+        .stats-section,
+        .filter-section,
+        .history-table-container {
+            padding: 20px 25px;
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .history-table {
+            font-size: 0.85em;
+        }
+
+        .history-table thead th,
+        .history-table tbody td {
+            padding: 12px 10px;
+        }
+    }
+</style>
+
+<div class="history-container">
+    <!-- HEADER -->
+    <header class="history-header">
+        <div class="header-left">
+            <a href="{% url 'admin_menu' %}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="header-title">Medicine Distribution History</h1>
+        </div>
+    </header>
+
+    <!-- STATISTICS SECTION -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <p class="stat-value">{{ total_distributions }}</p>
+            <p class="stat-label">Total Distributions</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ total_medicines_distributed }}</p>
+            <p class="stat-label">Medicines Distributed</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ unique_recipients }}</p>
+            <p class="stat-label">Unique Recipients</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ top_medicines.count }}</p>
+            <p class="stat-label">Medicine Types</p>
+        </div>
+    </div>
+
+    <!-- FILTER SECTION -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-search"></i> Search
+                </label>
+                <input type="text" name="search" value="{{ search_query }}" 
+                       placeholder="Search by user name, email, or medicine..." class="filter-input">
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-calendar-alt"></i> From Date
+                </label>
+                <input type="date" name="date_from" value="{{ date_from }}" class="filter-input">
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-calendar-alt"></i> To Date
+                </label>
+                <input type="date" name="date_to" value="{{ date_to }}" class="filter-input">
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-pills"></i> Medicine
+                </label>
+                <select name="medicine" class="filter-select">
+                    <option value="">All Medicines</option>
+                    {% for medicine in all_medicines %}
+                        <option value="{{ medicine.id }}" {% if medicine_filter == medicine.id|stringformat:"s" %}selected{% endif %}>
+                            {{ medicine.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-user"></i> Recipient
+                </label>
+                <select name="user" class="filter-select">
+                    <option value="">All Users</option>
+                    {% for user in all_users %}
+                        <option value="{{ user.id }}" {% if user_filter == user.id|stringformat:"s" %}selected{% endif %}>
+                            {{ user.first_name }} {{ user.last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn-apply">
+                    <i class="fas fa-filter"></i> Apply
+                </button>
+                <a href="{% url 'medicine_distribution_history' %}" class="btn-reset">
+                    <i class="fas fa-redo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- HISTORY TABLE -->
+    <div class="history-table-container">
+        {% if completed_orders %}
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i> Order ID</th>
+                        <th><i class="fas fa-user"></i> Recipient</th>
+                        <th><i class="fas fa-pills"></i> Medicines Distributed</th>
+                        <th><i class="fas fa-sort-numeric-up"></i> Total Quantity</th>
+                        <th><i class="fas fa-calendar-check"></i> Date Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in completed_orders %}
+                        <tr>
+                            <td><strong>#{{ order.id }}</strong></td>
+                            <td>
+                                <div class="user-info">
+                                    <span class="user-name">
+                                        {{ order.user.first_name }} {{ order.user.last_name }}
+                                    </span>
+                                    <span class="user-email">{{ order.user.email }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <ul class="medicine-list">
+                                    {% for item in order.items.all %}
+                                        <li class="medicine-item">
+                                            {{ item.medicine.name }} <strong>(× {{ item.quantity }})</strong>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td><strong>{{ order.get_total_quantity }}</strong></td>
+                            <td>
+                                <span class="date-badge">
+                                    <i class="far fa-calendar-alt"></i>
+                                    {{ order.completed_at|date:"M d, Y" }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-history empty-icon"></i>
+                <h3 class="empty-title">No medicine distribution records found</h3>
+                <p class="empty-text">
+                    {% if search_query or date_from or date_to or medicine_filter or user_filter %}
+                        Try adjusting your filters to see more results.
+                    {% else %}
+                        No distributions have been completed yet.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -323,6 +323,29 @@
         box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
     }
 
+    /* History Card - Purple Theme */
+    .card-history {
+        border-left: 6px solid #6f42c1;
+    }
+
+    .card-history .admin-card-icon {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        color: #6f42c1;
+    }
+
+    .card-history .admin-card-title {
+        color: #5a32a3;
+    }
+
+    .card-history .admin-card-description {
+        color: #6c757d;
+    }
+
+    .card-history:hover {
+        border-color: #6f42c1;
+        box-shadow: 0 8px 30px rgba(111, 66, 193, 0.2);
+    }
+
     /* Profile Card - Red Theme */
     .card-profile {
         border-left: 6px solid #dc3545;
@@ -503,7 +526,16 @@
                 <p class="admin-card-description">Create and manage public announcements</p>
             </a>
 
-            <!-- 4. Admin Profile - UPDATED LINK -->
+            <!-- 4. Medicine Distribution History - NEW -->
+            <a href="{% url 'medicine_distribution_history' %}" class="admin-card card-history">
+                <div class="admin-card-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3 class="admin-card-title">Medicine History</h3>
+                <p class="admin-card-description">View all medicine distributions and requests</p>
+            </a>
+
+            <!-- 5. Admin Profile -->
             <a href="{% url 'admin_profile' %}" class="admin-card card-profile">
                 <div class="admin-card-icon">
                     <i class="fas fa-user-shield"></i>
