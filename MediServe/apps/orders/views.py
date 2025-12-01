@@ -76,7 +76,6 @@ def order_list(request):
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 def delivery_page(request):
-    """Admin page to manage order deliveries."""
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
         action = request.POST.get('action')
@@ -84,111 +83,79 @@ def delivery_page(request):
         try:
             order = Order.objects.get(id=order_id)
 
-            # Handle different actions
+            # ASSIGN DRIVER
             if action == 'assign_driver':
-                driver_id = request.POST.get('driver_id')
-                if driver_id:
-                    driver = User.objects.get(id=driver_id)
-                    order.driver = driver
-                    order.save()
-                    messages.success(request, f"✅ Driver {driver.username} assigned to Order #{order_id}.")
-                else:
-                    order.driver = None
-                    order.save()
-                    messages.success(request, f"✅ Driver removed from Order #{order_id}.")
+                driver_name = request.POST.get('driver_name')
 
+                # If the dropdown has value, assign driver
+                if driver_name and driver_name != "":
+                    order.driver = driver_name
+                    order.save()
+                    messages.success(request, f"✅ Driver {driver_name} assigned to Order #{order_id}.")
+
+                # If the dropdown is empty, DO NOT automatically remove driver
+                elif driver_name == "":
+                    messages.warning(request, f"⚠️ No driver selected. Please choose a driver.")
+
+            # PROCESS
             elif action == 'process':
                 if order.status == 'Pending':
                     order.status = 'Processing'
                     order.save()
                     messages.success(request, f"✅ Order #{order_id} is now being processed.")
                 else:
-                    messages.warning(request, f"⚠️ Order #{order_id} cannot be processed from {order.status} status.")
+                    messages.warning(request, f"⚠️ Order #{order_id} cannot be processed from {order.status}.")
 
+            # SHIP
             elif action == 'ship':
                 if order.status == 'Processing':
-                    # FEFO Dispensing Logic
-                    with transaction.atomic():
-                        for item in order.items.all():
-                            medicine = item.medicine
-                            quantity_needed = item.quantity
-
-                            # Get batches ordered by expiry date (FEFO)
-                            batches = MedicineBatch.objects.filter(
-                                medicine=medicine,
-                                quantity_available__gt=0
-                            ).order_by('expiry_date', 'batch_id')
-
-                            total_available = sum(batch.quantity_available for batch in batches)
-
-                            if total_available < quantity_needed:
-                                raise Exception(
-                                    f"Insufficient stock for {medicine.name}. "
-                                    f"Available: {total_available}, Needed: {quantity_needed}"
-                                )
-
-                            # Dispense from batches (FEFO)
-                            remaining = quantity_needed
-                            for batch in batches:
-                                if remaining <= 0:
-                                    break
-
-                                take = min(batch.quantity_available, remaining)
-                                batch.quantity_available -= take
-                                batch.quantity_dispensed += take
-                                batch.save()
-                                remaining -= take
-
-                        # Update order status to Shipped
-                        order.status = 'Shipped'
-                        order.save()
-
-                    messages.success(request, f"✅ Order #{order_id} is out for delivery!")
+                    order.status = 'Shipped'
+                    order.save()
+                    messages.success(request, f"🚚 Order #{order_id} is out for delivery!")
                 else:
-                    messages.warning(request, f"⚠️ Order #{order_id} must be in Processing status to ship.")
+                    messages.warning(request, f"⚠️ Order #{order_id} must be Processing to ship.")
 
+            # COMPLETE
             elif action == 'complete':
                 if order.status == 'Shipped':
                     order.status = 'Completed'
                     order.completed_at = timezone.now()
                     order.save()
-                    messages.success(request, f"✅ Order #{order_id} has been marked as completed!")
+                    messages.success(request, f"🏁 Order #{order_id} marked as completed!")
                 else:
-                    messages.warning(request, f"⚠️ Order #{order_id} must be shipped before marking as completed.")
+                    messages.warning(request, f"⚠️ Order #{order_id} must be Shipped to complete.")
 
+            # CANCEL
             elif action == 'cancel':
                 if order.status in ['Pending', 'Processing']:
                     order.status = 'Cancelled'
                     order.save()
-                    messages.success(request, f"✅ Order #{order_id} has been cancelled.")
+                    messages.success(request, f"❌ Order #{order_id} has been cancelled.")
                 else:
-                    messages.warning(request, f"⚠️ Order #{order_id} cannot be cancelled from {order.status} status.")
+                    messages.warning(request, f"⚠️ Order #{order_id} cannot be cancelled from {order.status}.")
 
+            # REOPEN
             elif action == 'reopen':
                 if order.status in ['Completed', 'Cancelled']:
                     order.status = 'Pending'
                     order.save()
-                    messages.success(request, f"✅ Order #{order_id} has been reopened.")
+                    messages.success(request, f"🔄 Order #{order_id} reopened.")
 
         except Order.DoesNotExist:
             messages.error(request, f"❌ Order #{order_id} not found.")
-        except User.DoesNotExist:
-            messages.error(request, "❌ Driver not found.")
-        except Exception as e:
-            messages.error(request, f"❌ Error: {str(e)}")
 
         return redirect('delivery_page')
 
-    # GET request - display all orders except Completed
+    # GET request
     orders = Order.objects.exclude(status='Completed').order_by('-created_at')
-    drivers = User.objects.filter(groups__name='Driver')  # Assuming you have a Driver group
+    drivers = Order.DRIVER_CHOICES  # NEW — pulled directly from model
 
     context = {
         'orders': orders,
         'drivers': drivers,
     }
-
     return render(request, 'delivery_page.html', context)
+
 
 @login_required
 def remove_order_item(request, item_id):

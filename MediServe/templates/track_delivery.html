@@ -451,12 +451,18 @@
             <div class="order-card {% if order.status == 'Completed' %}completed{% endif %}" data-order-id="{{ order.id }}" data-status="{{ order.status }}">
                 <div class="order-header">
                     <div>
-                        <h3 class="order-id">Order #{{ order.id }}</h3>
-                        <p class="order-date">
-                            <i class="far fa-calendar-alt"></i>
-                            {{ order.created_at|date:"F d, Y" }}
-                        </p>
-                    </div>
+                            <h3 class="order-id">Order #{{ order.id }}</h3>
+
+                            <p class="order-driver">
+                                <i class="fas fa-user"></i>
+                                Driver: {% if order.driver %} {{ order.driver }} {% else %} Not assigned {% endif %}
+                            </p>
+
+                            <p class="order-date">
+                                <i class="far fa-calendar-alt"></i>
+                                {{ order.created_at|date:"F d, Y" }}
+                            </p>
+                        </div>
                     <span class="status-badge {% if order.status == 'Processing' %}status-processing{% elif order.status == 'Shipped' %}status-outfordelivery{% else %}status-{{ order.status|lower }}{% endif %}">
                         {% if order.status == "Pending" %}
                             <i class="fas fa-clock"></i> Pending
