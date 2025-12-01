@@ -155,7 +155,7 @@
                             <span>
                                 <strong>Driver:</strong>
                                 {% if order.driver %}
-                                    {{ order.driver.username }}
+                                    {{ order.driver }}
                                 {% else %}
                                     Not assigned
                                 {% endif %}
@@ -217,17 +217,21 @@
                         </div>
 
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <select name="driver_id" style="flex: 1; min-width: 180px; padding: 12px 16px;
-                                                            border: 2px solid #e2e8f0; border-radius: 10px;
-                                                            background: white; font-size: 0.95em; color: #2d3748;
-                                                            transition: all 0.3s ease; cursor: pointer;">
+                            <select name="driver_name" style="flex: 1; min-width: 180px; padding: 12px 16px;
+                                border: 2px solid #e2e8f0; border-radius: 10px;
+                                background: white; font-size: 0.95em; color: #2d3748;
+                                transition: all 0.3s ease; cursor: pointer;">
+
                                 <option value="">-- Select Driver --</option>
+
                                 {% for driver in drivers %}
-                                    <option value="{{ driver.id }}" {% if order.driver and order.driver.id == driver.id %}selected{% endif %}>
-                                        {{ driver.username }} ({{ driver.email }})
-                                    </option>
+                                    <option value="{{ driver.0 }}">{{ driver.1 }}</option>
                                 {% endfor %}
+
                             </select>
+
+
+
 
                             <button type="submit" name="action" value="assign_driver"
                                     style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
@@ -241,7 +245,7 @@
 
                             {% if order.driver %}
                             <button type="submit" name="action" value="assign_driver"
-                                    onclick="this.form.driver_id.value=''"
+                                    onclick="this.form.driver_name.value=''"
                                     style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
                                            color: white; border: none; padding: 11px 20px; border-radius: 10px;
                                            cursor: pointer; font-size: 0.9em; font-weight: 600;

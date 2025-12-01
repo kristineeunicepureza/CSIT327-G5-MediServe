@@ -5,15 +5,38 @@ from apps.medicine.models import Medicine
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ("Pending", "Pending"),  # user just placed the order
-        ("Processing", "Processing"),  # admin confirmed
-        ("Shipped", "Out for Delivery"),  # admin shipped it
-        ("Completed", "Completed"),  # delivery done
-        ("Cancelled", "Cancelled"),  # cancelled manually
+        ("Pending", "Pending"),
+        ("Processing", "Processing"),
+        ("Shipped", "Out for Delivery"),
+        ("Completed", "Completed"),
+        ("Cancelled", "Cancelled"),
     ]
 
+    DRIVERS = [
+        "Marco Dela Cruz",
+        "Johnrey Santos",
+        "Carlito Mendoza",
+        "Jerome Villanueva",
+        "Renzo Ramirez",
+        "Gabriel Torres",
+        "Alfred Navarro",
+        "Kristoffer Soriano",
+        "Ralph Gutierrez",
+        "Leo Manalang",
+    ]
+
+    DRIVER_CHOICES = [(driver, driver) for driver in DRIVERS]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    # NEW: driver name stored directly
+    driver = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        choices=DRIVER_CHOICES
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)
@@ -27,7 +50,6 @@ class Order(models.Model):
         return f"Order #{self.id} - {self.user.first_name} {self.user.last_name} ({self.status})"
 
     def get_total_quantity(self):
-        """Calculate total quantity of all items in the order"""
         return sum(item.quantity for item in self.items.all())
 
 
