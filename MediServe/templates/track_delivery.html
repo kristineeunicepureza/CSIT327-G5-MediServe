@@ -450,31 +450,34 @@
             {% for order in orders %}
             <div class="order-card {% if order.status == 'Completed' %}completed{% endif %}" data-order-id="{{ order.id }}" data-status="{{ order.status }}">
                 <div class="order-header">
-                    <div>
-                            <h3 class="order-id">Order #{{ order.id }}</h3>
+                <div>
+                    <!-- Display Queue Number instead of Order ID -->
+                    <h3 class="order-queue">Queue #{{ order.queue_number }}</h3>
 
-                            <p class="order-driver">
-                                <i class="fas fa-user"></i>
-                                Driver: {% if order.driver %} {{ order.driver }} {% else %} Not assigned {% endif %}
-                            </p>
+                    <p class="order-driver">
+                        <i class="fas fa-user"></i>
+                        Driver: {% if order.driver %} {{ order.driver }} {% else %} Not assigned {% endif %}
+                    </p>
 
-                            <p class="order-date">
-                                <i class="far fa-calendar-alt"></i>
-                                {{ order.created_at|date:"F d, Y" }}
-                            </p>
-                        </div>
-                    <span class="status-badge {% if order.status == 'Processing' %}status-processing{% elif order.status == 'Shipped' %}status-outfordelivery{% else %}status-{{ order.status|lower }}{% endif %}">
-                        {% if order.status == "Pending" %}
-                            <i class="fas fa-clock"></i> Pending
-                        {% elif order.status == "Processing" %}
-                            <i class="fas fa-cog fa-spin"></i> Processing
-                        {% elif order.status == "Shipped" %}
-                            <i class="fas fa-shipping-fast"></i> Out for Delivery
-                        {% elif order.status == "Completed" %}
-                            <i class="fas fa-check-circle"></i> Completed
-                        {% endif %}
-                    </span>
+                    <p class="order-date">
+                        <i class="far fa-calendar-alt"></i>
+                        {{ order.created_at|date:"F d, Y" }}
+                    </p>
                 </div>
+                <span class="status-badge {% if order.status == 'Processing' %}status-processing{% elif order.status == 'Shipped' %}status-outfordelivery{% else %}status-{{ order.status|lower }}{% endif %}">
+                    {% if order.status == "Pending" %}
+                        <i class="fas fa-clock"></i> Pending
+                    {% elif order.status == "Processing" %}
+                        <i class="fas fa-cog fa-spin"></i> Processing
+                    {% elif order.status == "Shipped" %}
+                        <i class="fas fa-shipping-fast"></i> Out for Delivery
+                    {% elif order.status == "Completed" %}
+                        <i class="fas fa-check-circle"></i> Completed
+                    {% endif %}
+                </span>
+            </div>
+
+
 
                 <div class="status-timeline">
                     <div class="status-step {% if order.status in 'Pending Processing Shipped Completed' %}completed{% endif %}">
