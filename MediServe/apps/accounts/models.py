@@ -40,7 +40,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=50, default='user', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+
     objects = AccountManager()
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -50,3 +52,13 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+    @property
+    def full_name(self):
+        """
+        Returns the user's full name combining first, middle, and last names.
+        Skips empty parts automatically.
+        """
+        names = [self.first_name, self.middle_name, self.last_name]
+        return " ".join(filter(None, names))
+
