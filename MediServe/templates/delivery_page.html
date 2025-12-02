@@ -136,11 +136,20 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em;">
                             <i class="fas fa-user" style="color: #dc3545; width: 16px;"></i>
-                            <span>{{ order.user.username }}</span>
+                            <span>{{ order.user.full_name }}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em;">
                             <i class="fas fa-envelope" style="color: #dc3545; width: 16px;"></i>
                             <span>{{ order.user.email }}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em; grid-column: 1 / -1;">
+                            <i class="fas fa-map-marker-alt" style="color: #dc3545; width: 16px;"></i>
+                            <span>
+                                {% with user=order.user %}
+                                    {{ user.house_number }} {{ user.street }}, {{ user.barangay }},
+                                    {{ user.municipality }}, {{ user.province }} {{ user.zip_code }}
+                                {% endwith %}
+                            </span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em;">
                             <i class="fas fa-calendar-alt" style="color: #dc3545; width: 16px;"></i>
