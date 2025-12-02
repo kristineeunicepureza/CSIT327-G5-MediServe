@@ -4,77 +4,149 @@
 {% block title %}Order Queue Status{% endblock %}
 
 {% block content %}
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<div style="width: 100%; max-width: 650px; margin: 50px auto; background-color: #FFFFFF; border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; font-family: Arial, sans-serif;">
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f5f7fa; }
 
-    {# HEADER #}
-    <header style="padding: 20px 30px; background-color: #36489e; color: #FFFFFF; display: flex; align-items: center; gap: 15px;">
-        <a href="{% url 'main_menu' %}" style="
-            width: 45px; height: 45px; background-color: #FFFFFF; color: #36489e;
-            display: flex; justify-content: center; align-items: center;
-            border-radius: 50%; text-decoration: none; font-weight: bold;
-            transition: transform 0.2s;
-        " onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';">
+    .page-container {
+        width: 100%;
+        max-width: 950px;
+        margin: 30px auto;
+        background-color: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(54,72,158,0.12);
+        overflow: hidden;
+    }
+
+    /* Header */
+    .page-header {
+        padding: 25px 35px;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+    }
+
+    .btn-back {
+        width: 45px; height: 45px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(255,255,255,0.2);
+        color: #fff;
+        font-weight: bold;
+        border: none;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .btn-back:hover { background-color: rgba(255,255,255,0.3); transform: translateX(-3px); }
+
+    .page-title { font-size: 1.8em; font-weight: 600; color: #fff; }
+
+    /* Main content */
+    .main-content {
+        padding: 40px 45px;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .queue-number-section { text-align: center; }
+    .queue-number-section h2 { color: #36489e; margin-bottom: 15px; font-weight: 700; font-size: 1.8em; }
+    .queue-number { background-color: #36489e; color: #fff; width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; font-size: 3em; font-weight: bold; }
+    .currently-serving { color: #dc3545; font-size: 1.2em; }
+
+    .status-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(54,72,158,0.08);
+    }
+    .status-card .label { font-weight: 700; color: #36489e; }
+    .status-card .wait-time { font-size: 1.8em; color: #28a745; margin-top: 5px; display: block; }
+    .status-card .label-small { font-size: 0.95em; color: #777; margin-top: 10px; }
+    .status-card .status-text { font-weight: 700; color: #36489e; }
+
+    .progress-bar { background-color: #e0e0e0; border-radius: 10px; height: 14px; margin-top: 15px; overflow: hidden; }
+    .progress-fill { height: 100%; background-color: #36489e; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+
+    .order-items-list { list-style: none; padding: 0; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; }
+    .order-items-list li { padding: 15px 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; background-color: #fff; font-size: 1em; }
+
+    .actions { display: flex; flex-direction: column; gap: 15px; }
+    .btn {
+        width: 100%;
+        padding: 16px;
+        font-size: 1.1em;
+        font-weight: 600;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-primary { background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%); color: #fff; box-shadow: 0 4px 15px rgba(54,72,158,0.25); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(54,72,158,0.35); }
+
+    .no-order-msg { font-size: 1.1em; color: #555; text-align: center; margin-bottom: 20px; }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <a href="{% url 'main_menu' %}" class="btn-back">
             <i class="fas fa-arrow-left"></i>
         </a>
-        <h1 style="font-size: 1.8em; font-weight: 700; margin: 0; color: #FFFFFF;">Queue Status</h1>
-    </header>
+        <h1 class="page-title">Queue Status</h1>
+    </div>
 
-    {# MAIN CONTENT #}
-    <main style="padding: 35px 30px; display: flex; flex-direction: column; gap: 25px;">
-
+    <div class="main-content">
         {% if current_order %}
+            <section class="queue-number-section">
+                <h2>Your Queue Number</h2>
+                <div class="queue-number">#{{ current_order.queue_number }}</div>
+                <p class="currently-serving">Currently Serving: <strong>#{{ currently_serving }}</strong></p>
+            </section>
 
-            <h2 style="color: #36489e; margin-bottom: 10px;">Your Queue Number</h2>
-            <div style="background-color: #36489e; color: #FFFFFF; padding: 25px; border-radius: 15px; margin-bottom: 10px;">
-                <h1 style="font-size: 4em; margin: 0;">#{{ current_number }}</h1>
-            </div>
-            <p style="font-size: 1.1em; color: #777; margin-bottom: 25px;">
-                Currently Serving: <strong style="color: #dc3545;">#{{ currently_serving }}</strong>
-            </p>
+           <section class="status-card">
+                    <p class="label">Estimated Wait Time</p>
+                    <strong class="wait-time">{{ estimated_wait|default:"3-5 days" }}</strong>
+                    <p class="label-small">Status: <span class="status-text">{{ current_order.status }}</span></p>
+                    <div class="progress-bar">
+                        {% with progress=current_order.queue_number|add:'-1' %}
+                            <div class="progress-fill" style="width: {{ progress|divisibleby:currently_serving|default:0 }}%;"></div>
+                        {% endwith %}
+                    </div>
+                </section>
 
-            {# ESTIMATED WAIT TIME & STATUS #}
-            <div style="border: 1px solid #E3EBEE; padding: 20px; border-radius: 12px; margin-bottom: 30px; background-color: #f7f9fa;">
-                <p style="font-weight: bold; margin: 0; color: #36489e;">Estimated Wait Time</p>
-                <strong style="font-size: 1.8em; color: #28a745; display: block; margin-top: 5px;">
-                    {{ estimated_wait|default:"20 minutes" }}
-                </strong>
-                <p style="font-size: 0.9em; color: #777; margin-top: 10px;">
-                    Status: <span style="font-weight: bold; color: #36489e;">{{ current_order.status }}</span>
-                </p>
-            </div>
 
-            {# ORDER ITEMS SUMMARY #}
-            <div style="text-align: left; margin-bottom: 30px;">
-                <h3 style="margin-bottom: 10px; color: #36489e;">Your Order Items:</h3>
-                <ul style="list-style: none; padding: 0; border-radius: 10px; overflow: hidden; border: 1px solid #E3EBEE;">
+            <section>
+                <h3 style="color:#36489e; margin-bottom:12px; font-weight:700;">Your Order Items:</h3>
+                <ul class="order-items-list">
                     {% for item in current_order.items.all %}
-                        <li style="padding: 12px 15px; border-bottom: 1px solid #E3EBEE; display: flex; justify-content: space-between; background-color: #FFFFFF;">
-                            <span>{{ item.medicine.name }}</span>
-                            <strong>Qty: {{ item.quantity }}</strong>
-                        </li>
+                        <li><span>{{ item.medicine.name }}</span><strong>Qty: {{ item.quantity }}</strong></li>
                     {% endfor %}
                 </ul>
-            </div>
+            </section>
 
-            {# CANCEL ORDER BUTTON #}
-            <button class="btn" style="width: 100%; background-color: #dc3545; color: #FFFFFF; padding: 15px; font-size: 1.1em; border-radius: 10px; cursor: not-allowed; margin-bottom: 15px;">
-                <i class="fas fa-ban"></i> Cancel Order
-            </button>
-
-            {# RETURN TO MAIN MENU BUTTON #}
-            <a href="{% url 'main_menu' %}" class="btn" style="width: 100%; background-color: #5c74e3; color: #FFFFFF; padding: 15px; font-size: 1.1em; border-radius: 10px;">
-                <i class="fas fa-home"></i> Return to Main Menu
-            </a>
+            <section class="actions">
+                <a href="{% url 'main_menu' %}" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Return to Main Menu
+                </a>
+            </section>
 
         {% else %}
-            <p style="text-align: center; padding: 30px; color: #555;">You do not have an active order in the queue.</p>
-            <a href="{% url 'medicine_list' %}" class="btn" style="width: 100%; background-color: #5c74e3; color: #FFFFFF; padding: 15px; font-size: 1.1em; border-radius: 10px;">
+            <p class="no-order-msg">You do not have an active order in the queue.</p>
+            <a href="{% url 'medicine_list' %}" class="btn btn-primary" style="max-width: 300px; margin: 0 auto; display:block;">
                 <i class="fas fa-prescription-bottle-alt"></i> Browse Medicines
             </a>
         {% endif %}
-
-    </main>
+    </div>
 </div>
-
 {% endblock %}

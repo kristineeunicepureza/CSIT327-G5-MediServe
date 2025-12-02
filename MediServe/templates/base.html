@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -8,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
+        /* Admin hover action for admin pages */
         .admin-action-hover {
             display: none;
             position: absolute;
@@ -21,10 +21,47 @@
             display: block;
         }
 
+        /* Dark mode support */
         .dark-mode { background-color: #333; color: white; }
         .dark-mode .left-panel { background-color: #444; color: white; }
         .dark-mode .right-panel { background-color: #222; color: white; }
-        .dark-mode input, .dark-mode select, .dark-mode textarea { background-color: #555; color: white; border: 1px solid #666; }
+        .dark-mode input, .dark-mode select, .dark-mode textarea {
+            background-color: #555; color: white; border: 1px solid #666;
+        }
+
+        /* ===== UNIVERSAL BUTTON STYLES ===== */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            transition: 0.2s all;
+            cursor: pointer;
+            border: none;
+        }
+        .btn i {
+            margin-right: 8px;
+        }
+        .btn-primary { background-color: #5c74e3; color: #fff; }
+        .btn-primary:hover { background-color: #3f57c4; }
+        .btn-danger { background-color: #dc3545; color: #fff; }
+        .btn-danger:hover { background-color: #b71c29; }
+        .btn-back {
+            width: 45px; height: 45px; background-color: #fff; color: #36489e;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-weight: bold; transition: transform 0.2s; text-decoration: none;
+        }
+        .btn-back:hover { transform: scale(1.1); }
+        .btn.disabled, .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+        /* Optional: consistent spacing for links in actions */
+        .btn + .btn { margin-top: 10px; }
     </style>
 </head>
 <body>
