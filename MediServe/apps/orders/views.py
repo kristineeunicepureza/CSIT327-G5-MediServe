@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from django.db import transaction
+from django.http import JsonResponse
 from django.db.models import F, Max, Q
 from apps.orders.models import Order, OrderItem
 from apps.medicine.models import Medicine
@@ -45,8 +46,6 @@ def add_to_order(request, medicine_id):
     return redirect("medicine_info", medicine_id=medicine.id)
 
 
-
-# 🟢 Order List
 @login_required
 def order_list(request):
     orders = Order.objects.filter(user=request.user, status="Pending")
@@ -61,14 +60,13 @@ def order_list(request):
     return render(request, "order_list.html", context)
 
 
-
-# 🟢 Checkout
+# 🟢 Checkout - place order
 @login_required
 def order_checkout(request):
     try:
         order = Order.objects.get(user=request.user, status="Pending")
 
-        # Check stock
+        # Check stock availability
         can_checkout = True
         for item in order.items.all():
             if item.quantity > item.medicine.total_stock:
@@ -78,25 +76,31 @@ def order_checkout(request):
                     f"⚠️ Not enough stock for {item.medicine.name}. "
                     f"Available: {item.medicine.total_stock}, In cart: {item.quantity}"
                 )
-
         if not can_checkout:
             return redirect("order_list")
 
-        # Queue numbers
-        if request.user.senior_citizen_id or request.user.pwd_id:
-            last_priority = Order.objects.filter(
-                Q(user__senior_citizen_id__isnull=False) |
-                Q(user__pwd_id__isnull=False)
-            ).aggregate(Max('queue_number'))['queue_number__max'] or 0
-            order.queue_number = last_priority + 1
-        else:
-            max_queue = Order.objects.aggregate(Max('queue_number'))['queue_number__max'] or 0
-            order.queue_number = max_queue + 1
+        # IMPORTANT: Assign queue number FIRST while status is still "Pending"
+        # This way the order is included in the queue properly
+        order.assign_queue_number()
 
+        # THEN change status to Processing
         order.status = "Processing"
         order.save()
 
-        messages.success(request, "✅ Your order has been placed!")
+        # Show priority message if applicable
+        if order.is_priority_user():
+            messages.success(
+                request,
+                f"✅ Your order has been placed with PRIORITY (Senior Citizen/PWD)! "
+                f"You are Queue #{order.queue_number}. Check your queue status below."
+            )
+        else:
+            messages.success(
+                request,
+                f"✅ Your order has been placed! You are Queue #{order.queue_number}. "
+                f"Check your queue status below."
+            )
+
         return redirect("queue_status")
 
     except Order.DoesNotExist:
@@ -104,146 +108,219 @@ def order_checkout(request):
         return redirect("order_list")
 
 
-
-
-# 🟢 Queue Status
 @login_required
 def queue_status(request):
-    current_order = Order.objects.filter(user=request.user, status__in=['Pending', 'Processing']).first()
-    serving_order = Order.objects.filter(status__in=['Pending', 'Processing']).order_by('queue_number').first()
+    current_order = Order.objects.filter(
+        user=request.user,
+        status__in=['Pending', 'Processing']
+    ).first()
+
+    serving_order = Order.objects.filter(
+        status__in=['Pending', 'Processing']
+    ).order_by('queue_number').first()
+
     currently_serving = serving_order.queue_number if serving_order else 0
 
-    estimated_wait = "3-5 days"
+    position = None
+    estimated_wait = "1-2 hours"
+    is_almost_turn = False
+    total_ahead = 0
+    is_priority = False
+
+    if current_order:
+        position = current_order.get_queue_position()
+        is_priority = current_order.is_priority_user()
+
+        if position:
+            total_ahead = position - 1
+            if position == 1:
+                estimated_wait = "20-30 minutes"
+            elif position <= 5:
+                estimated_wait = "30-40 minutes"
+            else:
+                estimated_wait = "50-60 minutes"
+            is_almost_turn = position <= 3
 
     context = {
         'current_order': current_order,
         'currently_serving': currently_serving,
         'estimated_wait': estimated_wait,
+        'position': position,
+        'is_almost_turn': is_almost_turn,
+        'total_ahead': total_ahead,
+        'is_priority': is_priority,
     }
     return render(request, "queue_page.html", context)
 
 
+# Updated API (returns additional fields including priority status)
+@login_required
+def queue_status_api(request):
+    current_order = Order.objects.filter(
+        user=request.user,
+        status__in=['Pending', 'Processing']
+    ).first()
 
-# 🟢 Track Delivery
+    serving_order = Order.objects.filter(
+        status__in=['Pending', 'Processing']
+    ).order_by('queue_number').first()
+
+    currently_serving = serving_order.queue_number if serving_order else 0
+
+    position = None
+    estimated_wait = "1-2 hours"
+    is_almost_turn = False
+    total_ahead = 0
+    is_priority = False
+
+    if current_order:
+        position = current_order.get_queue_position()
+        is_priority = current_order.is_priority_user()
+
+        if position:
+            total_ahead = position - 1
+            if position == 1:
+                estimated_wait = "20-30 minutes"
+            elif position <= 5:
+                estimated_wait = "30-40 minutes"
+            else:
+                estimated_wait = "50-60 minutes"
+            is_almost_turn = position <= 3
+
+    data = {
+        'queue_number': current_order.queue_number if current_order else None,
+        'currently_serving': currently_serving,
+        'estimated_wait': estimated_wait,
+        'status': current_order.status if current_order else None,
+        'position': position,
+        'is_almost_turn': is_almost_turn,
+        'total_ahead': total_ahead,
+        'is_priority': is_priority,
+        'items': [
+            {'name': item.medicine.name, 'quantity': item.quantity}
+            for item in current_order.items.all()
+        ] if current_order else []
+    }
+    return JsonResponse(data)
+
+
 @login_required
 def track_delivery(request):
-    orders = Order.objects.filter(user=request.user).exclude(status="Pending").order_by("-created_at")
+    # Show all orders except Pending (includes Shipped, Completed, Cancelled)
+    orders = Order.objects.filter(
+        user=request.user
+    ).exclude(status="Pending").order_by("-created_at")
+
     return render(request, "track_delivery.html", {"orders": orders})
 
 
-
-# 🟢 Order History
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user, status='Completed').order_by('-created_at')
+    orders = Order.objects.filter(
+        user=request.user,
+        status='Completed'
+    ).order_by('-completed_at', '-created_at')
+
     return render(request, 'order_history.html', {'orders': orders})
 
 
-
-# 🟥 ADMIN: Delivery Control Page (FULLY UPDATED)
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 def delivery_page(request):
-
-    if request.method == "POST":
-        order_id = request.POST.get("order_id")
-        action = request.POST.get("action")
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        action = request.POST.get('action')
 
         try:
             order = Order.objects.get(id=order_id)
 
-            # ----------------------------------------------
-            # 1️⃣ ASSIGN DRIVER (PERSISTENCE FIX)
-            # ----------------------------------------------
-            if action == "assign_driver":
-                driver_label = request.POST.get("driver_name")
+            # Validation: Ensure sequential processing for queue orders
+            if action in ['process', 'ship']:
+                next_in_queue = Order.objects.filter(
+                    status__in=['Pending', 'Processing']
+                ).order_by('queue_number').first()
 
-                if driver_label:
-                    order.driver = driver_label  # store LABEL not key
+                if next_in_queue and order != next_in_queue:
+                    priority_msg = " (PRIORITY)" if next_in_queue.is_priority_user() else ""
+                    messages.warning(
+                        request,
+                        f"⚠️ You must process Order #{next_in_queue.id} first "
+                        f"(Queue #{next_in_queue.queue_number}{priority_msg})."
+                    )
+                    return redirect('delivery_page')
+
+            if action == 'assign_driver':
+                driver_name = request.POST.get('driver_name')
+                if driver_name:
+                    order.driver = driver_name
                     order.save()
-                    messages.success(request, f"🚗 Driver assigned to Order #{order_id}")
+                    messages.success(request, f"✅ Driver {driver_name} assigned to Order #{order_id}.")
                 else:
                     messages.warning(request, "⚠️ No driver selected.")
 
-                return redirect("delivery_page")
-
-            # ----------------------------------------------
-            # 2️⃣ PROCESS ORDER
-            # ----------------------------------------------
-            elif action == "process" and order.status == "Pending":
-                order.status = "Processing"
+            elif action == 'process' and order.status == 'Pending':
+                order.status = 'Processing'
                 order.save()
-                messages.success(request, f"⚙️ Order #{order_id} is now being processed.")
-                return redirect("delivery_page")
+                messages.success(request, f"✅ Order #{order_id} is now being processed.")
 
-            # ----------------------------------------------
-            # 3️⃣ SHIP ORDER — DRIVER REQUIRED
-            # ----------------------------------------------
-            elif action == "ship" and order.status == "Processing":
-
-                if not order.driver:
-                    messages.error(
-                        request,
-                        f"⚠️ Cannot ship Order #{order_id}. Please assign a driver first."
-                    )
-                    return redirect("delivery_page")
-
-                order.status = "Shipped"
+            elif action == 'ship' and order.status == 'Processing':
+                order.status = 'Shipped'
                 order.save()
-                messages.success(request, f"🚚 Order #{order_id} is now out for delivery!")
-                return redirect("delivery_page")
+                # Remove from queue when shipped (but order remains visible)
+                order.remove_from_queue()
+                messages.success(request, f"🚚 Order #{order_id} is out for delivery!")
 
-            # ----------------------------------------------
-            # 4️⃣ COMPLETE ORDER
-            # ----------------------------------------------
-            elif action == "complete" and order.status == "Shipped":
-                order.status = "Completed"
+            elif action == 'complete' and order.status == 'Shipped':
+                order.status = 'Completed'
                 order.completed_at = timezone.now()
                 order.save()
-                messages.success(request, f"🏁 Order #{order_id} marked completed!")
-                return redirect("delivery_page")
+                messages.success(request, f"🏁 Order #{order_id} marked as completed!")
 
-            # ----------------------------------------------
-            # 5️⃣ CANCEL ORDER
-            # ----------------------------------------------
-            elif action == "cancel" and order.status in ["Pending", "Processing"]:
-                order.status = "Cancelled"
+            elif action == 'cancel' and order.status in ['Pending', 'Processing']:
+                order.status = 'Cancelled'
                 order.save()
-                messages.success(request, f"❌ Order #{order_id} cancelled.")
-                return redirect("delivery_page")
+                # Remove from queue when cancelled
+                order.remove_from_queue()
+                messages.success(request, f"❌ Order #{order_id} has been cancelled.")
 
-            # ----------------------------------------------
-            # 6️⃣ REOPEN ORDER
-            # ----------------------------------------------
-            elif action == "reopen" and order.status in ["Completed", "Cancelled"]:
-                order.status = "Pending"
-                order.save()
-                messages.success(request, f"🔄 Order #{order_id} reopened.")
-                return redirect("delivery_page")
+            elif action == 'reopen' and order.status in ['Completed', 'Cancelled']:
+                order.status = 'Processing'
+                # Re-assign queue number on reopen (respects priority)
+                order.assign_queue_number()
+                messages.success(request, f"🔄 Order #{order_id} reopened and added back to queue.")
 
             else:
-                messages.warning(request, "⚠️ Action not allowed.")
-                return redirect("delivery_page")
+                messages.warning(request, f"⚠️ Action '{action}' cannot be applied to Order #{order_id}.")
 
         except Order.DoesNotExist:
-            messages.error(request, "❌ Order not found.")
-            return redirect("delivery_page")
+            messages.error(request, f"❌ Order #{order_id} not found.")
 
-    # LOAD ORDERS & DRIVERS
-    orders = Order.objects.exclude(status="Completed").order_by("-created_at")
+        return redirect('delivery_page')
+
+    # Get all orders except completed ones
+    # Priority orders (with queue_number) will appear first, sorted by queue_number
+    orders = Order.objects.exclude(status='Completed').order_by(
+        'queue_number',  # Orders in queue first (nulls last in most DBs)
+        '-created_at'  # Then by creation time
+    )
+
     drivers = Order.DRIVER_CHOICES
 
-    return render(request, "delivery_page.html", {"orders": orders, "drivers": drivers})
+    context = {
+        'orders': orders,
+        'drivers': drivers,
+    }
+
+    return render(request, 'delivery_page.html', context)
 
 
-
-# 🟢 Remove Order Item
 @login_required
 def remove_order_item(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
     medicine_name = item.medicine.name
     item.delete()
 
+    # If no items left, delete the order
     if item.order.items.count() == 0:
         item.order.delete()
 
@@ -251,8 +328,6 @@ def remove_order_item(request, item_id):
     return redirect("order_list")
 
 
-
-# 🟢 Update Order Item Quantity
 @login_required
 def update_order_item(request, item_id):
     if request.method == "POST":
@@ -261,38 +336,36 @@ def update_order_item(request, item_id):
 
         if quantity <= 0:
             item.delete()
-            messages.success(request, f"🗑️ {item.medicine.name} removed.")
+            messages.success(request, f"🗑️ {item.medicine.name} removed from your order.")
         elif quantity > item.medicine.total_stock:
-            messages.warning(request, f"⚠️ Only {item.medicine.total_stock} available.")
+            messages.warning(request, f"⚠️ Only {item.medicine.total_stock} available in stock.")
         else:
             item.quantity = quantity
             item.save()
-            messages.success(request, f"📝 Updated quantity.")
+            messages.success(request, f"📝 {item.medicine.name} quantity updated to {quantity}.")
 
     return redirect("order_list")
 
 
-
-# 🟢 Admin: Manual complete action
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 def mark_order_completed(request, order_id):
-    if request.method == "POST":
+    if request.method == 'POST':
         try:
             order = Order.objects.get(id=order_id)
-            if order.status == "Shipped":
-                order.status = "Completed"
+            if order.status == 'Shipped':
+                order.status = 'Completed'
+                order.completed_at = timezone.now()
                 order.save()
-                messages.success(request, "Order marked completed!")
+                messages.success(request, f"✅ Order #{order_id} marked as completed!")
             else:
-                messages.warning(request, "Order must be shipped first.")
+                messages.warning(request, f"⚠️ Order #{order_id} must be shipped before marking as completed.")
         except Order.DoesNotExist:
             messages.error(request, "Order not found.")
-    return redirect("delivery_page")
+
+    return redirect('delivery_page')
 
 
-
-# 🟢 Order Detail
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
