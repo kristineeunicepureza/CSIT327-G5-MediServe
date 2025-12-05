@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Archived Announcements{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+/* Container */
+.archived-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+/* Header */
+.archived-header {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    padding: 30px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-button {
+    padding: 12px;
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border: 2px solid rgba(255,255,255,0.3);
+    text-decoration: none
+}
+
+.header-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Buttons */
+.green-btn, .gray-btn {
+    padding: 14px 22px;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    transition: all .3s ease;
+}
+
+.green-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.gray-btn {
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+/* Cards */
+.announcement-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 25px;
+    border-left: 6px solid #6c757d;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.announcement-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color:#495057;
+}
+
+.badge-archived {
+    background:#e0e0e0;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:.85rem;
+    color:#495057;
+}
+</style>
+
+
+<div class="archived-container">
+
+    <!-- HEADER -->
+    <header class="archived-header">
+        <div class="header-left">
+            <a href="{% url 'announcements' %}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="header-title">Archived Announcements</h1>
+        </div>
+    </header>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        {% for message in messages %}
+        <div style="margin:20px; padding:18px;
+            border-radius:12px;
+            font-weight:600;
+            text-align:center;
+            background: {% if 'success' in message.tags %}#d4edda{% else %}#f8d7da{% endif %};
+            color: {% if 'success' in message.tags %}#155724{% else %}#721c24{% endif %};
+            border: 2px solid {% if 'success' in message.tags %}#28a745{% else %}#dc3545{% endif %};">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- MAIN CONTENT -->
+    <main style="padding:35px; background:#f8f9fa;">
+
+        <div class="announcements-grid" style="
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(450px,1fr));
+            gap:25px;">
+
+            {% for post in announcements %}
+            <div class="announcement-card">
+
+                <div class="card-header" style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <h3 class="announcement-title">{{ post.title }}</h3>
+
+                    <span class="badge-archived">
+                        <i class="fas fa-archive"></i>
+                        Archived {{ post.archived_at|date:"M j, Y" }}
+                    </span>
+                </div>
+
+                <p style="color:#2c3e50; line-height:1.6;">{{ post.content }}</p>
+
+                <div style="
+                    margin-top:18px;
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    padding-top:15px;
+                    border-top:2px solid #e8ecf4;">
+
+                    <span style="color:#7c8db5; font-size:.85rem;">
+                        Originally posted {{ post.date_posted|date:"M j, Y" }}
+                    </span>
+
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="confirmRestore('{{ post.id }}')"
+                                class="green-btn"
+                                style="padding:10px 14px;">
+                            <i class="fas fa-undo"></i> Restore
+                        </button>
+
+                        <form id="restore-form-{{ post.id }}"
+                              action="{% url 'restore_post' post.id %}"
+                              method="post"
+                              style="display:none;">
+                            {% csrf_token %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center; padding:60px; grid-column:1/-1;">
+                <i class="fas fa-box-open" style="font-size:4rem; color:#dee2e6;"></i>
+                <p style="font-size:1.3rem; color:#777;">No archived announcements.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+<script>
+function confirmRestore(id) {
+    Swal.fire({
+        title: "Restore this post?",
+        text: "This will move it back to active announcements.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745"
+    }).then(res => {
+        if (res.isConfirmed) {
+            document.getElementById("restore-form-" + id).submit();
+        }
+    });
+}
+</script>
+
+{% endblock %}
