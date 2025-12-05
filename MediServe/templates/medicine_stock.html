@@ -304,27 +304,6 @@
         gap: 8px;
     }
 
-    .btn-edit {
-        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
-        color: #333;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.85em;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
-    }
-
-    .btn-edit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
-    }
-
     .btn-delete {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         color: #ffffff;
@@ -428,25 +407,72 @@
     }
 
     .batch-header-fields {
-        background: linear-gradient(135deg, #fff9e6 0%, #ffecb3 100%);
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
         padding: 20px;
         border-radius: 12px;
         margin-bottom: 20px;
-        border: 2px solid #ffc107;
+        border: 2px solid #28a745;
     }
 
     .batch-header-fields h3 {
-        color: #f57c00;
-        margin: 0 0 15px 0;
+        color: #2e7d32;
+        margin: 0 0 10px 0;
         font-size: 1.1em;
         display: flex;
         align-items: center;
         gap: 8px;
     }
 
+    .batch-note {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .batch-note i {
+        color: #28a745;
+    }
+
+    .auto-batch-id {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        padding: 15px 20px;
+        border-radius: 10px;
+        border: 2px solid #2196f3;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .auto-batch-id-label {
+        font-size: 0.9em;
+        color: #1565c0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .auto-batch-id-value {
+        font-size: 1.1em;
+        color: #0d47a1;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+        background: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 2px solid #2196f3;
+    }
+
     .form-row {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 15px;
         margin-bottom: 0;
     }
@@ -484,6 +510,24 @@
         box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
     }
 
+    .form-input.error, .form-select.error {
+        border-color: #dc3545;
+        background-color: #fff5f5;
+    }
+
+    .date-hint {
+        color: #6c757d;
+        font-size: 0.85em;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .date-hint i {
+        font-size: 0.9em;
+    }
+
     .items-section {
         margin-top: 25px;
     }
@@ -495,6 +539,13 @@
         display: flex;
         align-items: center;
         gap: 8px;
+    }
+
+    .medicine-box {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 2px solid #e8ecf4;
     }
 
     .modal-actions {
@@ -609,7 +660,7 @@
             <h1 class="header-title">Medicine Stock Management (FEFO)</h1>
         </div>
 
-        <button onclick="document.getElementById('addBatchModal').style.display='flex'" class="add-medicine-btn">
+        <button onclick="openBatchModal()" class="add-medicine-btn">
             <i class="fas fa-shipping-fast"></i> Add New Batch
         </button>
     </header>
@@ -691,8 +742,8 @@
                     <tr>
                         <td><span class="batch-badge">{{ batch.batch_id }}</span></td>
                         <td><strong>{{ batch.medicine.name }}</strong></td>
-                        <td>{{ batch.medicine.brand }}</td>
-                        <td>{{ batch.medicine.category }}</td>
+                        <td>{{ batch.medicine.brand|default:"-" }}</td>
+                        <td>{{ batch.medicine.category|default:"-" }}</td>
                         <td class="{% if batch.is_expiring_soon %}expiry-warning{% else %}expiry-normal{% endif %}">
                             {{ batch.expiry_date|date:"M d, Y" }}
                         </td>
@@ -719,7 +770,7 @@
     </div>
 </div>
 
-<!-- ADD NEW BATCH MODAL - SINGLE MEDICINE PER BATCH -->
+<!-- ADD NEW BATCH MODAL - AUTO-GENERATED BATCH ID -->
 <div id="addBatchModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -735,23 +786,38 @@
             <!-- Batch Information -->
             <div class="batch-header-fields">
                 <h3><i class="fas fa-info-circle"></i> Batch Information</h3>
-                <p style="color: #6c757d; font-size: 0.9em; margin-bottom: 15px;">
-                    <i class="fas fa-exclamation-circle"></i> Note: One medicine product per batch
-                </p>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Batch ID *</label>
-                        <input type="text" name="batch_id" required class="form-input" placeholder="e.g., BATCH-001">
+                <div class="batch-note">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Auto-generated:</strong> Batch ID will be automatically assigned
+                </div>
+
+                <!-- AUTO-GENERATED BATCH ID DISPLAY -->
+                <div class="auto-batch-id">
+                    <div class="auto-batch-id-label">
+                        <i class="fas fa-barcode"></i>
+                        Next Batch ID:
                     </div>
+                    <div class="auto-batch-id-value" id="nextBatchId">
+                        Loading...
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Date Received *</label>
                         <input type="date" name="date_received" id="date_received" required class="form-input">
-                        <small style="color: #6c757d; font-size: 0.85em;">Cannot be in the future</small>
+                        <div class="date-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Cannot be in the future
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Expiry Date *</label>
                         <input type="date" name="expiry_date" id="expiry_date" required class="form-input">
-                        <small style="color: #6c757d; font-size: 0.85em;">Must be in the future</small>
+                        <div class="date-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Must be in the future
+                        </div>
                     </div>
                 </div>
             </div>
@@ -759,22 +825,22 @@
             <!-- Medicine Information -->
             <div class="items-section">
                 <h3><i class="fas fa-pills"></i> Medicine Information</h3>
-                <div style="background: white; padding: 20px; border-radius: 12px; border: 2px solid #e8ecf4;">
-                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                <div class="medicine-box">
+                    <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Medicine Name *</label>
-                            <input type="text" name="medicine_name" required class="form-input" placeholder="e.g., Paracetamol">
+                            <input type="text" name="medicine_name" id="medicine_name" required class="form-input" placeholder="e.g., Paracetamol">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Brand</label>
-                            <input type="text" name="brand" class="form-input" placeholder="e.g., Biogesic">
+                            <input type="text" name="brand" id="brand" class="form-input" placeholder="e.g., Biogesic">
                         </div>
                     </div>
 
-                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Category</label>
-                            <select name="category" class="form-select">
+                            <select name="category" id="category" class="form-select">
                                 <option value="">Select Category</option>
                                 <option value="Analgesic">Analgesic (Pain Relief)</option>
                                 <option value="Antibiotic">Antibiotic</option>
@@ -789,13 +855,13 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Quantity *</label>
-                            <input type="number" name="quantity" min="1" required class="form-input" placeholder="0">
+                            <input type="number" name="quantity" id="quantity" min="1" required class="form-input" placeholder="0">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Description (Optional)</label>
-                        <textarea name="description" class="form-textarea" placeholder="Medicine description, usage, side effects..." rows="3"></textarea>
+                        <textarea name="description" id="description" class="form-textarea" placeholder="Medicine description, usage, side effects..." rows="3"></textarea>
                     </div>
                 </div>
             </div>
@@ -813,7 +879,33 @@
 </div>
 
 <script>
-// Set max date for date_received (today) and min date for expiry_date (tomorrow)
+// CALCULATE NEXT BATCH ID
+function calculateNextBatchId() {
+    // Get all existing batch IDs from the table
+    const batchBadges = document.querySelectorAll('.batch-badge');
+    let maxNumber = 0;
+
+    batchBadges.forEach(badge => {
+        const batchId = badge.textContent.trim();
+        if (batchId.startsWith('BATCH-')) {
+            try {
+                const number = parseInt(batchId.split('-')[1]);
+                if (number > maxNumber) {
+                    maxNumber = number;
+                }
+            } catch (e) {
+                // Skip invalid batch IDs
+            }
+        }
+    });
+
+    const nextNumber = maxNumber + 1;
+    const nextBatchId = 'BATCH-' + String(nextNumber).padStart(3, '0');
+
+    document.getElementById('nextBatchId').textContent = nextBatchId;
+}
+
+// DATE VALIDATION SCRIPT
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date();
     const tomorrow = new Date(today);
@@ -823,26 +915,96 @@ document.addEventListener('DOMContentLoaded', function() {
     const expiryDateInput = document.getElementById('expiry_date');
 
     // Format dates as YYYY-MM-DD
-    const formatDate = (date) => date.toISOString().split('T')[0];
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     // Set max for date_received to today
-    dateReceivedInput.setAttribute('max', formatDate(today));
+    if (dateReceivedInput) {
+        dateReceivedInput.setAttribute('max', formatDate(today));
+    }
 
     // Set min for expiry_date to tomorrow
-    expiryDateInput.setAttribute('min', formatDate(tomorrow));
+    if (expiryDateInput) {
+        expiryDateInput.setAttribute('min', formatDate(tomorrow));
+    }
+
+    // Real-time validation on date input change
+    if (dateReceivedInput) {
+        dateReceivedInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate > today) {
+                this.classList.add('error');
+                alert('❌ Date Received cannot be in the future!');
+                this.value = '';
+            } else {
+                this.classList.remove('error');
+            }
+        });
+    }
+
+    if (expiryDateInput) {
+        expiryDateInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate <= today) {
+                this.classList.add('error');
+                alert('❌ Expiry Date must be in the future!');
+                this.value = '';
+            } else {
+                this.classList.remove('error');
+            }
+
+            // Also check if expiry is after date received
+            const dateReceivedValue = dateReceivedInput.value;
+            if (dateReceivedValue) {
+                const dateReceived = new Date(dateReceivedValue);
+                dateReceived.setHours(0, 0, 0, 0);
+
+                if (selectedDate <= dateReceived) {
+                    this.classList.add('error');
+                    alert('❌ Expiry Date must be after Date Received!');
+                    this.value = '';
+                }
+            }
+        });
+    }
 });
 
-// Form validation
+// FORM SUBMISSION VALIDATION
 document.getElementById('addBatchForm').addEventListener('submit', function(e) {
-    const dateReceived = new Date(document.getElementById('date_received').value);
-    const expiryDate = new Date(document.getElementById('expiry_date').value);
+    const dateReceivedValue = document.getElementById('date_received').value;
+    const expiryDateValue = document.getElementById('expiry_date').value;
+
+    if (!dateReceivedValue || !expiryDateValue) {
+        e.preventDefault();
+        alert('❌ Please fill in all required date fields!');
+        return false;
+    }
+
+    const dateReceived = new Date(dateReceivedValue);
+    const expiryDate = new Date(expiryDateValue);
     const today = new Date();
+
+    // Reset time portions for accurate comparison
     today.setHours(0, 0, 0, 0);
+    dateReceived.setHours(0, 0, 0, 0);
+    expiryDate.setHours(0, 0, 0, 0);
 
     // Validate date_received is not in the future
     if (dateReceived > today) {
         e.preventDefault();
         alert('❌ Date Received cannot be in the future!');
+        document.getElementById('date_received').classList.add('error');
+        document.getElementById('date_received').focus();
         return false;
     }
 
@@ -850,6 +1012,8 @@ document.getElementById('addBatchForm').addEventListener('submit', function(e) {
     if (expiryDate <= today) {
         e.preventDefault();
         alert('❌ Expiry Date must be in the future!');
+        document.getElementById('expiry_date').classList.add('error');
+        document.getElementById('expiry_date').focus();
         return false;
     }
 
@@ -857,25 +1021,47 @@ document.getElementById('addBatchForm').addEventListener('submit', function(e) {
     if (expiryDate <= dateReceived) {
         e.preventDefault();
         alert('❌ Expiry Date must be after Date Received!');
+        document.getElementById('expiry_date').classList.add('error');
+        document.getElementById('expiry_date').focus();
         return false;
     }
+
+    // All validations passed
+    return true;
 });
+
+// MODAL FUNCTIONS
+function openBatchModal() {
+    document.getElementById('addBatchModal').style.display = 'flex';
+    // Calculate next batch ID when modal opens
+    calculateNextBatchId();
+}
 
 function closeBatchModal() {
     document.getElementById('addBatchModal').style.display = 'none';
+    // Reset form
+    document.getElementById('addBatchForm').reset();
+    // Remove error classes
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 }
 
 function openDeleteModal(batchId, medicineName, batchNumber) {
-    if (confirm(`Are you sure you want to delete ${medicineName} from ${batchNumber}?`)) {
+    if (confirm(`⚠️ Are you sure you want to delete ${medicineName} from ${batchNumber}?\n\nThis action cannot be undone.`)) {
         window.location.href = `/medicine/delete/${batchId}/`;
     }
 }
 
+// Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('addBatchModal');
     if (event.target === modal) {
         closeBatchModal();
     }
 };
+
+// Prevent form resubmission on page refresh
+if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href);
+}
 </script>
 {% endblock %}
