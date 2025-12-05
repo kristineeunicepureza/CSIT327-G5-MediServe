@@ -399,7 +399,10 @@ def medicine_distribution_history(request):
 # -------------------------------------------------------------------
 @login_required
 def medicine_list(request):
-    """Display list of medicines with search and filter capabilities."""
+    """
+    Display list of medicines with search and filter capabilities.
+    In-stock medicines appear FIRST, out-of-stock medicines appear LAST.
+    """
     # Get all medicines
     medicines = Medicine.objects.all()
 
@@ -421,23 +424,35 @@ def medicine_list(request):
 
     # Stock filter
     stock_filter = request.GET.get('stock', '')
-    if stock_filter:
-        if stock_filter == 'in-stock':
-            medicines = [m for m in medicines if m.total_stock > 10]
-        elif stock_filter == 'low-stock':
-            medicines = [m for m in medicines if 0 < m.total_stock <= 10]
-        elif stock_filter == 'out-of-stock':
-            medicines = [m for m in medicines if m.total_stock == 0]
 
-    # Add batch information for each medicine
+    # Convert to list and add batch information for each medicine
+    medicines_list = []
     for medicine in medicines:
         medicine.batch_list = MedicineBatch.objects.filter(
             medicine=medicine,
             quantity_available__gt=0
         ).order_by('expiry_date', 'batch_id').values_list('batch_id', flat=True).distinct()
+        medicines_list.append(medicine)
+
+    # Apply stock filter
+    if stock_filter:
+        if stock_filter == 'in-stock':
+            medicines_list = [m for m in medicines_list if m.total_stock > 10]
+        elif stock_filter == 'low-stock':
+            medicines_list = [m for m in medicines_list if 0 < m.total_stock <= 10]
+        elif stock_filter == 'out-of-stock':
+            medicines_list = [m for m in medicines_list if m.total_stock == 0]
+
+    # ============================================
+    # SORT: In-stock medicines FIRST, out-of-stock LAST
+    # ============================================
+    medicines_list.sort(key=lambda m: (m.total_stock == 0, m.name.lower()))
+    # This sorts by:
+    # 1. Stock status (False/0 = has stock comes first, True/1 = no stock comes last)
+    # 2. Then alphabetically by name within each group
 
     context = {
-        'medicines': medicines,
+        'medicines': medicines_list,
         'categories': categories,
         'search_query': search_query,
         'category_filter': category_filter,
@@ -445,6 +460,71 @@ def medicine_list(request):
     }
 
     return render(request, 'medicine_list.html', context)
+
+
+# -------------------------------------------------------------------
+# Medicine Info Page
+# -------------------------------------------------------------------
+@login_required
+def medicine_info(request, medicine_id):
+    """Medicine details page."""
+    medicine = get_object_or_404(Medicine, id=medicine_id)
+    return render(request, 'medicine_info.html', {'medicine': medicine})
+
+
+# -------------------------------------------------------------------
+# Add medicine to order
+# -------------------------------------------------------------------
+@login_required
+def add_to_order(request, medicine_id):
+    """Add medicine to user's order (cart)."""
+    from apps.orders.models import Order, OrderItem
+    from django.utils import timezone
+
+    medicine = get_object_or_404(Medicine, id=medicine_id)
+
+    if request.method == "POST":
+        quantity = int(request.POST.get("quantity", 1))
+        special_request = request.POST.get("special_request", "")
+
+        # Check stock using total_stock property
+        if quantity > medicine.total_stock:
+            messages.warning(
+                request,
+                f"⚠️ Only {medicine.total_stock} units available in stock."
+            )
+            return redirect("medicine_info", medicine_id=medicine.id)
+
+        # Get or create pending order (cart)
+        order, created = Order.objects.get_or_create(
+            user=request.user,
+            status="Pending",
+            defaults={"created_at": timezone.now()}
+        )
+
+        # Add or update order item
+        item, item_created = OrderItem.objects.get_or_create(
+            order=order,
+            medicine=medicine,
+            defaults={"quantity": quantity, "special_request": special_request}
+        )
+
+        if not item_created:
+            item.quantity += quantity
+            if special_request:
+                item.special_request = special_request
+            item.save()
+
+        messages.success(
+            request,
+            f"✅ Added {quantity} × {medicine.name} to your order."
+        )
+
+        # Redirect to order list to review cart
+        return redirect("order_list")
+
+    # GET request - show medicine info page
+    return redirect("medicine_info", medicine_id=medicine.id)
 
 
 # -------------------------------------------------------------------
