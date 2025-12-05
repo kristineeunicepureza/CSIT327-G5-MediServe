@@ -149,6 +149,20 @@
         margin: 0 0 5px 0;
     }
 
+    .order-queue {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #36489e;
+        margin: 0 0 8px 0;
+    }
+
+    .order-driver {
+        font-size: 0.9em;
+        color: #495057;
+        margin: 5px 0;
+        font-weight: 500;
+    }
+
     .order-date {
         font-size: 0.85em;
         color: #7c8db5;
@@ -156,6 +170,7 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        margin: 5px 0 0 0;
     }
 
     .status-timeline {
@@ -320,6 +335,43 @@
         to { opacity: 0; transform: translateY(-20px); }
     }
 
+    .order-actions {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #e8ecf4;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .btn-queue {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9em;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 12px rgba(54, 72, 158, 0.3);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-queue:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 18px rgba(54, 72, 158, 0.4);
+        background: linear-gradient(135deg, #5c74e3 0%, #7a8ee8 100%);
+        color: #ffffff;
+    }
+
+    .btn-queue i {
+        font-size: 1.1em;
+    }
+
     .empty-state {
         text-align: center;
         padding: 80px 40px;
@@ -428,6 +480,15 @@
             font-size: 0.7em;
             max-width: 70px;
         }
+
+        .order-actions {
+            justify-content: center;
+        }
+
+        .btn-queue {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 
@@ -509,6 +570,14 @@
                         <span class="item-quantity">Qty: {{ item.quantity }}</span>
                     </div>
                     {% endfor %}
+                </div>
+
+                <!-- Queue Status Button -->
+                <div class="order-actions">
+                    <a href="{% url 'queue_status' %}" class="btn-queue">
+                        <i class="fas fa-users"></i>
+                        View Queue Status
+                    </a>
                 </div>
             </div>
             {% empty %}
