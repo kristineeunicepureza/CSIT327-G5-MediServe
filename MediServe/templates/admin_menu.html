@@ -19,6 +19,7 @@
         border-radius: 20px;
         overflow: hidden;
         background: #ffffff;
+        position: relative;
     }
 
     @keyframes fadeInUp {
@@ -492,6 +493,160 @@
         box-shadow: 0 8px 30px rgba(23, 162, 184, 0.22);
     }
 
+    /* Loading Screen Styles */
+    .loading-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        flex-direction: column;
+        border-radius: 20px;
+    }
+
+    .loading-screen.active {
+        display: flex;
+    }
+
+    .medicine-loader {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin-bottom: 30px;
+    }
+
+    /* Pill Animation */
+    .pill {
+        position: absolute;
+        width: 80px;
+        height: 40px;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #dc3545 50%, #ffffff 50%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: rotatePill 2s ease-in-out infinite;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .pill::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.1);
+        transform: translateX(-50%);
+    }
+
+    @keyframes rotatePill {
+        0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+        25% { transform: translate(-50%, -50%) rotate(90deg) scale(1.1); }
+        50% { transform: translate(-50%, -50%) rotate(180deg) scale(1); }
+        75% { transform: translate(-50%, -50%) rotate(270deg) scale(1.1); }
+    }
+
+    /* Floating Pills */
+    .floating-pills {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .floating-pill {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        opacity: 0.6;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-pill:nth-child(1) {
+        background: #4ecdc4;
+        top: 0;
+        left: 50%;
+        animation-delay: 0s;
+    }
+
+    .floating-pill:nth-child(2) {
+        background: #ff6b6b;
+        top: 50%;
+        right: 0;
+        animation-delay: 0.5s;
+    }
+
+    .floating-pill:nth-child(3) {
+        background: #ffe66d;
+        bottom: 0;
+        left: 50%;
+        animation-delay: 1s;
+    }
+
+    .floating-pill:nth-child(4) {
+        background: #95e1d3;
+        top: 50%;
+        left: 0;
+        animation-delay: 1.5s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+        50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
+    }
+
+    .loading-text {
+        color: #dc3545;
+        font-size: 1.5em;
+        font-weight: 600;
+        margin-bottom: 15px;
+        animation: fadeInOut 1.5s ease-in-out infinite;
+    }
+
+    .loading-subtext {
+        color: #6c757d;
+        font-size: 1em;
+    }
+
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+    }
+
+    /* Progress Bar */
+    .progress-bar-container {
+        width: 250px;
+        height: 6px;
+        background: rgba(220, 53, 69, 0.2);
+        border-radius: 10px;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #dc3545, #c82333);
+        border-radius: 10px;
+        animation: loadProgress 2s ease-in-out infinite;
+    }
+
+    @keyframes loadProgress {
+        0% { width: 0%; }
+        50% { width: 70%; }
+        100% { width: 100%; }
+    }
+
     /* Responsive Design */
     @media (max-width: 1200px) {
         .admin-menu-grid {
@@ -544,10 +699,44 @@
         .admin-card {
             padding: 25px 20px;
         }
+
+        .medicine-loader {
+            width: 100px;
+            height: 100px;
+        }
+
+        .pill {
+            width: 60px;
+            height: 30px;
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+        }
     }
 </style>
 
 <div class="admin-container">
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="medicine-loader">
+            <div class="floating-pills">
+                <div class="floating-pill"></div>
+                <div class="floating-pill"></div>
+                <div class="floating-pill"></div>
+                <div class="floating-pill"></div>
+            </div>
+            <div class="pill"></div>
+        </div>
+        <div class="loading-text">
+            <i class="fas fa-heartbeat"></i> Loading...
+        </div>
+        <div class="loading-subtext">Please wait</div>
+        <div class="progress-bar-container">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+
     <!-- HEADER BAR -->
     <header class="admin-header">
         <div class="header-left">
@@ -707,4 +896,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Add click event to all admin-card links
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.admin-card');
+        const loadingScreen = document.getElementById('loadingScreen');
+
+        cards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Show loading screen
+                loadingScreen.classList.add('active');
+            });
+        });
+    });
+</script>
+
 {% endblock %}
