@@ -1,25 +1,26 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.db import transaction
+from datetime import date, datetime, timedelta
 from .models import Medicine, MedicineBatch
 
 
 # -------------------------------------------------------------------
-# Medicine History Page
-# -------------------------------------------------------------------
-@login_required
-def medicine_history(request):
-    return render(request, 'medicine_history.html')
-
-
-# -------------------------------------------------------------------
-# Admin: Medicine Stock (FEFO Batch View)
+# Admin: Medicine Stock (FEFO Batch View) - SINGLE MEDICINE PER BATCH
 # -------------------------------------------------------------------
 @login_required
 def medicine_stock(request):
-    """Medicine stock management (FEFO batch view)."""
+    """
+    Medicine stock management (FEFO batch view).
+
+    UPDATED RULES:
+    1. Only ONE medicine per batch
+    2. Date Received cannot be in the future
+    3. Expiry Date must be in the future
+    4. Expiry Date must be after Date Received
+    """
 
     # Get all batches sorted by expiry date (FEFO)
     batches = MedicineBatch.objects.select_related('medicine').order_by('expiry_date', 'batch_id')
@@ -54,103 +55,162 @@ def medicine_stock(request):
     # Get unique categories for filter dropdown
     categories = Medicine.objects.values_list('category', flat=True).distinct()
 
-    # Handle POST - Add New Batch with Multiple Medicines
+    # Handle POST - Add New Batch with SINGLE Medicine and DATE VALIDATION
     if request.method == 'POST':
         try:
-            batch_id = request.POST.get('batch_id')
-            expiry_date = request.POST.get('expiry_date')
-            date_received = request.POST.get('date_received')
+            # Get form data
+            batch_id = request.POST.get('batch_id', '').strip()
+            expiry_date_str = request.POST.get('expiry_date', '').strip()
+            date_received_str = request.POST.get('date_received', '').strip()
+            medicine_name = request.POST.get('medicine_name', '').strip()
+            brand = request.POST.get('brand', '').strip()
+            category = request.POST.get('category', '').strip()
+            description = request.POST.get('description', '').strip()
+            quantity_str = request.POST.get('quantity', '').strip()
 
-            medicine_names = request.POST.getlist('medicine_name[]')
-            brands = request.POST.getlist('brand[]')
-            categories = request.POST.getlist('category[]')
-            descriptions = request.POST.getlist('description[]')
-            quantities = request.POST.getlist('quantity[]')
+            # ==================== VALIDATION ====================
 
-            # Validation
-            if not batch_id or not expiry_date or not date_received:
-                messages.error(request, '⚠️ Please fill all batch information fields.')
+            # Check required fields
+            if not batch_id:
+                messages.error(request, '❌ Batch ID is required!')
                 return redirect('medicine_stock')
 
-            if not medicine_names or len(medicine_names) == 0:
-                messages.error(request, '⚠️ Please add at least one medicine to the batch.')
+            if not date_received_str:
+                messages.error(request, '❌ Date Received is required!')
+                return redirect('medicine_stock')
+
+            if not expiry_date_str:
+                messages.error(request, '❌ Expiry Date is required!')
+                return redirect('medicine_stock')
+
+            if not medicine_name:
+                messages.error(request, '❌ Medicine Name is required!')
+                return redirect('medicine_stock')
+
+            if not quantity_str:
+                messages.error(request, '❌ Quantity is required!')
+                return redirect('medicine_stock')
+
+            # Convert dates
+            try:
+                expiry_date = datetime.strptime(expiry_date_str, '%Y-%m-%d').date()
+                date_received = datetime.strptime(date_received_str, '%Y-%m-%d').date()
+            except ValueError:
+                messages.error(request, '❌ Invalid date format! Please use the date picker.')
+                return redirect('medicine_stock')
+
+            # Get today's date
+            today = date.today()
+
+            # ==================== DATE VALIDATION ====================
+
+            # RULE 1: Date Received cannot be in the future
+            if date_received > today:
+                messages.error(
+                    request,
+                    f'❌ Date Received cannot be in the future! You entered: {date_received.strftime("%B %d, %Y")} but today is {today.strftime("%B %d, %Y")}.'
+                )
+                return redirect('medicine_stock')
+
+            # RULE 2: Expiry Date must be in the future
+            if expiry_date <= today:
+                messages.error(
+                    request,
+                    f'❌ Expiry Date must be in the future! You entered: {expiry_date.strftime("%B %d, %Y")} but today is {today.strftime("%B %d, %Y")}.'
+                )
+                return redirect('medicine_stock')
+
+            # RULE 3: Expiry Date must be after Date Received
+            if expiry_date <= date_received:
+                messages.error(
+                    request,
+                    f'❌ Expiry Date ({expiry_date.strftime("%B %d, %Y")}) must be after Date Received ({date_received.strftime("%B %d, %Y")})!'
+                )
+                return redirect('medicine_stock')
+
+            # Validate quantity
+            try:
+                quantity = int(quantity_str)
+                if quantity <= 0:
+                    messages.error(request, '❌ Quantity must be greater than 0!')
+                    return redirect('medicine_stock')
+            except ValueError:
+                messages.error(request, '❌ Invalid quantity! Please enter a valid number.')
                 return redirect('medicine_stock')
 
             # Check for duplicate batch_id
             if MedicineBatch.objects.filter(batch_id=batch_id).exists():
-                messages.error(request, f'⚠️ Batch ID "{batch_id}" already exists. Please use a unique Batch ID.')
+                messages.error(
+                    request,
+                    f'❌ Batch ID "{batch_id}" already exists! Please use a unique Batch ID.'
+                )
                 return redirect('medicine_stock')
 
-            # Use transaction to ensure all-or-nothing save
+            # ==================== CREATE BATCH ====================
+
+            # Use transaction to ensure atomic operation
             with transaction.atomic():
-                created_count = 0
+                # Get or create medicine (case-insensitive check)
+                medicine = Medicine.objects.filter(name__iexact=medicine_name).first()
 
-                for i, medicine_name in enumerate(medicine_names):
-                    if not medicine_name or not medicine_name.strip():
-                        continue
+                if medicine:
+                    # Medicine exists - update info if new data provided
+                    updated_fields = []
 
-                    brand = brands[i] if i < len(brands) else ''
-                    category = categories[i] if i < len(categories) else ''
-                    description = descriptions[i] if i < len(descriptions) else ''
-                    quantity = int(quantities[i]) if i < len(quantities) and quantities[i] else 0
+                    if brand and brand != medicine.brand:
+                        medicine.brand = brand
+                        updated_fields.append('brand')
 
-                    if quantity <= 0:
-                        continue
+                    if category and category != medicine.category:
+                        medicine.category = category
+                        updated_fields.append('category')
 
-                    # Get or create medicine
-                    medicine, created = Medicine.objects.get_or_create(
-                        name__iexact=medicine_name.strip(),
-                        defaults={
-                            'name': medicine_name.strip(),
-                            'brand': brand.strip() if brand else None,
-                            'category': category.strip() if category else None,
-                            'description': description.strip() if description else None,
-                        }
-                    )
+                    if description and description != medicine.description:
+                        medicine.description = description
+                        updated_fields.append('description')
 
-                    # Update medicine info if it already exists and new data provided
-                    if not created:
-                        updated = False
-                        if brand and brand.strip():
-                            medicine.brand = brand.strip()
-                            updated = True
-                        if category and category.strip():
-                            medicine.category = category.strip()
-                            updated = True
-                        if description and description.strip():
-                            medicine.description = description.strip()
-                            updated = True
-                        if updated:
-                            medicine.save()
-
-                    # Check if this medicine already exists in this batch
-                    if MedicineBatch.objects.filter(batch_id=batch_id, medicine=medicine).exists():
-                        messages.warning(request, f'⚠️ {medicine.name} is already in batch {batch_id}. Skipped.')
-                        continue
-
-                    # Create batch entry
-                    MedicineBatch.objects.create(
-                        batch_id=batch_id,
-                        medicine=medicine,
-                        expiry_date=expiry_date,
-                        date_received=date_received,
-                        quantity_received=quantity,
-                        quantity_available=quantity,
-                        quantity_dispensed=0
-                    )
-                    created_count += 1
-
-                if created_count > 0:
-                    messages.success(request,
-                                     f'✅ Batch "{batch_id}" added successfully with {created_count} medicine(s)!')
+                    if updated_fields:
+                        medicine.save()
+                        messages.info(
+                            request,
+                            f'ℹ️ Updated {", ".join(updated_fields)} for existing medicine "{medicine.name}".'
+                        )
                 else:
-                    messages.error(request, '⚠️ No valid medicines were added to the batch.')
+                    # Create new medicine
+                    medicine = Medicine.objects.create(
+                        name=medicine_name,
+                        brand=brand if brand else None,
+                        category=category if category else None,
+                        description=description if description else None,
+                    )
+                    messages.info(request, f'ℹ️ New medicine "{medicine.name}" created.')
+
+                # Create batch entry
+                new_batch = MedicineBatch.objects.create(
+                    batch_id=batch_id,
+                    medicine=medicine,
+                    expiry_date=expiry_date,
+                    date_received=date_received,
+                    quantity_received=quantity,
+                    quantity_available=quantity,
+                    quantity_dispensed=0
+                )
+
+                messages.success(
+                    request,
+                    f'✅ Batch "{batch_id}" added successfully!\n'
+                    f'Medicine: {medicine.name}\n'
+                    f'Quantity: {quantity} units\n'
+                    f'Expiry: {expiry_date.strftime("%B %d, %Y")}'
+                )
 
         except Exception as e:
-            messages.error(request, f'⚠️ Error adding batch: {str(e)}')
+            messages.error(request, f'❌ Unexpected error: {str(e)}')
+            print(f"Error in medicine_stock POST: {e}")  # For debugging
 
         return redirect('medicine_stock')
 
+    # GET request - render the page
     return render(request, 'medicine_stock.html', {
         'batches': batches,
         'all_medicines': all_medicines,
@@ -161,149 +221,24 @@ def medicine_stock(request):
     })
 
 
+# -------------------------------------------------------------------
+# Edit Batch (Placeholder - redirects with message)
+# -------------------------------------------------------------------
 @login_required
 def edit_batch(request, batch_id):
-    """Edit batch by adding new medicines to it."""
-    # Get all batch items with this batch_id
-    batch_items = MedicineBatch.objects.filter(batch_id=batch_id)
-
-    if not batch_items.exists():
-        messages.error(request, f"Batch {batch_id} not found.")
-        return redirect('medicine_stock')
-
-    # Get batch info from first item
-    first_item = batch_items.first()
-    expiry_date = first_item.expiry_date
-    date_received = first_item.date_received
-
-    # Get unique categories from database
-    categories = Medicine.objects.values_list('category', flat=True).distinct().order_by('category')
-    categories = [cat for cat in categories if cat]
-
-    if request.method == 'POST':
-        medicine_names = request.POST.getlist('medicine_name[]')
-        brands = request.POST.getlist('brand[]')
-        categories_list = request.POST.getlist('category[]')
-        descriptions = request.POST.getlist('description[]')
-        quantities = request.POST.getlist('quantity[]')
-
-        added_count = 0
-        error_count = 0
-
-        for i in range(len(medicine_names)):
-            medicine_name = medicine_names[i].strip()
-            brand = brands[i].strip() if i < len(brands) and brands[i] else ''
-            category = categories_list[i].strip() if i < len(categories_list) and categories_list[i] else ''
-            description = descriptions[i].strip() if i < len(descriptions) and descriptions[i] else ''
-
-            try:
-                quantity = int(quantities[i])
-            except (ValueError, IndexError):
-                quantity = 0
-
-            if not medicine_name or quantity <= 0:
-                continue
-
-            # Process each medicine in its own transaction
-            try:
-                with transaction.atomic():
-                    # Check if medicine already exists (case-insensitive)
-                    medicine = Medicine.objects.filter(name__iexact=medicine_name).first()
-
-                    if medicine:
-                        # Medicine exists - update fields if provided
-                        if brand:
-                            medicine.brand = brand
-                        if category:
-                            medicine.category = category
-                        if description:
-                            medicine.description = description
-                        medicine.save()
-                    else:
-                        # Medicine doesn't exist - create new one
-                        medicine = Medicine.objects.create(
-                            name=medicine_name,
-                            brand=brand,
-                            category=category,
-                            description=description
-                        )
-
-                    # Check if this medicine already exists in this batch
-                    existing_batch = MedicineBatch.objects.filter(
-                        batch_id=batch_id,
-                        medicine=medicine
-                    ).first()
-
-                    if existing_batch:
-                        messages.warning(request, f"⚠️ {medicine_name} already exists in batch {batch_id}. Skipped.")
-                        continue
-
-                    # Create new batch entry
-                    MedicineBatch.objects.create(
-                        medicine=medicine,
-                        batch_id=batch_id,
-                        quantity_received=quantity,
-                        quantity_available=quantity,
-                        quantity_dispensed=0,
-                        expiry_date=expiry_date,
-                        date_received=date_received
-                    )
-
-                    added_count += 1
-
-            except Exception as e:
-                error_count += 1
-                messages.error(request, f"❌ Error adding {medicine_name}: {str(e)}")
-                continue
-
-        if added_count > 0:
-            messages.success(request, f"✅ Added {added_count} medicine(s) to batch {batch_id}.")
-
-        if error_count > 0 and added_count == 0:
-            messages.error(request, f"❌ Failed to add any medicines. Please check the errors above.")
-
-        return redirect('medicine_stock')
-
-    context = {
-        'batch_id': batch_id,
-        'batch_items': batch_items,
-        'expiry_date': expiry_date,
-        'date_received': date_received,
-        'categories': categories,
-    }
-
-    return render(request, 'edit_batch.html', context)
-
-# -------------------------------------------------------------------
-# Medicine Records Page
-# -------------------------------------------------------------------
-@login_required
-def medicine_records(request):
-    return render(request, 'medicine_records.html')
+    """
+    Edit batch functionality.
+    Since we're using single medicine per batch, it's simpler to delete and recreate.
+    """
+    messages.info(
+        request,
+        'ℹ️ To modify a batch, please delete the existing batch and create a new one with the correct information.'
+    )
+    return redirect('medicine_stock')
 
 
 # -------------------------------------------------------------------
-# Edit Medicine
-# -------------------------------------------------------------------
-@login_required
-def edit_medicine(request, id):
-    """Edit medicine details."""
-    medicine = get_object_or_404(Medicine, id=id)
-
-    if request.method == 'POST':
-        medicine.name = request.POST.get('name')
-        medicine.brand = request.POST.get('brand')
-        medicine.category = request.POST.get('category')
-        medicine.description = request.POST.get('description')
-        medicine.save()
-        messages.success(request, f"✅ {medicine.name} updated successfully!")
-        return redirect('medicine_stock')
-
-    return render(request, 'edit_medicine.html', {'medicine': medicine})
-
-
-# -------------------------------------------------------------------
-# Delete Medicine
+# Delete Medicine Batch
 # -------------------------------------------------------------------
 @login_required
 def delete_medicine(request, id):
@@ -313,72 +248,37 @@ def delete_medicine(request, id):
             batch = MedicineBatch.objects.get(id=id)
             batch_id = batch.batch_id
             medicine_name = batch.medicine.name
+
             batch.delete()
-            messages.success(request, f"🗑️ {medicine_name} from {batch_id} deleted successfully!")
+
+            messages.success(
+                request,
+                f'🗑️ Successfully deleted {medicine_name} from batch {batch_id}!'
+            )
         except MedicineBatch.DoesNotExist:
-            messages.error(request, "⚠️ Batch not found.")
+            messages.error(request, "❌ Batch not found!")
         except Exception as e:
-            messages.error(request, f"⚠️ Error deleting batch: {e}")
+            messages.error(request, f"❌ Error deleting batch: {e}")
 
     return redirect("medicine_stock")
 
 
-# 🟢 Add medicine to order
-@login_required
-def add_to_order(request, medicine_id):
-    medicine = get_object_or_404(Medicine, id=medicine_id)
-
-    if request.method == "POST":
-        quantity = int(request.POST.get("quantity", 1))
-        special_request = request.POST.get("special_request", "")
-
-        # ✅ USE total_stock PROPERTY INSTEAD OF stock_quantity
-        if quantity > medicine.total_stock:
-            messages.warning(request, f"⚠️ Only {medicine.total_stock} available in stock.")
-            return redirect("medicine_info", medicine_id=medicine.id)
-
-        # Get or create pending order (cart)
-        order, created = Order.objects.get_or_create(
-            user=request.user,
-            status="Pending",
-            defaults={"created_at": timezone.now()}
-        )
-
-        item, item_created = OrderItem.objects.get_or_create(
-            order=order,
-            medicine=medicine,
-            defaults={"quantity": quantity, "special_request": special_request}
-        )
-
-        if not item_created:
-            item.quantity += quantity
-            if special_request:
-                item.special_request = special_request
-            item.save()
-
-        messages.success(request, f"✅ Added {quantity} × {medicine.name} to your order.")
-
-        # 🔧 Redirect to order_list (Current Orders) to review cart
-        return redirect("order_list")
-
-    # GET request - just show the medicine info page
-    return redirect("medicine_info", medicine_id=medicine.id)
-
-
-# UPDATED VIEW FUNCTION - Excludes admin users from medicine distribution history
-# Add this function to apps/medicine/views.py
-
+# -------------------------------------------------------------------
+# Medicine Distribution History - EXCLUDES ADMIN USERS
+# -------------------------------------------------------------------
 @login_required
 def medicine_distribution_history(request):
-    """View medicine distribution history - Admin only"""
+    """
+    View medicine distribution history.
+    Only shows distributions to NON-ADMIN users (regular community members).
+    Admin only view.
+    """
     from apps.orders.models import Order, OrderItem
     from apps.accounts.models import Account
-    from django.db.models import Q, Sum
-    from datetime import datetime, timedelta
 
     # Check if user is admin
     if not (request.user.is_staff or request.user.is_superuser):
-        messages.error(request, 'Access denied. Admins only.')
+        messages.error(request, '❌ Access denied. Admins only.')
         return redirect('main_menu')
 
     # Get all completed orders - EXCLUDE orders from admin users
@@ -463,6 +363,7 @@ def medicine_distribution_history(request):
 
     return render(request, 'medicine_distribution_history.html', context)
 
+
 # -------------------------------------------------------------------
 # Medicine List (Public Browse)
 # -------------------------------------------------------------------
@@ -480,9 +381,7 @@ def medicine_list(request):
     search_query = request.GET.get('search', '')
     if search_query:
         medicines = medicines.filter(
-            name__icontains=search_query
-        ) | medicines.filter(
-            brand__icontains=search_query
+            Q(name__icontains=search_query) | Q(brand__icontains=search_query)
         )
 
     # Category filter
@@ -494,18 +393,14 @@ def medicine_list(request):
     stock_filter = request.GET.get('stock', '')
     if stock_filter:
         if stock_filter == 'in-stock':
-            # Filter medicines with total_stock > 10
             medicines = [m for m in medicines if m.total_stock > 10]
         elif stock_filter == 'low-stock':
-            # Filter medicines with 1 <= total_stock <= 10
             medicines = [m for m in medicines if 0 < m.total_stock <= 10]
         elif stock_filter == 'out-of-stock':
-            # Filter medicines with total_stock == 0
             medicines = [m for m in medicines if m.total_stock == 0]
 
-    # ✅ Add batch information for each medicine
+    # Add batch information for each medicine
     for medicine in medicines:
-        # Get all batches for this medicine with available quantity
         medicine.batch_list = MedicineBatch.objects.filter(
             medicine=medicine,
             quantity_available__gt=0
@@ -525,7 +420,99 @@ def medicine_list(request):
 # -------------------------------------------------------------------
 # Medicine Info Page
 # -------------------------------------------------------------------
+@login_required
 def medicine_info(request, medicine_id):
     """Medicine details page."""
     medicine = get_object_or_404(Medicine, id=medicine_id)
     return render(request, 'medicine_info.html', {'medicine': medicine})
+
+
+# -------------------------------------------------------------------
+# Add medicine to order
+# -------------------------------------------------------------------
+@login_required
+def add_to_order(request, medicine_id):
+    """Add medicine to user's order (cart)."""
+    from apps.orders.models import Order, OrderItem
+    from django.utils import timezone
+
+    medicine = get_object_or_404(Medicine, id=medicine_id)
+
+    if request.method == "POST":
+        quantity = int(request.POST.get("quantity", 1))
+        special_request = request.POST.get("special_request", "")
+
+        # Check stock using total_stock property
+        if quantity > medicine.total_stock:
+            messages.warning(
+                request,
+                f"⚠️ Only {medicine.total_stock} units available in stock."
+            )
+            return redirect("medicine_info", medicine_id=medicine.id)
+
+        # Get or create pending order (cart)
+        order, created = Order.objects.get_or_create(
+            user=request.user,
+            status="Pending",
+            defaults={"created_at": timezone.now()}
+        )
+
+        # Add or update order item
+        item, item_created = OrderItem.objects.get_or_create(
+            order=order,
+            medicine=medicine,
+            defaults={"quantity": quantity, "special_request": special_request}
+        )
+
+        if not item_created:
+            item.quantity += quantity
+            if special_request:
+                item.special_request = special_request
+            item.save()
+
+        messages.success(
+            request,
+            f"✅ Added {quantity} × {medicine.name} to your order."
+        )
+
+        # Redirect to order list to review cart
+        return redirect("order_list")
+
+    # GET request - show medicine info page
+    return redirect("medicine_info", medicine_id=medicine.id)
+
+
+# -------------------------------------------------------------------
+# Edit Medicine (if needed)
+# -------------------------------------------------------------------
+@login_required
+def edit_medicine(request, id):
+    """Edit medicine details."""
+    medicine = get_object_or_404(Medicine, id=id)
+
+    if request.method == 'POST':
+        medicine.name = request.POST.get('name', '').strip()
+        medicine.brand = request.POST.get('brand', '').strip()
+        medicine.category = request.POST.get('category', '').strip()
+        medicine.description = request.POST.get('description', '').strip()
+        medicine.save()
+
+        messages.success(request, f"✅ {medicine.name} updated successfully!")
+        return redirect('medicine_stock')
+
+    return render(request, 'edit_medicine.html', {'medicine': medicine})
+
+
+# -------------------------------------------------------------------
+# Medicine History and Records (Placeholder views)
+# -------------------------------------------------------------------
+@login_required
+def medicine_history(request):
+    """Medicine history page."""
+    return render(request, 'medicine_history.html')
+
+
+@login_required
+def medicine_records(request):
+    """Medicine records page."""
+    return render(request, 'medicine_records.html')
