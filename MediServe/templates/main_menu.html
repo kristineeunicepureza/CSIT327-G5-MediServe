@@ -6,494 +6,774 @@
 {% block content %}
 <style>
     body {
-        background: linear-gradient(135deg, #E3EBEE 0%, #FFFFFF 100%);
+        background: #f8f9fa;
         min-height: 100vh;
     }
 
     .main-container {
         width: 100%;
-        max-width: 1000px;
+        max-width: 1400px;
         margin: 40px auto;
-        background-color: #FFFFFF;
+        animation: fadeInUp 0.6s ease-out;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(54, 72, 158, 0.12);
         overflow: hidden;
+        background: #ffffff;
     }
 
-    /* UPDATED HEADER - BLUE GRADIENT STYLE */
-    .top-header {
-        padding: 20px 40px;
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .main-header {
         background: linear-gradient(135deg, #36489e 0%, #4a5fb8 100%);
+        padding: 40px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 4px 20px rgba(54, 72, 158, 0.3);
+        box-shadow: 0 4px 20px rgba(54, 72, 158, 0.2);
         position: relative;
         overflow: hidden;
     }
 
-    .top-header::before {
+    .main-header::before {
         content: '';
         position: absolute;
         top: -50%;
         right: -10%;
-        width: 400px;
-        height: 400px;
+        width: 500px;
+        height: 500px;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 50%;
     }
 
-    .logo-section {
+    .main-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -5%;
+        width: 350px;
+        height: 350px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+
+    .header-left {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 20px;
         position: relative;
         z-index: 1;
     }
 
     .logo-section img {
-        width: 110px;
+        width: 80px;
         height: auto;
-        filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
+        filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
     }
 
-    .logo-text h1 {
-        font-size: 1.5em;
+    .header-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
         color: #ffffff;
-        margin: 0;
-        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
-    .logo-text p {
-        font-size: 0.8em;
-        color: rgba(255, 255, 255, 0.9);
+    .main-header h1 {
+        font-size: 2.2em;
+        color: #FFFFFF;
+        margin: 0 0 8px 0;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    .main-subtitle {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.05em;
         margin: 0;
-        line-height: 1;
+        font-weight: 400;
     }
 
     .btn-logout {
-        background-color: rgba(255, 255, 255, 0.2);
-        color: #ffffff;
+        background: rgba(255, 255, 255, 0.15);
+        color: #FFFFFF;
         border: 2px solid rgba(255, 255, 255, 0.3);
-        padding: 10px 20px;
+        padding: 14px 28px;
         font-weight: 600;
-        border-radius: 10px;
+        border-radius: 12px;
         text-decoration: none;
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+        font-size: 1em;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-logout:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .main-content {
+        padding: 40px 40px 80px 40px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        max-height: calc(100vh - 220px);
+        overflow-y: auto;
+    }
+
+    /* Scrollbar Styling */
+    .main-content::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .main-content::-webkit-scrollbar-track {
+        background: #f1f3f5;
+        border-radius: 10px;
+    }
+
+    .main-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #36489e 0%, #4a5fb8 100%);
+        border-radius: 10px;
+    }
+
+    .main-content::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #2a3875 0%, #36489e 100%);
+    }
+
+    .welcome-section {
+        margin-bottom: 25px;
+        padding: 25px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-left: 6px solid #36489e;
+        animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .welcome-section h2 {
+        color: #2c3e50;
+        font-size: 1.5em;
+        margin: 0 0 6px 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .welcome-section h2 i {
+        color: #36489e;
+        font-size: 0.9em;
+    }
+
+    .welcome-section p {
+        color: #6c757d;
+        font-size: 0.95em;
+        margin: 0;
+    }
+
+    .announcement-banner {
+        border: none;
+        padding: 25px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
+        border-left: 6px solid #ffc107;
+        animation: slideIn 0.6s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .announcement-banner::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+    }
+
+    .announcement-banner-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
         position: relative;
         z-index: 1;
     }
 
-    .btn-logout:hover {
-        background-color: rgba(255, 255, 255, 0.3);
-        border-color: rgba(255, 255, 255, 0.5);
-        transform: translateY(-2px);
-    }
-    /* END OF HEADER UPDATES */
-
-    .content-area {
-        padding: 40px;
-        background-color: #FFFFFF;
-    }
-
-    .welcome-section h1 {
-        color: #36489e;
-        font-size: 2.4em;
-        margin-bottom: 8px;
-        font-weight: 700;
-    }
-
-    .welcome-section p {
-        color: #666;
-        font-size: 1.15em;
-        margin-bottom: 40px;
-    }
-
-    .menu-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        margin-bottom: 50px;
-    }
-
-    .menu-btn {
-        background: linear-gradient(135deg, #36489e 0%, #4a5fb8 100%);
-        color: #FFFFFF;
-        padding: 18px 12px;
-        font-size: 0.95em;
-        font-weight: 600;
+    .announcement-icon {
+        width: 40px;
+        height: 40px;
+        background: #ffc107;
+        color: #ffffff;
         border-radius: 12px;
-        text-decoration: none;
-        text-align: center;
-        transition: all 0.3s ease;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.25);
-        border: none;
-        cursor: pointer;
-        font-family: inherit;
+        font-size: 1.2em;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
     }
 
-    .menu-btn:hover {
-        background: linear-gradient(135deg, #2a3875 0%, #36489e 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.35);
-    }
-
-    .menu-btn i {
-        font-size: 1.8em;
-    }
-
-
-
-    /* Announcement Section */
-    .announcement-section h3 {
-        color: #36489e;
-        font-size: 1.6em;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 3px solid #BFB9FA;
+    .announcement-banner strong {
+        color: #f57c00;
+        font-size: 1.15em;
         font-weight: 700;
+        margin: 0;
     }
 
-    .announcement-card {
-        background: linear-gradient(135deg, #FFFFFF 0%, #E3EBEE 100%);
-        padding: 20px;
-        border-radius: 12px;
-        border-left: 5px solid #36489e;
-        box-shadow: 0 2px 8px rgba(54, 72, 158, 0.08);
-        transition: all 0.3s ease;
-    }
-
-    .announcement-card:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.15);
-    }
-
-    .announcement-card strong {
-        font-size: 1.1em;
-        color: #36489e;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .announcement-card p {
+    .announcement-banner p {
         font-size: 0.95em;
-        color: #555;
-        margin: 8px 0;
+        color: #5d4037;
+        margin: 0;
         line-height: 1.6;
+        padding-left: 52px;
+        position: relative;
+        z-index: 1;
     }
 
     .announcement-date {
         font-size: 0.85em;
-        color: #777;
-        margin-top: 10px;
+        color: #8d6e63;
+        padding-left: 52px;
+        margin-top: 8px;
         display: flex;
         align-items: center;
         gap: 6px;
+        position: relative;
+        z-index: 1;
     }
 
     .announcement-link {
-        font-size: 0.95em;
-        color: #36489e;
+        font-size: 0.9em;
+        color: #f57c00;
         text-decoration: none;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        margin-top: 10px;
+        padding-left: 52px;
+        margin-top: 8px;
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
     }
 
     .announcement-link:hover {
-        color: #2a3875;
+        color: #e65100;
         gap: 10px;
     }
 
-    /* Profile Sidebar */
-    .profile-sidebar {
-        position: fixed;
-        top: 0;
-        right: 0;
-        height: 100%;
-        width: 0;
-        background-color: #FFFFFF;
-        box-shadow: -6px 0 30px rgba(54, 72, 158, 0.2);
-        z-index: 1000;
-        overflow-x: hidden;
-        transition: 0.4s ease;
-        padding-left: 0;
+    .section-header {
+        margin-bottom: 20px;
     }
 
-    .sidebar-content {
-        padding: 25px;
-        width: 300px;
-    }
-
-    .close-btn {
-        position: absolute;
-        top: 15px;
-        right: 25px;
-        font-size: 32px;
-        border: none;
-        background: none;
-        color: #36489e;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .close-btn:hover {
-        color: #d93025;
-        transform: rotate(90deg);
-    }
-
-    .sidebar-content h3 {
-        color: #36489e;
-        margin-bottom: 30px;
-        padding-top: 25px;
-        font-size: 1.5em;
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.3em;
+        margin: 0 0 5px 0;
         font-weight: 700;
-    }
-
-    .profile-header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #E3EBEE;
-    }
-
-    .profile-header i {
-        font-size: 3em;
-        color: #36489e;
-        background: linear-gradient(135deg, #E3EBEE 0%, #BFB9FA 100%);
-        padding: 20px;
-        border-radius: 50%;
-        margin-bottom: 10px;
-    }
-
-    .profile-header p {
-        font-size: 1.15em;
-        font-weight: 700;
-        margin: 8px 0 0 0;
-        color: #36489e;
-    }
-
-    .profile-header small {
-        color: #666;
-        font-size: 0.9em;
-    }
-
-    .sidebar-menu {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .sidebar-link {
-        text-decoration: none;
-        color: #36489e;
-        padding: 12px 15px;
-        border-radius: 10px;
-        background-color: #E3EBEE;
-        transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-weight: 500;
+        gap: 10px;
     }
 
-    .sidebar-link:hover {
-        background-color: #BFB9FA;
-        transform: translateX(5px);
+    .section-title i {
+        color: #36489e;
     }
 
-    .sidebar-link i {
-        width: 20px;
-        text-align: center;
+    .section-subtitle {
+        color: #6c757d;
+        font-size: 0.95em;
+        margin: 0;
     }
 
-    .btn-sidebar-logout {
-        width: 100%;
-        margin-top: 40px;
-        background: linear-gradient(135deg, #d93025 0%, #f44336 100%);
-        color: #FFFFFF;
-        padding: 14px;
-        border: none;
-        border-radius: 10px;
-        font-weight: 700;
-        text-align: center;
+    .main-menu-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        max-width: 100%;
+        padding-bottom: 30px;
+    }
+
+    .main-card {
+        background: #ffffff;
+        padding: 25px 22px;
+        border-radius: 12px;
         text-decoration: none;
+        transition: all 0.3s ease;
+        display: block;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        border: 2px solid #e8ecf4;
+        position: relative;
+        animation: scaleIn 0.4s ease-out;
+        height: 100%;
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .main-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        border-color: currentColor;
+    }
+
+    .main-card-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .main-card-icon {
+        width: 55px;
+        height: 55px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        font-size: 1.6em;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(217, 48, 37, 0.3);
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+        flex-shrink: 0;
     }
 
-    .btn-sidebar-logout:hover {
-        background: linear-gradient(135deg, #b71c1c 0%, #d93025 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(217, 48, 37, 0.4);
+    .main-card:hover .main-card-icon {
+        transform: scale(1.08);
+    }
+
+    .main-card-header-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .main-card-title {
+        font-size: 1.15em;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+        color: #2c3e50;
+    }
+
+    .main-card-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.7em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.9;
+    }
+
+    .main-card-description {
+        font-size: 0.85em;
+        color: #6c757d;
+        margin: 0 0 12px 0;
+        line-height: 1.5;
+    }
+
+    .main-card-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #6c757d;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .main-card:hover .main-card-footer {
+        color: currentColor;
+    }
+
+    .main-card-footer i {
+        transition: transform 0.3s ease;
+    }
+
+    .main-card:hover .main-card-footer i {
+        transform: translateX(4px);
+    }
+
+    /* --- CARD THEMES ------------------------------------------------- */
+
+    /* Medicines */
+    .card-medicines {
+        color: #dc3545;
+    }
+    .card-medicines .main-card-icon {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        color: #c62828;
+    }
+    .card-medicines .main-card-badge {
+        background: #ffebee;
+        color: #c62828;
+    }
+    .card-medicines:hover {
+        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.22);
+    }
+
+    /* Order */
+    .card-order {
+        color: #28a745;
+    }
+    .card-order .main-card-icon {
+        background: linear-gradient(135deg, #e6ffea 0%, #c8e6c9 100%);
+        color: #2e7d32;
+    }
+    .card-order .main-card-badge {
+        background: #e6ffea;
+        color: #2e7d32;
+    }
+    .card-order:hover {
+        box-shadow: 0 8px 30px rgba(40, 167, 69, 0.22);
+    }
+
+    /* Delivery */
+    .card-delivery {
+        color: #007bff;
+    }
+    .card-delivery .main-card-icon {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1565c0;
+    }
+    .card-delivery .main-card-badge {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+    .card-delivery:hover {
+        box-shadow: 0 8px 30px rgba(0, 123, 255, 0.22);
+    }
+
+    /* History */
+    .card-history {
+        color: #6f42c1;
+    }
+    .card-history .main-card-icon {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        color: #6a1b9a;
+    }
+    .card-history .main-card-badge {
+        background: #f3e5f5;
+        color: #6a1b9a;
+    }
+    .card-history:hover {
+        box-shadow: 0 8px 30px rgba(111, 66, 193, 0.22);
+    }
+
+    /* Announcements */
+    .card-announcements {
+        color: #ffc107;
+    }
+    .card-announcements .main-card-icon {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        color: #f57f17;
+    }
+    .card-announcements .main-card-badge {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+    .card-announcements:hover {
+        box-shadow: 0 8px 30px rgba(255, 193, 7, 0.22);
+    }
+
+    /* Profile */
+    .card-profile {
+        color: #17a2b8;
+    }
+    .card-profile .main-card-icon {
+        background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+        color: #00838f;
+    }
+    .card-profile .main-card-badge {
+        background: #e0f7fa;
+        color: #00838f;
+    }
+    .card-profile:hover {
+        box-shadow: 0 8px 30px rgba(23, 162, 184, 0.22);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .main-menu-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
     @media (max-width: 768px) {
-        .menu-grid {
-            grid-template-columns: repeat(2, 1fr);
+        .main-container {
+            margin: 20px;
+            border-radius: 15px;
         }
 
-        .content-area {
+        .main-header {
             padding: 25px;
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start;
         }
 
-        .top-header {
-            padding: 15px 25px;
+        .header-left {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .main-header h1 {
+            font-size: 1.6em;
+        }
+
+        .btn-logout {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .main-content {
+            padding: 25px 25px 35px 25px;
+        }
+
+        .welcome-section {
+            padding: 20px;
+        }
+
+        .announcement-banner {
+            padding: 20px;
+        }
+
+        .announcement-banner p,
+        .announcement-date,
+        .announcement-link {
+            padding-left: 0;
+        }
+
+        .main-menu-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .main-card {
+            padding: 25px 20px;
         }
     }
 </style>
 
 <div class="main-container">
-    <!-- TOP HEADER BAR -->
-    <header class="top-header">
-        <div class="logo-section">
-            <img src="{% static 'img/MediServe.png' %}" alt="MediServe Logo">
-            <div class="logo-text">
+    <!-- HEADER BAR -->
+    <header class="main-header">
+        <div class="header-left">
+            <img src="{% static 'img/MediServe.png' %}" alt="MediServe Logo" class="logo-section">
+            <div>
+                <span class="header-badge">
+                    <i class="fas fa-user"></i> User Portal
+                </span>
                 <h1>MediServe</h1>
-                <p>Community Health Partner</p>
+                <p class="main-subtitle">Your Community Health Partner</p>
             </div>
         </div>
 
-        <!-- LOGOUT BUTTON -->
         <a href="{% url 'logout' %}" class="btn-logout">
-            <i class="fas fa-sign-out-alt"></i> Logout
+            <i class="fas fa-sign-out-alt"></i> Log Out
         </a>
     </header>
 
-    <!-- MAIN CONTENT AREA -->
-    <div class="content-area">
+    <div class="main-content">
+        <!-- WELCOME SECTION -->
         <div class="welcome-section">
-            <h1>Welcome back, {{ user.first_name|default:"User" }}!</h1>
-            <p>What would you like to do today?</p>
+            <h2>
+                <i class="fas fa-hand-wave"></i>
+                Welcome Back, {{ user.first_name|default:"User" }}
+            </h2>
+            <p>Access your medicines, track deliveries, and stay updated with health information.</p>
         </div>
 
-        <!-- ACTION BUTTON GRID -->
-        <div class="menu-grid">
-            <button onclick="toggleProfileSidebar(true)" class="menu-btn">
-                <i class="fas fa-user-circle"></i>
-                <span>View Profile</span>
-            </button>
-            <a href="{% url 'medicine_list' %}" class="menu-btn">
-                <i class="fas fa-prescription-bottle-alt"></i>
-                <span>Browse Medicines</span>
-            </a>
-            <a href="{% url 'order_list' %}" class="menu-btn">
-                <i class="fas fa-shopping-cart"></i>
-                <span>View Current Order</span>
-            </a>
-            <a href="{% url 'view_announcements' %}" class="menu-btn">
-                <i class="fas fa-bullhorn"></i>
-                <span>View Announcements</span>
-            </a>
-            <a href="{% url 'track_delivery' %}" class="menu-btn">
-                <i class="fas fa-truck"></i>
-                <span>Track Delivery</span>
-            </a>
-            <!-- Order History Button -->
-            <a href="{% url 'order_history' %}" class="menu-btn">
-                <i class="fas fa-history"></i>
-                <span>Order History</span>
+        <!-- ANNOUNCEMENT BANNER -->
+        {% if latest_announcement %}
+        <div class="announcement-banner">
+            <div class="announcement-banner-header">
+                <div class="announcement-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <strong>{{ latest_announcement.title }}</strong>
+            </div>
+            <p>{{ latest_announcement.content|truncatewords:20 }}</p>
+            <p class="announcement-date">
+                <i class="fas fa-calendar-alt"></i> {{ latest_announcement.date_posted|date:"M d, Y" }}
+            </p>
+            <a href="{% url 'view_announcements' %}" class="announcement-link">
+                View All Announcements <i class="fas fa-arrow-right"></i>
             </a>
         </div>
+        {% else %}
+        <div class="announcement-banner">
+            <div class="announcement-banner-header">
+                <div class="announcement-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <strong>Welcome to MediServe!</strong>
+            </div>
+            <p>Access free medicines and health services through our community health program.</p>
+        </div>
+        {% endif %}
 
-        <!-- ANNOUNCEMENTS -->
-        <div class="announcement-section">
-            <h3>Recent Announcement</h3>
-            {% if latest_announcement %}
-                <div class="announcement-card">
-                    <strong>{{ latest_announcement.title }}</strong>
-                    <p>{{ latest_announcement.content|truncatewords:25 }}</p>
-                    <p class="announcement-date">
-                        <i class="fas fa-calendar-alt"></i> Posted on {{ latest_announcement.date_posted|date:"F j, Y, g:i a" }}
-                    </p>
-                    <a href="{% url 'view_announcements' %}" class="announcement-link">
-                        View All Announcements <i class="fas fa-arrow-right"></i>
-                    </a>
+        <!-- SECTION HEADER -->
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-th-large"></i>
+                Quick Actions
+            </h3>
+            <p class="section-subtitle">What would you like to do today?</p>
+        </div>
+
+        <!-- MAIN MENU GRID -->
+        <div class="main-menu-grid">
+
+            <!-- 1. Browse Medicines -->
+            <a href="{% url 'medicine_list' %}" class="main-card card-medicines">
+                <div class="main-card-header">
+                    <div class="main-card-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="main-card-header-text">
+                        <h3 class="main-card-title">Browse Medicines</h3>
+                        <span class="main-card-badge">Catalog</span>
+                    </div>
                 </div>
-            {% else %}
-                <div class="announcement-card">
-                    <strong>Welcome to MediServe Free Medicine Program</strong>
-                    <p>All barangay residents can now access free medicines including maintenance drugs, vitamins, and over-the-counter medications. Simply browse our medicine list, add items to your order, and submit your request. Orders are processed within 24-48 hours and delivered directly to your address.</p>
-                    <p class="announcement-date">
-                        <i class="fas fa-info-circle"></i> For assistance, contact your barangay health center
-                    </p>
-                    <a href="{% url 'view_announcements' %}" class="announcement-link">
-                        View More Information <i class="fas fa-arrow-right"></i>
-                    </a>
+                <p class="main-card-description">Search and explore available medicines in our inventory</p>
+                <div class="main-card-footer">
+                    <span>View Catalog</span>
+                    <i class="fas fa-arrow-right"></i>
                 </div>
-            {% endif %}
+            </a>
+
+            <!-- 2. Current Order -->
+            <a href="{% url 'order_list' %}" class="main-card card-order">
+                <div class="main-card-header">
+                    <div class="main-card-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="main-card-header-text">
+                        <h3 class="main-card-title">Current Order</h3>
+                        <span class="main-card-badge">Cart</span>
+                    </div>
+                </div>
+                <p class="main-card-description">View and manage your current medicine order</p>
+                <div class="main-card-footer">
+                    <span>View Cart</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- 3. Track Delivery -->
+            <a href="{% url 'track_delivery' %}" class="main-card card-delivery">
+                <div class="main-card-header">
+                    <div class="main-card-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="main-card-header-text">
+                        <h3 class="main-card-title">Track Delivery</h3>
+                        <span class="main-card-badge">Status</span>
+                    </div>
+                </div>
+                <p class="main-card-description">Monitor the status of your medicine delivery</p>
+                <div class="main-card-footer">
+                    <span>Track Now</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- 4. Order History -->
+            <a href="{% url 'order_history' %}" class="main-card card-history">
+                <div class="main-card-header">
+                    <div class="main-card-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="main-card-header-text">
+                        <h3 class="main-card-title">Order History</h3>
+                        <span class="main-card-badge">Records</span>
+                    </div>
+                </div>
+                <p class="main-card-description">View your past orders and delivery records</p>
+                <div class="main-card-footer">
+                    <span>View History</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- 5. Announcements -->
+            <a href="{% url 'view_announcements' %}" class="main-card card-announcements">
+                <div class="main-card-header">
+                    <div class="main-card-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="main-card-header-text">
+                        <h3 class="main-card-title">Announcements</h3>
+                        <span class="main-card-badge">Updates</span>
+                    </div>
+                </div>
+                <p class="main-card-description">Stay updated with important health notices</p>
+                <div class="main-card-footer">
+                    <span>Read All</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- 6. My Profile -->
+            <a href="{% url 'profile_view' %}" class="main-card card-profile">
+                <div class="main-card-header">
+                    <div class="main-card-icon">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="main-card-header-text">
+                        <h3 class="main-card-title">My Profile</h3>
+                        <span class="main-card-badge">Account</span>
+                    </div>
+                </div>
+                <p class="main-card-description">Manage your account and medical documents</p>
+                <div class="main-card-footer">
+                    <span>View Profile</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
         </div>
     </div>
 </div>
-
-<!-- PROFILE SIDEBAR WITH 6.1, 6.2, 6.3 -->
-<div id="profile-sidebar" class="profile-sidebar">
-    <div class="sidebar-content">
-        <button onclick="toggleProfileSidebar(false)" class="close-btn">&times;</button>
-        <h3>Profile Menu</h3>
-
-        <div class="profile-header">
-            <i class="fas fa-user-circle"></i>
-            <p>{{ user.first_name }} {{ user.last_name }}</p>
-        </div>
-
-        <div class="sidebar-menu">
-            <!-- 6.2 View Documents -->
-            <a href="{% url 'profile_view' %}" class="sidebar-link">
-                <i class="fas fa-file-alt"></i> View Documents
-            </a>
-
-            <a href="{% url 'profile_view' %}" class="sidebar-link">
-                <i class="fas fa-user"></i> View/Edit Profile
-            </a>
-            <a href="{% url 'settings' %}" class="sidebar-link">
-                <i class="fas fa-cog"></i> Settings
-            </a>
-            <a href="{% url 'feedback' %}" class="sidebar-link">
-                <i class="fas fa-comment-dots"></i> Feedback
-            </a>
-        </div>
-
-        <a href="{% url 'logout' %}" class="btn-sidebar-logout">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
-</div>
-
-<script>
-    function toggleProfileSidebar(show) {
-        const sidebar = document.getElementById('profile-sidebar');
-        const openWidth = '350px';
-        if (show) {
-            sidebar.style.width = openWidth;
-            sidebar.style.paddingLeft = '0';
-        } else {
-            sidebar.style.width = '0';
-            sidebar.style.paddingLeft = '0';
-        }
-    }
-
-    document.addEventListener('click', function(event) {
-        const sidebar = document.getElementById('profile-sidebar');
-        const profileButton = document.querySelector('.menu-grid button:first-child');
-        if (sidebar.style.width !== '0px' && !sidebar.contains(event.target) && !profileButton.contains(event.target)) {
-            toggleProfileSidebar(false);
-        }
-    });
-</script>
 {% endblock %}
