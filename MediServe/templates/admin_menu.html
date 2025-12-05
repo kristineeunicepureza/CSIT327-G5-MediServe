@@ -34,7 +34,7 @@
 
     .admin-header {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        padding: 30px 40px;
+        padding: 40px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -48,9 +48,20 @@
         position: absolute;
         top: -50%;
         right: -10%;
-        width: 400px;
-        height: 400px;
+        width: 500px;
+        height: 500px;
         background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .admin-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -5%;
+        width: 350px;
+        height: 350px;
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 50%;
     }
 
@@ -59,73 +70,93 @@
         z-index: 1;
     }
 
+    .header-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
     .admin-header h1 {
-        font-size: 1.8em;
+        font-size: 2.2em;
         color: #FFFFFF;
-        margin: 0 0 5px 0;
-        font-weight: 700;
+        margin: 0 0 8px 0;
+        font-weight: 800;
         letter-spacing: 0.5px;
     }
 
     .admin-subtitle {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 0.95em;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.05em;
         margin: 0;
         font-weight: 400;
     }
 
     .btn-admin-logout {
-        background-color: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         color: #FFFFFF;
         border: 2px solid rgba(255, 255, 255, 0.3);
-        padding: 12px 24px;
+        padding: 14px 28px;
         font-weight: 600;
         border-radius: 12px;
         text-decoration: none;
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         position: relative;
         z-index: 1;
+        font-size: 1em;
+        backdrop-filter: blur(10px);
     }
 
     .btn-admin-logout:hover {
-        background-color: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.25);
         border-color: rgba(255, 255, 255, 0.5);
         transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     }
 
     .admin-content {
         padding: 40px;
-        background: #f8f9fa;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        max-height: calc(100vh - 220px);
+        overflow-y: auto;
+    }
+
+    /* Scrollbar Styling */
+    .admin-content::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .admin-content::-webkit-scrollbar-track {
+        background: #f1f3f5;
+        border-radius: 10px;
+    }
+
+    .admin-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border-radius: 10px;
+    }
+
+    .admin-content::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
     }
 
     .welcome-section {
-        margin-bottom: 30px;
-    }
-
-    .welcome-section h2 {
-        color: #2c3e50;
-        font-size: 1.6em;
-        margin-bottom: 8px;
-        font-weight: 700;
-    }
-
-    .welcome-section p {
-        color: #6c757d;
-        font-size: 1.05em;
-        margin: 0;
-    }
-
-    .announcement-banner {
-        border: none;
+        margin-bottom: 25px;
         padding: 25px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
         border-radius: 16px;
-        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
-        margin-bottom: 40px;
-        box-shadow: 0 4px 20px rgba(0, 123, 255, 0.15);
-        border-left: 6px solid #007bff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-left: 6px solid #dc3545;
         animation: slideIn 0.5s ease-out;
     }
 
@@ -140,20 +171,75 @@
         }
     }
 
+    .welcome-section h2 {
+        color: #2c3e50;
+        font-size: 1.5em;
+        margin: 0 0 6px 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .welcome-section h2 i {
+        color: #dc3545;
+        font-size: 0.9em;
+    }
+
+    .welcome-section p {
+        color: #6c757d;
+        font-size: 0.95em;
+        margin: 0;
+    }
+
+    .announcement-banner {
+        border: none;
+        padding: 25px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
+        border-left: 6px solid #ffc107;
+        animation: slideIn 0.6s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .announcement-banner::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+    }
+
     .announcement-banner-header {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
     }
 
     .announcement-icon {
-        color: #007bff;
-        font-size: 1.3em;
+        width: 40px;
+        height: 40px;
+        background: #ffc107;
+        color: #ffffff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2em;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
     }
 
     .announcement-banner strong {
-        color: #007bff;
+        color: #f57c00;
         font-size: 1.15em;
         font-weight: 700;
         margin: 0;
@@ -161,36 +247,61 @@
 
     .announcement-banner p {
         font-size: 0.95em;
-        color: #2c3e50;
+        color: #5d4037;
         margin: 0;
         line-height: 1.6;
-        padding-left: 34px;
+        padding-left: 52px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-header {
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.3em;
+        margin: 0 0 5px 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: #dc3545;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        font-size: 0.95em;
+        margin: 0;
     }
 
     .admin-menu-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 25px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
         max-width: 100%;
     }
 
     .admin-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        padding: 30px 25px;
+        padding: 25px 22px;
         border-radius: 16px;
         text-decoration: none;
-        text-align: center;
         transition: all 0.3s ease;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        align-items: flex-start;
         gap: 15px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         border: 2px solid transparent;
         position: relative;
         overflow: hidden;
         animation: scaleIn 0.4s ease-out;
+        min-height: 100%;
     }
 
     @keyframes scaleIn {
@@ -209,247 +320,208 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 4px;
-        background: linear-gradient(90deg, transparent, currentColor, transparent);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        width: 6px;
+        height: 0;
+        background: linear-gradient(180deg, currentColor 0%, transparent 100%);
+        transition: height 0.3s ease;
     }
 
     .admin-card:hover::before {
-        opacity: 1;
+        height: 100%;
     }
 
     .admin-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        border-color: currentColor;
+    }
+
+    .admin-card-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
     }
 
     .admin-card-icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 16px;
+        width: 55px;
+        height: 55px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2em;
+        font-size: 1.6em;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .admin-card:hover .admin-card-icon {
-        transform: scale(1.1) rotate(5deg);
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    .admin-card-header-text {
+        flex: 1;
     }
 
     .admin-card-title {
-        font-size: 1.1em;
+        font-size: 1.15em;
         font-weight: 700;
-        margin: 0;
-        transition: all 0.3s ease;
+        margin: 0 0 4px 0;
+        color: #2c3e50;
+    }
+
+    .admin-card-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.7em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.9;
     }
 
     .admin-card-description {
         font-size: 0.85em;
-        opacity: 0.8;
+        color: #6c757d;
         margin: 0;
-        line-height: 1.4;
+        line-height: 1.5;
     }
 
-    /* Stock Card - Yellow Theme */
-    .card-stock {
-        border-left: 6px solid #ffc107;
-    }
-
-    .card-stock .admin-card-icon {
-        background: linear-gradient(135deg, #fff9e6 0%, #ffecb3 100%);
-        color: #ff8f00;
-    }
-
-    .card-stock .admin-card-title {
-        color: #f57c00;
-    }
-
-    .card-stock .admin-card-description {
+    .admin-card-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         color: #6c757d;
-    }
-
-    .card-stock:hover {
-        border-color: #ffc107;
-        box-shadow: 0 8px 30px rgba(255, 193, 7, 0.2);
-    }
-
-    /* Delivery Card - Green Theme */
-    .card-delivery {
-        border-left: 6px solid #28a745;
-    }
-
-    .card-delivery .admin-card-icon {
-        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-        color: #2e7d32;
-    }
-
-    .card-delivery .admin-card-title {
-        color: #1b5e20;
-    }
-
-    .card-delivery .admin-card-description {
-        color: #6c757d;
-    }
-
-    .card-delivery:hover {
-        border-color: #28a745;
-        box-shadow: 0 8px 30px rgba(40, 167, 69, 0.2);
-    }
-
-    /* Announcements Card - Blue Theme */
-    .card-announcements {
-        border-left: 6px solid #007bff;
-    }
-
-    .card-announcements .admin-card-icon {
-        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
-        color: #0056b3;
-    }
-
-    .card-announcements .admin-card-title {
-        color: #004085;
-    }
-
-    .card-announcements .admin-card-description {
-        color: #6c757d;
-    }
-
-    .card-announcements:hover {
-        border-color: #007bff;
-        box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
-    }
-
-    /* History Card - Purple Theme */
-    .card-history {
-        border-left: 6px solid #6f42c1;
-    }
-
-    .card-history .admin-card-icon {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-        color: #6f42c1;
-    }
-
-    .card-history .admin-card-title {
-        color: #5a32a3;
-    }
-
-    .card-history .admin-card-description {
-        color: #6c757d;
-    }
-
-    .card-history:hover {
-        border-color: #6f42c1;
-        box-shadow: 0 8px 30px rgba(111, 66, 193, 0.2);
-    }
-
-    /* Profile Card - Red Theme */
-    .card-profile {
-        border-left: 6px solid #dc3545;
-    }
-
-    .card-profile .admin-card-icon {
-        background: linear-gradient(135deg, #ffe6e6 0%, #ffcdd2 100%);
-        color: #c82333;
-    }
-
-    .card-profile .admin-card-title {
-        color: #bd2130;
-    }
-
-    .card-profile .admin-card-description {
-        color: #6c757d;
-    }
-
-    .card-profile:hover {
-        border-color: #dc3545;
-        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.2);
-    }
-
-    /* Stats Section */
-    .stats-section {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
-    }
-
-    .stat-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        border-left: 4px solid;
-        animation: slideIn 0.5s ease-out;
-    }
-
-    .stat-card h4 {
         font-size: 0.85em;
-        color: #6c757d;
-        margin: 0 0 8px 0;
+        margin-top: 5px;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
-    .stat-card .stat-value {
-        font-size: 2em;
-        font-weight: 700;
-        margin: 0;
+    .admin-card:hover .admin-card-footer {
+        color: currentColor;
     }
 
-    .stat-card.stat-primary {
-        border-left-color: #007bff;
+    /* --- CARD THEMES ------------------------------------------------- */
+
+    /* Stock */
+    .card-stock {
+        color: #ffc107;
+    }
+    .card-stock .admin-card-icon {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        color: #f57f17;
+    }
+    .card-stock .admin-card-badge {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+    .card-stock:hover {
+        box-shadow: 0 12px 35px rgba(255, 193, 7, 0.25);
     }
 
-    .stat-card.stat-primary .stat-value {
-        color: #007bff;
-    }
-
-    .stat-card.stat-success {
-        border-left-color: #28a745;
-    }
-
-    .stat-card.stat-success .stat-value {
+    /* Delivery */
+    .card-delivery {
         color: #28a745;
     }
-
-    .stat-card.stat-warning {
-        border-left-color: #ffc107;
+    .card-delivery .admin-card-icon {
+        background: linear-gradient(135deg, #e6ffea 0%, #c8e6c9 100%);
+        color: #2e7d32;
+    }
+    .card-delivery .admin-card-badge {
+        background: #e6ffea;
+        color: #2e7d32;
+    }
+    .card-delivery:hover {
+        box-shadow: 0 12px 35px rgba(40, 167, 69, 0.25);
     }
 
-    .stat-card.stat-warning .stat-value {
-        color: #f57c00;
+    /* Announcements */
+    .card-announcements {
+        color: #007bff;
+    }
+    .card-announcements .admin-card-icon {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1565c0;
+    }
+    .card-announcements .admin-card-badge {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+    .card-announcements:hover {
+        box-shadow: 0 12px 35px rgba(0, 123, 255, 0.25);
+    }
+
+    /* History */
+    .card-history {
+        color: #6f42c1;
+    }
+    .card-history .admin-card-icon {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        color: #6a1b9a;
+    }
+    .card-history .admin-card-badge {
+        background: #f3e5f5;
+        color: #6a1b9a;
+    }
+    .card-history:hover {
+        box-shadow: 0 12px 35px rgba(111, 66, 193, 0.25);
+    }
+
+    /* Admin Profile */
+    .card-profile {
+        color: #dc3545;
+    }
+    .card-profile .admin-card-icon {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        color: #c62828;
+    }
+    .card-profile .admin-card-badge {
+        background: #ffebee;
+        color: #c62828;
+    }
+    .card-profile:hover {
+        box-shadow: 0 12px 35px rgba(220, 53, 69, 0.25);
+    }
+
+    /* Analytics */
+    .card-analytics {
+        color: #17a2b8;
+    }
+    .card-analytics .admin-card-icon {
+        background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+        color: #00838f;
+    }
+    .card-analytics .admin-card-badge {
+        background: #e0f7fa;
+        color: #00838f;
+    }
+    .card-analytics:hover {
+        box-shadow: 0 12px 35px rgba(23, 162, 184, 0.25);
     }
 
     /* Responsive Design */
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
         .admin-menu-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
 
     @media (max-width: 768px) {
-        .admin-menu-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .admin-content {
-            padding: 25px;
+        .admin-container {
+            margin: 20px;
+            border-radius: 15px;
         }
 
         .admin-header {
-            padding: 20px 25px;
+            padding: 25px;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
             align-items: flex-start;
         }
 
         .admin-header h1 {
-            font-size: 1.4em;
+            font-size: 1.6em;
         }
 
         .btn-admin-logout {
@@ -457,12 +529,28 @@
             justify-content: center;
         }
 
+        .admin-content {
+            padding: 25px;
+        }
+
+        .welcome-section {
+            padding: 20px;
+        }
+
+        .announcement-banner {
+            padding: 20px;
+        }
+
         .announcement-banner p {
             padding-left: 0;
         }
 
-        .stats-section {
+        .admin-menu-grid {
             grid-template-columns: 1fr;
+        }
+
+        .admin-card {
+            padding: 25px 20px;
         }
     }
 </style>
@@ -471,11 +559,13 @@
     <!-- HEADER BAR -->
     <header class="admin-header">
         <div class="header-left">
-            <h1>ADMIN DASHBOARD</h1>
-            <p class="admin-subtitle">Manage your pharmacy operations</p>
+            <span class="header-badge">
+                <i class="fas fa-shield-alt"></i> Administrator
+            </span>
+            <h1>Dashboard</h1>
+            <p class="admin-subtitle">Manage your pharmacy operations efficiently</p>
         </div>
 
-        <!-- LOGOUT BUTTON -->
         <a href="{% url 'logout' %}" class="btn-admin-logout">
             <i class="fas fa-sign-out-alt"></i> Log Out
         </a>
@@ -484,65 +574,144 @@
     <div class="admin-content">
         <!-- WELCOME SECTION -->
         <div class="welcome-section">
-            <h2>Welcome, Administrator</h2>
-            <p>Monitor and manage your pharmacy system efficiently.</p>
+            <h2>
+                <i class="fas fa-hand-wave"></i>
+                Welcome Back, Administrator
+            </h2>
+            <p>Here's what's happening with your pharmacy system today.</p>
         </div>
 
         <!-- ANNOUNCEMENT BANNER -->
         <div class="announcement-banner">
             <div class="announcement-banner-header">
-                <i class="fas fa-bullhorn announcement-icon"></i>
+                <div class="announcement-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
                 <strong>Latest Announcement</strong>
             </div>
             <p>{{ recent_announcement }}</p>
         </div>
 
+        <!-- SECTION HEADER -->
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-th-large"></i>
+                Quick Actions
+            </h3>
+            <p class="section-subtitle">Access key features and management tools</p>
+        </div>
+
         <!-- ADMIN MENU GRID -->
         <div class="admin-menu-grid">
+
             <!-- 1. Manage Stock -->
             <a href="{% url 'medicine_stock' %}" class="admin-card card-stock">
-                <div class="admin-card-icon">
-                    <i class="fas fa-box"></i>
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="admin-card-header-text">
+                        <h3 class="admin-card-title">Manage Stock</h3>
+                        <span class="admin-card-badge">Inventory</span>
+                    </div>
                 </div>
-                <h3 class="admin-card-title">Manage Stock</h3>
-                <p class="admin-card-description">Update inventory and track medicine stock levels</p>
+                <p class="admin-card-description">Track, update, and monitor medicine inventory levels in real-time</p>
+                <div class="admin-card-footer">
+                    <span>Go to Stock</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </a>
 
-            <!-- 2. Orders for Delivery -->
+            <!-- 2. Fulfill Orders -->
             <a href="{% url 'delivery_page' %}" class="admin-card card-delivery">
-                <div class="admin-card-icon">
-                    <i class="fas fa-truck"></i>
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="admin-card-header-text">
+                        <h3 class="admin-card-title">Fulfill Orders</h3>
+                        <span class="admin-card-badge">Delivery</span>
+                    </div>
                 </div>
-                <h3 class="admin-card-title">Fulfill Orders</h3>
-                <p class="admin-card-description">Process and manage delivery requests</p>
+                <p class="admin-card-description">Process delivery requests and manage order fulfillment</p>
+                <div class="admin-card-footer">
+                    <span>View Orders</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </a>
 
-            <!-- 3. Manage Announcements -->
+            <!-- 3. Announcements -->
             <a href="{% url 'announcements' %}" class="admin-card card-announcements">
-                <div class="admin-card-icon">
-                    <i class="fas fa-bullhorn"></i>
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="admin-card-header-text">
+                        <h3 class="admin-card-title">Announcements</h3>
+                        <span class="admin-card-badge">Updates</span>
+                    </div>
                 </div>
-                <h3 class="admin-card-title">Announcements</h3>
-                <p class="admin-card-description">Create and manage public announcements</p>
+                <p class="admin-card-description">Create and publish important system announcements</p>
+                <div class="admin-card-footer">
+                    <span>Manage Posts</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </a>
 
-            <!-- 4. Medicine Distribution History - NEW -->
+            <!-- 4. Analytics Dashboard -->
+            <a href="{% url 'analytics' %}" class="admin-card card-analytics">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="admin-card-header-text">
+                        <h3 class="admin-card-title">Analytics</h3>
+                        <span class="admin-card-badge">Insights</span>
+                    </div>
+                </div>
+                <p class="admin-card-description">View system trends, statistics, and performance metrics</p>
+                <div class="admin-card-footer">
+                    <span>View Analytics</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- 5. Medicine History -->
             <a href="{% url 'medicine_distribution_history' %}" class="admin-card card-history">
-                <div class="admin-card-icon">
-                    <i class="fas fa-history"></i>
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="admin-card-header-text">
+                        <h3 class="admin-card-title">Medicine History</h3>
+                        <span class="admin-card-badge">Records</span>
+                    </div>
                 </div>
-                <h3 class="admin-card-title">Medicine History</h3>
-                <p class="admin-card-description">View all medicine distributions and requests</p>
+                <p class="admin-card-description">View complete logs and records of medicine distribution</p>
+                <div class="admin-card-footer">
+                    <span>View History</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </a>
 
-            <!-- 5. Admin Profile -->
+            <!-- 6. Admin Profile -->
             <a href="{% url 'admin_profile' %}" class="admin-card card-profile">
-                <div class="admin-card-icon">
-                    <i class="fas fa-user-shield"></i>
+                <div class="admin-card-header">
+                    <div class="admin-card-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="admin-card-header-text">
+                        <h3 class="admin-card-title">Admin Profile</h3>
+                        <span class="admin-card-badge">Account</span>
+                    </div>
                 </div>
-                <h3 class="admin-card-title">Admin Profile</h3>
-                <p class="admin-card-description">View and update your account settings</p>
+                <p class="admin-card-description">Update your administrator account and security settings</p>
+                <div class="admin-card-footer">
+                    <span>Edit Profile</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </a>
+
         </div>
     </div>
 </div>
