@@ -5,90 +5,305 @@
 
 {% block content %}
 
-    <div style="width: 100%; max-width: 900px; margin: 40px auto; background-color: #FFFFFF; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+<style>
+    body {
+        background: #f2f4f7;
+        font-family: 'Inter', sans-serif;
+    }
 
-        {# HEADER BAR (Admin Red Theme) #}
-        <header style="padding: 15px 30px; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between;">
+    .page-wrapper {
+        max-width: 1300px;
+        margin: 35px auto;
+        padding: 0 20px;
+    }
 
-            <div style="display: flex; align-items: center;">
-                <a href="{% url 'admin_menu' %}" class="btn" style="
-                    padding: 8px 10px;
-                    margin-right: 15px;
-                    background-color: #f7f9fa;
-                    color: #dc3545;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    border: 1px solid #ddd;
-                    box-shadow: none;
-                ">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
-                <h1 style="font-size: 1.5em; color: #36489e;">Orders in Processing & Shipping</h1>
+    /* HEADER */
+    .top-header {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        padding: 24px 30px;
+        border-radius: 18px;
+        box-shadow: 0 6px 22px rgba(220, 53, 69, 0.35);
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .head-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+    }
+
+    .head-sub {
+        opacity: .9;
+        font-size: .9rem;
+        margin-top: 3px;
+    }
+
+    .metric-pill {
+        padding: 10px 20px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.18);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .metric-pill span:last-child {
+        font-weight: 700;
+        background: rgba(255,255,255,0.35);
+        padding: 6px 12px;
+        border-radius: 999px;
+    }
+
+    /* GRID */
+    .orders-grid {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 22px;
+    }
+
+    /* ORDER CARD */
+    .order-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 6px 18px rgba(30,41,59,0.08);
+        border: 1px solid rgba(220,53,69,0.1);
+    }
+
+    .order-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .order-info strong {
+        font-size: 1.2rem;
+        color: #1e293b;
+        display: block;
+    }
+
+    .order-info small {
+        color: #6b7280;
+        margin-top: 3px;
+        display: block;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: .75rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    }
+
+    .badge-processing { background: #2563eb; }
+    .badge-shipped { background: #16a34a; }
+    .badge-pending { background: #facc15; color: #1e293b; }
+    .badge-cancelled { background: #6b7280; }
+
+    /* DRIVER SECTION */
+    .driver-section {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px dashed #e2e8f0;
+    }
+
+    .driver-title {
+        font-size: .9rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+
+    .driver-tag {
+        font-size: .85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+    }
+
+    .driver-tag.ok { color: #16a34a; }
+    .driver-tag.missing { color: #dc2626; }
+
+    select {
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        margin-top: 10px;
+        font-size: .85rem;
+    }
+
+    .assign-btn {
+        margin-top: 10px;
+        padding: 8px 12px;
+        background: #dc3545;
+        color: #fff;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .assign-btn:hover {
+        background: #b92c38;
+    }
+
+    /* ACTION BUTTONS */
+    .actions {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: .85rem;
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-blue { background: #0ea5e9; color: #fff; }
+    .btn-green { background: #22c55e; color: #fff; }
+    .btn-red { background: #dc2626; color: #fff; }
+    .btn-yellow { background: #facc15; color: #1e293b; }
+
+    .btn-disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+</style>
+
+<div class="page-wrapper">
+
+    <!-- HEADER -->
+    <header class="top-header">
+        <div>
+            <div class="head-title">Admin Delivery Control</div>
+            <div class="head-sub">Manage fulfillment, drivers, and shipment progress</div>
+        </div>
+
+        <div class="metric-pill">
+            <span>Active Orders</span>
+            <span>{{ orders|length }}</span>
+        </div>
+    </header>
+
+    <!-- ORDERS GRID -->
+    <div class="orders-grid">
+        {% for order in orders %}
+        <div class="order-card">
+
+            <!-- TOP -->
+            <div class="order-top">
+                <div class="order-info">
+                    <strong>Order #{{ order.id }}</strong>
+                    <small>Customer: {{ order.user.username }}</small>
+                    <small>Total: ₱{{ order.total_price|floatformat:2 }}</small>
+                </div>
+
+                {% if order.status == 'Processing' %}
+                    <span class="status-badge badge-processing">Processing</span>
+                {% elif order.status == 'Shipped' %}
+                    <span class="status-badge badge-shipped">Out for Delivery</span>
+                {% elif order.status == 'Pending' %}
+                    <span class="status-badge badge-pending">Pending</span>
+                {% elif order.status == 'Cancelled' %}
+                    <span class="status-badge badge-cancelled">Cancelled</span>
+                {% endif %}
             </div>
 
-            <button class="btn" style="background-color: #28a745; color: #FFFFFF; padding: 10px 15px; font-weight: 500; cursor: not-allowed;">
-                <i class="fas fa-plus"></i> Assign New Driver
-            </button>
-        </header>
+            <!-- DRIVER -->
+            <div class="driver-section">
 
-        {# MAIN CONTENT AREA #}
-        <main style="padding: 40px;">
-            <p style="color: #555; margin-bottom: 30px;">Use the controls below to manage order fulfillment and update status.</p>
+                <div class="driver-title">Driver Assignment</div>
 
-            <div class="order-list-view" style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
-
-                {% for order in orders %}
-                    <div class="order-tracking-card" style="
-                        background-color: #FFFFFF;
-                        padding: 20px;
-                        border-radius: 8px;
-                        border: 1px solid #ffc107; /* Highlight card border for active processing */
-                        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                    ">
-
-                        {# ORDER INFO #}
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-
-                            <div style="flex-grow: 1;">
-                                <strong style="font-size: 1.4em; color: #36489e;">Order #{{ order.id }}</strong>
-                                <p style="font-size: 0.9em; color: #777; margin: 0;">Customer: {{ order.user.username }}</p>
-                                <strong style="font-size: 1.1em; color: #dc3545;">Total: â‚±{{ order.total_price|floatformat:2 }}</strong>
-                            </div>
-
-                            {# STATUS BADGE #}
-                            <span style="font-weight: bold; font-size: 1em; padding: 5px 10px; border-radius: 4px;
-                                color: #FFFFFF;
-                                background-color: {% if order.status == 'Shipped' %}#007bff{% else %}#ffc107{% endif %};
-                            ">
-                                {{ order.status|upper }}
-                            </span>
-                        </div>
-
-                        {# ACTION BUTTONS - FIXED STRUCTURE FOR POST REQUESTS #}
-                        <form method="post" action="{% url 'delivery_page' %}" style="margin: 0; display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 15px;">
-                            {% csrf_token %}
-                            <input type="hidden" name="order_id" value="{{ order.id }}">
-
-                            <button type="submit" name="action" value="ship" class="btn" style="background-color: #007bff; color: #FFFFFF; padding: 10px 15px; flex-grow: 1;">
-                                <i class="fas fa-shipping-fast"></i> Mark Shipped
-                            </button>
-
-                            <button type="submit" name="action" value="complete" class="btn" style="background-color: #28a745; color: #FFFFFF; padding: 10px 15px; flex-grow: 1;">
-                                <i class="fas fa-check-double"></i> Mark Completed
-                            </button>
-                        </form>
-
+                {% if order.driver %}
+                    <div class="driver-tag ok">
+                        <i class="fas fa-user-check"></i>
+                        {{ order.driver }}
                     </div>
-                {% empty %}
-                    <p style="text-align: center; padding: 30px; border: 1px solid #ddd; border-radius: 8px;">
-                        No orders currently in the queue for processing or delivery.
-                    </p>
-                {% endfor %}
+                {% else %}
+                    <div class="driver-tag missing">
+                        <i class="fas fa-exclamation-circle"></i>
+                        No driver assigned
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'delivery_page' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+
+                    <select name="driver_name">
+                        <option value="">-- Select Driver --</option>
+
+                        {% for value, label in drivers %}
+                            <option value="{{ label }}" {% if order.driver == label %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button class="assign-btn" name="action" value="assign_driver">
+                        Assign / Change Driver
+                    </button>
+                </form>
             </div>
-        </main>
+
+            <!-- ACTIONS -->
+            <form method="post" action="{% url 'delivery_page' %}">
+                {% csrf_token %}
+                <input type="hidden" name="order_id" value="{{ order.id }}">
+
+                <div class="actions">
+
+                    {% if order.status == 'Pending' %}
+                        <button class="action-btn btn-blue" name="action" value="process">
+                            Start Processing
+                        </button>
+                        <button class="action-btn btn-red" name="action" value="cancel">
+                            Cancel
+                        </button>
+
+                    {% elif order.status == 'Processing' %}
+                        <button class="action-btn btn-green {% if not order.driver %}btn-disabled{% endif %}"
+                                name="action" value="ship"
+                                {% if not order.driver %}disabled{% endif %}>
+                            Out for Delivery
+                        </button>
+                        <button class="action-btn btn-red" name="action" value="cancel">
+                            Cancel
+                        </button>
+
+                    {% elif order.status == 'Shipped' %}
+                        <button class="action-btn btn-green" name="action" value="complete">
+                            Mark Complete
+                        </button>
+
+                    {% elif order.status in 'Cancelled,Completed' %}
+                        <button class="action-btn btn-yellow" name="action" value="reopen">
+                            Reopen Order
+                        </button>
+                    {% endif %}
+
+                </div>
+            </form>
+
+        </div>
+        {% endfor %}
     </div>
+
+</div>
+
 {% endblock %}
