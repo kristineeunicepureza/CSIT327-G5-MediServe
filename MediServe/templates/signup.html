@@ -4,173 +4,242 @@
 {% block title %}User Registration{% endblock %}
 
 {% block content %}
-<div style="width: 100%; max-width: 950px; margin: 20px auto; background-color: #FFFFFF; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); display: flex; overflow: hidden; max-height: 90vh;">
+<div style="width: 100%; max-width: 1100px; margin: 20px auto; background-color: #FFFFFF; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); display: flex; overflow: hidden; max-height: 92vh;">
 
     <!-- Left: Form Section -->
-    <div style="flex: 0.7; background-color: #faf8f8; padding: 40px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; overflow-y: auto;">
-        <h2 style="color: #36489e; margin-bottom: 25px;">Register New Account</h2>
+    <div style="flex: 0.68; background: linear-gradient(135deg, #fafafa 0%, #f5f7fa 100%); padding: 50px 45px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; overflow-y: auto;">
+        <div style="width: 100%; max-width: 680px;">
+            <h2 style="color: #2c3e95; margin-bottom: 8px; font-size: 2rem; font-weight: 700; letter-spacing: -0.5px;">Create Your Account</h2>
+            <p style="color: #6b7280; margin-bottom: 35px; font-size: 0.95rem;">Fill in your details to get started</p>
 
-        {% if messages %}
-        <ul style="list-style: none; padding: 0; width: 100%; max-width: 500px; margin-bottom: 20px;">
-            {% for message in messages %}
-                <li style="padding: 10px; border-radius: 5px; font-weight: bold; font-size: 0.9em;
-                    {% if 'error' in message.tags %}
-                        background-color: #ffe6e6; color: #d93025; border: 1px solid #d93025;
-                    {% elif 'success' in message.tags %}
-                        background-color: #e6ffed; color: #28a745; border: 1px solid #28a745;
-                    {% else %}
-                        background-color: #f7f9fa; color: #333; border: 1px solid #ddd;
-                    {% endif %}">
-                    {{ message }}
-                </li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-
-        <form method="post" enctype="multipart/form-data" style="width: 100%; max-width: 650px;">
-            {% csrf_token %}
-
-            <!-- Email & Password -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <input type="email" name="email" placeholder="Email Address" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                <input type="password" name="password" placeholder="Password" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
+            {% if messages %}
+            <div style="width: 100%; margin-bottom: 25px;">
+                {% for message in messages %}
+                    <div style="padding: 14px 18px; border-radius: 10px; font-weight: 500; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+                        {% if 'error' in message.tags %}
+                            background-color: #fee; color: #dc2626; border-left: 4px solid #dc2626;
+                        {% elif 'success' in message.tags %}
+                            background-color: #ecfdf5; color: #059669; border-left: 4px solid #059669;
+                        {% else %}
+                            background-color: #f3f4f6; color: #374151; border-left: 4px solid #9ca3af;
+                        {% endif %}">
+                        <i class="fas fa-{% if 'error' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% else %}info-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
             </div>
+            {% endif %}
 
-            <div style="margin-bottom: 15px;">
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required style="width: 100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-            </div>
+            <form method="post" enctype="multipart/form-data" style="width: 100%; text-align: left;">
+                {% csrf_token %}
 
-            <!-- Name Fields -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 0.5fr; gap: 15px; margin-bottom: 15px;">
-                <div style="display:flex; flex-direction:column;">
-                    <label for="first_name" style="font-size:0.85rem; text-align:left; margin-bottom:6px; color:#333;">First Name</label>
-                    <input id="first_name" type="text" name="first_name" placeholder="First Name" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
+                <!-- Account Credentials Section -->
+                <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <h3 style="color: #2c3e95; margin-bottom: 18px; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-key" style="font-size: 0.9rem;"></i> Account Credentials
+                    </h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Email Address *</label>
+                            <input type="email" name="email" placeholder="you@example.com" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Password *</label>
+                            <input type="password" name="password" placeholder="••••••••" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Confirm Password *</label>
+                        <input type="password" name="confirm_password" placeholder="••••••••" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                    </div>
                 </div>
 
-                <div style="display:flex; flex-direction:column;">
-                    <label for="last_name" style="font-size:0.85rem; text-align:left; margin-bottom:6px; color:#333;">Last Name</label>
-                    <input id="last_name" type="text" name="last_name" placeholder="Last Name" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
+                <!-- Personal Information Section -->
+                <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <h3 style="color: #2c3e95; margin-bottom: 18px; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-user" style="font-size: 0.9rem;"></i> Personal Information
+                    </h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 0.6fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">First Name *</label>
+                            <input type="text" name="first_name" placeholder="Juan" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Last Name *</label>
+                            <input type="text" name="last_name" placeholder="Dela Cruz" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">M.I.</label>
+                            <input type="text" name="middle_name" placeholder="M" maxlength="3" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Date of Birth *</label>
+                            <input type="date" name="date_of_birth" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Gender *</label>
+                            <select name="sex" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s; background-color: white;">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="display:flex; flex-direction:column;">
-                    <label for="middle_name">Middle Name</label>
-                    <input id="middle_name" type="text" name="middle_name" placeholder="Middle Name" style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                </div>
-            </div>
+                <!-- Address Information Section -->
+                <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <h3 style="color: #2c3e95; margin-bottom: 18px; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-map-marker-alt" style="font-size: 0.9rem;"></i> Address Information
+                    </h3>
 
-            <!-- DOB & Gender -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <div style="display:flex; flex-direction:column;">
-                    <label for="date_of_birth" style="font-size:0.85rem; text-align:left; margin-bottom:6px; color:#333;">Date of Birth</label>
-                    <input id="date_of_birth" type="date" name="date_of_birth" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                </div>
+                    <div style="display: grid; grid-template-columns: 0.6fr 1.4fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">House No./Lot *</label>
+                            <input type="text" name="house_number" placeholder="123" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
 
-                <div style="display:flex; flex-direction:column;">
-                    <label for="sex" style="font-size:0.85rem; text-align:left; margin-bottom:6px; color:#333;">Gender</label>
-                    <select id="sex" name="sex" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-            </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Street *</label>
+                            <input type="text" name="street" placeholder="Rizal Street" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+                    </div>
 
-            <!-- Address Fields -->
-            <h3 style="text-align:left; width:100%; max-width:650px; margin-bottom:10px; color:#36489e;">Address Information</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Barangay *</label>
+                            <input type="text" name="barangay" placeholder="Poblacion" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <div style="display:flex; flex-direction:column;">
-                    <label for="house_number" style="font-size:0.85rem; margin-bottom:6px; color:#333;">House Number / Lot</label>
-                    <input id="house_number" type="text" name="house_number" placeholder="House Number / Lot" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Municipality / City *</label>
+                            <input type="text" name="municipality" placeholder="Taguig City" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+                    </div>
 
-                <div style="display:flex; flex-direction:column;">
-                    <label for="street" style="font-size:0.85rem; margin-bottom:6px; color:#333;">Street</label>
-                    <input id="street" type="text" name="street" placeholder="Street" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                </div>
-            </div>
+                    <div style="display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 15px;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">Province *</label>
+                            <input type="text" name="province" placeholder="Metro Manila" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <div style="display:flex; flex-direction:column;">
-                    <label for="barangay" style="font-size:0.85rem; margin-bottom:6px; color:#333;">Barangay</label>
-                    <input id="barangay" type="text" name="barangay" placeholder="Barangay" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #374151; margin-bottom: 6px; display: block; font-weight: 500;">ZIP Code *</label>
+                            <input type="number" name="zip_code" placeholder="1630" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.95rem; transition: all 0.2s;">
+                        </div>
+                    </div>
                 </div>
 
-                <div style="display:flex; flex-direction:column;">
-                    <label for="municipality" style="font-size:0.85rem; margin-bottom:6px; color:#333;">Municipality / City</label>
-                    <input id="municipality" type="text" name="municipality" placeholder="Municipality / City" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
+                <!-- ID Documents Section -->
+                <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <h3 style="color: #2c3e95; margin-bottom: 18px; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-id-card" style="font-size: 0.9rem;"></i> ID Documents <span style="font-size: 0.8rem; color: #6b7280; font-weight: 400;">(Optional)</span>
+                    </h3>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 0.85rem; color: #374151; margin-bottom: 8px; display: block; font-weight: 500;">
+                            <i class="fas fa-users" style="color: #6b7280; margin-right: 6px;"></i>Senior Citizen ID
+                        </label>
+                        <input type="file" name="senior_id" accept=".jpg,.jpeg,.png,.pdf" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px dashed #d1d5db; font-size: 0.9rem; background: #fafafa; transition: all 0.2s;">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 0.85rem; color: #374151; margin-bottom: 8px; display: block; font-weight: 500;">
+                            <i class="fas fa-wheelchair" style="color: #6b7280; margin-right: 6px;"></i>PWD ID
+                        </label>
+                        <input type="file" name="pwd_id" accept=".jpg,.jpeg,.png,.pdf" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px dashed #d1d5db; font-size: 0.9rem; background: #fafafa; transition: all 0.2s;">
+                    </div>
+
+                    <div>
+                        <label style="font-size: 0.85rem; color: #374151; margin-bottom: 8px; display: block; font-weight: 500;">
+                            <i class="fas fa-home" style="color: #6b7280; margin-right: 6px;"></i>Barangay ID
+                        </label>
+                        <input type="file" name="barangay_id" accept=".jpg,.jpeg,.png,.pdf" style="width: 100%; padding: 10px; border-radius: 8px; border: 1.5px dashed #d1d5db; font-size: 0.9rem; background: #fafafa; transition: all 0.2s;">
+                    </div>
                 </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 0.5fr; gap: 15px; margin-bottom: 20px;">
-                <div style="display:flex; flex-direction:column;">
-                    <label for="province" style="font-size:0.85rem; margin-bottom:6px; color:#333;">Province</label>
-                    <input id="province" type="text" name="province" placeholder="Province" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                </div>
-
-                <div style="display:flex; flex-direction:column;">
-                    <label for="zip_code" style="font-size:0.85rem; margin-bottom:6px; color:#333;">ZIP Code</label>
-                    <input id="zip_code" type="number" name="zip_code" placeholder="ZIP Code" required style="padding:10px; border-radius:6px; border:1px solid #ccc;">
-                </div>
-            </div>
-
-            <!-- ID Uploads -->
-            <div style="margin-bottom: 15px;">
-                <label for="senior_id" style="font-size:0.85rem; text-align:left; margin-bottom:6px; color:#333; display:block;">Upload Senior Citizen ID (if applicable)</label>
-                <input id="senior_id" type="file" name="senior_id" accept=".jpg,.jpeg,.png,.pdf" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="pwd_id" style="font-size:0.85rem; text-align:left; margin-bottom:6px; color:#333; display:block;">Upload PWD ID (if applicable)</label>
-                <input id="pwd_id" type="file" name="pwd_id" accept=".jpg,.jpeg,.png,.pdf" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <label for="barangay_id" style="font-size:0.85rem; text-align:left; margin-bottom:6px; color:#333; display:block;">Upload Barangay ID (if applicable)</label>
-                <input id="barangay_id" type="file" name="barangay_id" accept=".jpg,.jpeg,.png,.pdf" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-            </div>
-
-            <button type="submit" class="btn" style="background-color: #36489e; color:#fff; padding: 15px 0; width: 100%; border-radius:6px; border:none; font-size:1rem; transition: background-color 0.3s, color 0.3s;">
-                <i class="fas fa-check"></i> Confirm Registration
-            </button>
-        </form>
+                <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #2c3e95 0%, #3b4fc7 100%); color: #fff; padding: 16px 0; width: 100%; border-radius: 10px; border: none; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(44, 62, 149, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fas fa-check-circle"></i> Create Account
+                </button>
+            </form>
+        </div>
     </div>
 
-    <!-- Right: Member Access -->
-    <div style="flex: 0.3; background-color: #36489e; color: #FFFFFF; padding: 40px 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        <h2 style="color: #FFFFFF; margin-bottom: 15px;">Member Access</h2>
-        <p style="color: #E3EBEE; margin-bottom: 30px;">Already have an account? Log in now.</p>
-        <a href="{% url 'login' %}" class="btn-secondary" style="background-color: #BFB9FA; color: #36489e; padding: 12px 25px; border-radius:6px; text-decoration:none; transition: all 0.3s;">
-            <i class="fas fa-sign-in-alt"></i> Log In
-        </a>
+    <!-- Right: Member Access Panel -->
+    <div style="flex: 0.32; background: linear-gradient(135deg, #2c3e95 0%, #3b4fc7 100%); color: #FFFFFF; padding: 50px 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden;">
+        <!-- Decorative circles -->
+        <div style="position: absolute; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; top: -50px; right: -50px;"></div>
+        <div style="position: absolute; width: 150px; height: 150px; background: rgba(255,255,255,0.06); border-radius: 50%; bottom: -30px; left: -30px;"></div>
+
+        <div style="position: relative; z-index: 1;">
+            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px;">
+                <i class="fas fa-user-circle" style="font-size: 2.5rem; color: #fff;"></i>
+            </div>
+
+            <h2 style="color: #FFFFFF; margin-bottom: 12px; font-size: 1.8rem; font-weight: 700;">Welcome Back!</h2>
+            <p style="color: rgba(255,255,255,0.85); margin-bottom: 35px; font-size: 0.95rem; line-height: 1.6;">Already have an account?<br>Sign in to continue</p>
+
+            <a href="{% url 'login' %}" class="btn-secondary" style="background-color: #ffffff; color: #2c3e95; padding: 14px 32px; border-radius: 10px; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+
+        </div>
     </div>
 </div>
 
 <style>
-    .btn:hover {
-        background-color: #E3EBEE;
-        color: #36489e;
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #3b4fc7 0%, #2c3e95 100%);
+        box-shadow: 0 6px 20px rgba(44, 62, 149, 0.4);
+        transform: translateY(-2px);
     }
 
     .btn-secondary:hover {
-        background-color: #36489e;
-        color: #fff;
+        background-color: rgba(255,255,255,0.95);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     }
 
     input:focus, select:focus {
         outline: none;
-        border: 2px solid #36489e;
-        box-shadow: 0 0 5px rgba(54, 72, 158, 0.5);
+        border-color: #2c3e95;
+        box-shadow: 0 0 0 3px rgba(44, 62, 149, 0.1);
     }
 
-    /* Make left form scrollable */
-    div[style*="flex: 0.7"]::-webkit-scrollbar {
-        width: 8px;
+    input[type="file"]:hover {
+        border-color: #2c3e95;
+        background: #f0f4ff;
     }
-    div[style*="flex: 0.7"]::-webkit-scrollbar-thumb {
-        background-color: rgba(54, 72, 158, 0.5);
-        border-radius: 4px;
+
+    /* Custom scrollbar */
+    div[style*="flex: 0.68"]::-webkit-scrollbar {
+        width: 10px;
+    }
+    div[style*="flex: 0.68"]::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    div[style*="flex: 0.68"]::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #2c3e95 0%, #3b4fc7 100%);
+        border-radius: 10px;
+    }
+    div[style*="flex: 0.68"]::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #3b4fc7 0%, #2c3e95 100%);
+    }
+
+    /* Smooth animations */
+    input, select, button, a {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 </style>
 {% endblock %}
