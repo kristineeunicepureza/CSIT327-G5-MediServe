@@ -3,8 +3,35 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Sum
 from django.db import transaction
+from django.http import JsonResponse
 from datetime import date, datetime, timedelta
 from .models import Medicine, MedicineBatch
+
+
+# -------------------------------------------------------------------
+# Get Next Batch ID (AJAX endpoint for auto-generation)
+# -------------------------------------------------------------------
+@login_required
+def get_next_batch_id(request):
+    """Return the next available batch ID in sequence."""
+    # Get the last batch by numeric order
+    last_batch = MedicineBatch.objects.filter(
+        batch_id__startswith='BATCH-'
+    ).order_by('-batch_id').first()
+
+    if last_batch:
+        try:
+            # Extract number from BATCH-XXX format
+            last_number = int(last_batch.batch_id.split('-')[1])
+            next_number = last_number + 1
+        except (IndexError, ValueError):
+            next_number = 1
+    else:
+        next_number = 1
+
+    next_batch_id = f'BATCH-{next_number:03d}'  # Format as BATCH-001, BATCH-002, etc.
+
+    return JsonResponse({'next_batch_id': next_batch_id})
 
 
 # -------------------------------------------------------------------
@@ -17,9 +44,10 @@ def medicine_stock(request):
 
     UPDATED RULES:
     1. Only ONE medicine per batch
-    2. Date Received cannot be in the future
-    3. Expiry Date must be in the future
-    4. Expiry Date must be after Date Received
+    2. Batch ID auto-generated (BATCH-001, BATCH-002, etc.)
+    3. Date Received cannot be in the future
+    4. Expiry Date must be in the future
+    5. Expiry Date must be after Date Received
     """
 
     # Get all batches sorted by expiry date (FEFO)
@@ -58,8 +86,23 @@ def medicine_stock(request):
     # Handle POST - Add New Batch with SINGLE Medicine and DATE VALIDATION
     if request.method == 'POST':
         try:
+            # AUTO-GENERATE BATCH ID
+            last_batch = MedicineBatch.objects.filter(
+                batch_id__startswith='BATCH-'
+            ).order_by('-batch_id').first()
+
+            if last_batch:
+                try:
+                    last_number = int(last_batch.batch_id.split('-')[1])
+                    next_number = last_number + 1
+                except (IndexError, ValueError):
+                    next_number = 1
+            else:
+                next_number = 1
+
+            batch_id = f'BATCH-{next_number:03d}'  # Auto-generated batch ID
+
             # Get form data
-            batch_id = request.POST.get('batch_id', '').strip()
             expiry_date_str = request.POST.get('expiry_date', '').strip()
             date_received_str = request.POST.get('date_received', '').strip()
             medicine_name = request.POST.get('medicine_name', '').strip()
@@ -69,11 +112,6 @@ def medicine_stock(request):
             quantity_str = request.POST.get('quantity', '').strip()
 
             # ==================== VALIDATION ====================
-
-            # Check required fields
-            if not batch_id:
-                messages.error(request, '❌ Batch ID is required!')
-                return redirect('medicine_stock')
 
             if not date_received_str:
                 messages.error(request, '❌ Date Received is required!')
@@ -138,14 +176,6 @@ def medicine_stock(request):
                 messages.error(request, '❌ Invalid quantity! Please enter a valid number.')
                 return redirect('medicine_stock')
 
-            # Check for duplicate batch_id
-            if MedicineBatch.objects.filter(batch_id=batch_id).exists():
-                messages.error(
-                    request,
-                    f'❌ Batch ID "{batch_id}" already exists! Please use a unique Batch ID.'
-                )
-                return redirect('medicine_stock')
-
             # ==================== CREATE BATCH ====================
 
             # Use transaction to ensure atomic operation
@@ -185,7 +215,7 @@ def medicine_stock(request):
                     )
                     messages.info(request, f'ℹ️ New medicine "{medicine.name}" created.')
 
-                # Create batch entry
+                # Create batch entry with AUTO-GENERATED ID
                 new_batch = MedicineBatch.objects.create(
                     batch_id=batch_id,
                     medicine=medicine,
