@@ -191,7 +191,7 @@ def delivery_page(request):
                 order.status = "Shipped"
                 order.save()
                 messages.success(request, f"🚚 Order #{order_id} is now out for delivery!")
-                return redirect("admin_delivery_control")
+                return redirect("delivery_page")
 
             # ----------------------------------------------
             # 4️⃣ COMPLETE ORDER
