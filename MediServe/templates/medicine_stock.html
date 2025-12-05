@@ -365,7 +365,7 @@
         background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
         padding: 35px;
         border-radius: 20px;
-        width: 900px;
+        width: 700px;
         max-width: 95%;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         position: relative;
@@ -497,75 +497,6 @@
         gap: 8px;
     }
 
-    .items-list {
-        max-height: 400px;
-        overflow-y: auto;
-        border: 2px solid #e8ecf4;
-        border-radius: 12px;
-        padding: 15px;
-        background-color: #f8f9fa;
-    }
-
-    .item-row {
-        display: grid;
-        grid-template-columns: 2fr 1.5fr 2fr 1fr 40px;
-        gap: 12px;
-        margin-bottom: 12px;
-        padding: 12px;
-        background: white;
-        border-radius: 10px;
-        border: 1px solid #e8ecf4;
-        align-items: start;
-    }
-
-    .item-row:last-child {
-        margin-bottom: 0;
-    }
-
-    .btn-remove-item {
-        background-color: #fee2e2;
-        color: #dc2626;
-        border: 1px solid #fca5a5;
-        border-radius: 8px;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 22px;
-    }
-
-    .btn-remove-item:hover {
-        background-color: #dc2626;
-        color: #ffffff;
-    }
-
-    .btn-add-item {
-        width: 100%;
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 0.95em;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 12px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-    }
-
-    .btn-add-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-    }
-
     .modal-actions {
         display: flex;
         justify-content: flex-end;
@@ -610,25 +541,21 @@
     }
 
     /* Scrollbar Styling */
-    .stock-table-container::-webkit-scrollbar,
-    .items-list::-webkit-scrollbar {
+    .stock-table-container::-webkit-scrollbar {
         width: 10px;
     }
 
-    .stock-table-container::-webkit-scrollbar-track,
-    .items-list::-webkit-scrollbar-track {
+    .stock-table-container::-webkit-scrollbar-track {
         background: #f1f3f5;
         border-radius: 10px;
     }
 
-    .stock-table-container::-webkit-scrollbar-thumb,
-    .items-list::-webkit-scrollbar-thumb {
+    .stock-table-container::-webkit-scrollbar-thumb {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         border-radius: 10px;
     }
 
-    .stock-table-container::-webkit-scrollbar-thumb:hover,
-    .items-list::-webkit-scrollbar-thumb:hover {
+    .stock-table-container::-webkit-scrollbar-thumb:hover {
         background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
     }
 
@@ -639,10 +566,6 @@
         }
 
         .form-row {
-            grid-template-columns: 1fr;
-        }
-
-        .item-row {
             grid-template-columns: 1fr;
         }
     }
@@ -777,9 +700,6 @@
                         <td>{{ batch.date_received|date:"M d, Y" }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button onclick="openEditModal('{{ batch.batch_id }}')" class="btn-edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
                                 <button onclick="openDeleteModal('{{ batch.id }}', '{{ batch.medicine.name }}', '{{ batch.batch_id }}')" class="btn-delete">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
@@ -799,7 +719,7 @@
     </div>
 </div>
 
-<!-- ADD NEW BATCH MODAL WITH DESCRIPTIONS -->
+<!-- ADD NEW BATCH MODAL - SINGLE MEDICINE PER BATCH -->
 <div id="addBatchModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -812,44 +732,49 @@
         <form method="POST" id="addBatchForm">
             {% csrf_token %}
 
-            <!-- Batch Header Fields (Uniform for all items) -->
+            <!-- Batch Information -->
             <div class="batch-header-fields">
-                <h3><i class="fas fa-info-circle"></i> Batch Information (Same for All Items)</h3>
+                <h3><i class="fas fa-info-circle"></i> Batch Information</h3>
+                <p style="color: #6c757d; font-size: 0.9em; margin-bottom: 15px;">
+                    <i class="fas fa-exclamation-circle"></i> Note: One medicine product per batch
+                </p>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Batch ID</label>
+                        <label class="form-label">Batch ID *</label>
                         <input type="text" name="batch_id" required class="form-input" placeholder="e.g., BATCH-001">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Expiry Date (Uniform)</label>
-                        <input type="date" name="expiry_date" required class="form-input">
+                        <label class="form-label">Date Received *</label>
+                        <input type="date" name="date_received" id="date_received" required class="form-input">
+                        <small style="color: #6c757d; font-size: 0.85em;">Cannot be in the future</small>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Date Received</label>
-                        <input type="date" name="date_received" required class="form-input">
+                        <label class="form-label">Expiry Date *</label>
+                        <input type="date" name="expiry_date" id="expiry_date" required class="form-input">
+                        <small style="color: #6c757d; font-size: 0.85em;">Must be in the future</small>
                     </div>
                 </div>
             </div>
 
-            <!-- Items Section (Multiple medicines with descriptions) -->
+            <!-- Medicine Information -->
             <div class="items-section">
-                <h3><i class="fas fa-list"></i> Batch Items (20-30 different medicines)</h3>
-                <div class="items-list" id="itemsList">
-                    <!-- Initial item row -->
-                    <div class="item-row">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label">Medicine Name</label>
-                                <input type="text" name="medicine_name[]" required class="form-input" placeholder="e.g., Paracetamol">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label">Brand</label>
-                                <input type="text" name="brand[]" class="form-input" placeholder="e.g., Biogesic">
-                            </div>
+                <h3><i class="fas fa-pills"></i> Medicine Information</h3>
+                <div style="background: white; padding: 20px; border-radius: 12px; border: 2px solid #e8ecf4;">
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Medicine Name *</label>
+                            <input type="text" name="medicine_name" required class="form-input" placeholder="e.g., Paracetamol">
                         </div>
                         <div class="form-group">
+                            <label class="form-label">Brand</label>
+                            <input type="text" name="brand" class="form-input" placeholder="e.g., Biogesic">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
                             <label class="form-label">Category</label>
-                            <select name="category[]" class="form-select">
+                            <select name="category" class="form-select">
                                 <option value="">Select Category</option>
                                 <option value="Analgesic">Analgesic (Pain Relief)</option>
                                 <option value="Antibiotic">Antibiotic</option>
@@ -863,21 +788,16 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Description (Optional)</label>
-                            <textarea name="description[]" class="form-textarea" placeholder="Medicine description, usage, side effects..." rows="2"></textarea>
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" name="quantity" min="1" required class="form-input" placeholder="0">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Quantity</label>
-                            <input type="number" name="quantity[]" min="1" required class="form-input" placeholder="0">
-                        </div>
-                        <button type="button" class="btn-remove-item" onclick="removeItem(this)" disabled>
-                            <i class="fas fa-times"></i>
-                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea name="description" class="form-textarea" placeholder="Medicine description, usage, side effects..." rows="3"></textarea>
                     </div>
                 </div>
-                <button type="button" class="btn-add-item" onclick="addNewItem()">
-                    <i class="fas fa-plus"></i> Add New Medicine
-                </button>
             </div>
 
             <div class="modal-actions">
@@ -893,43 +813,56 @@
 </div>
 
 <script>
-function addNewItem() {
-    const itemsList = document.getElementById('itemsList');
-    const firstRow = itemsList.querySelector('.item-row');
-    const newRow = firstRow.cloneNode(true);
+// Set max date for date_received (today) and min date for expiry_date (tomorrow)
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const inputs = newRow.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-        if (input.type === 'number') {
-            input.value = '';
-        } else if (input.tagName === 'SELECT') {
-            input.selectedIndex = 0;
-        } else {
-            input.value = '';
-        }
-    });
+    const dateReceivedInput = document.getElementById('date_received');
+    const expiryDateInput = document.getElementById('expiry_date');
 
-    const removeBtn = newRow.querySelector('.btn-remove-item');
-    removeBtn.disabled = false;
+    // Format dates as YYYY-MM-DD
+    const formatDate = (date) => date.toISOString().split('T')[0];
 
-    itemsList.appendChild(newRow);
-}
+    // Set max for date_received to today
+    dateReceivedInput.setAttribute('max', formatDate(today));
 
-function removeItem(button) {
-    const itemRow = button.closest('.item-row');
-    const itemsList = document.getElementById('itemsList');
+    // Set min for expiry_date to tomorrow
+    expiryDateInput.setAttribute('min', formatDate(tomorrow));
+});
 
-    if (itemsList.querySelectorAll('.item-row').length > 1) {
-        itemRow.remove();
+// Form validation
+document.getElementById('addBatchForm').addEventListener('submit', function(e) {
+    const dateReceived = new Date(document.getElementById('date_received').value);
+    const expiryDate = new Date(document.getElementById('expiry_date').value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Validate date_received is not in the future
+    if (dateReceived > today) {
+        e.preventDefault();
+        alert('❌ Date Received cannot be in the future!');
+        return false;
     }
-}
+
+    // Validate expiry_date is in the future
+    if (expiryDate <= today) {
+        e.preventDefault();
+        alert('❌ Expiry Date must be in the future!');
+        return false;
+    }
+
+    // Validate expiry_date is after date_received
+    if (expiryDate <= dateReceived) {
+        e.preventDefault();
+        alert('❌ Expiry Date must be after Date Received!');
+        return false;
+    }
+});
 
 function closeBatchModal() {
     document.getElementById('addBatchModal').style.display = 'none';
-}
-
-function openEditModal(batchId) {
-    window.location.href = `/medicine/edit-batch/${batchId}/`;
 }
 
 function openDeleteModal(batchId, medicineName, batchNumber) {
@@ -944,34 +877,5 @@ window.onclick = function(event) {
         closeBatchModal();
     }
 };
-
-document.getElementById('addBatchForm').addEventListener('submit', function(e) {
-    const itemRows = document.querySelectorAll('#itemsList .item-row');
-
-    if (itemRows.length === 0) {
-        e.preventDefault();
-        alert('Please add at least one medicine to the batch.');
-        return false;
-    }
-
-    const medicineNames = [];
-    let hasDuplicates = false;
-
-    itemRows.forEach(row => {
-        const medicineName = row.querySelector('input[name="medicine_name[]"]').value.trim().toLowerCase();
-        if (medicineName && medicineNames.includes(medicineName)) {
-            hasDuplicates = true;
-        }
-        if (medicineName) {
-            medicineNames.push(medicineName);
-        }
-    });
-
-    if (hasDuplicates) {
-        e.preventDefault();
-        alert('You cannot add the same medicine twice in one batch. Please remove duplicates.');
-        return false;
-    }
-});
 </script>
 {% endblock %}
