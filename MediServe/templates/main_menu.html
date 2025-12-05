@@ -276,26 +276,6 @@
         z-index: 1;
     }
 
-    .announcement-link {
-        font-size: 0.9em;
-        color: #f57c00;
-        text-decoration: none;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding-left: 52px;
-        margin-top: 8px;
-        transition: all 0.3s ease;
-        position: relative;
-        z-index: 1;
-    }
-
-    .announcement-link:hover {
-        color: #e65100;
-        gap: 10px;
-    }
-
     .section-header {
         margin-bottom: 20px;
     }
@@ -580,8 +560,7 @@
         }
 
         .announcement-banner p,
-        .announcement-date,
-        .announcement-link {
+        .announcement-date {
             padding-left: 0;
         }
 
@@ -633,13 +612,10 @@
                 </div>
                 <strong>{{ latest_announcement.title }}</strong>
             </div>
-            <p>{{ latest_announcement.content|truncatewords:20 }}</p>
+            <p>{{ latest_announcement.content }}</p>
             <p class="announcement-date">
                 <i class="fas fa-calendar-alt"></i> {{ latest_announcement.date_posted|date:"M d, Y" }}
             </p>
-            <a href="{% url 'view_announcements' %}" class="announcement-link">
-                View All Announcements <i class="fas fa-arrow-right"></i>
-            </a>
         </div>
         {% else %}
         <div class="announcement-banner">
