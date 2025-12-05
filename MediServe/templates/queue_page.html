@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+// {% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Order Queue Status{% endblock %}
@@ -54,10 +54,16 @@
         gap: 30px;
     }
 
+    .alert { padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; }
+    .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
     .queue-number-section { text-align: center; }
     .queue-number-section h2 { color: #36489e; margin-bottom: 15px; font-weight: 700; font-size: 1.8em; }
-    .queue-number { background-color: #36489e; color: #fff; width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; font-size: 3em; font-weight: bold; }
+    .queue-number { background-color: #36489e; color: #fff; width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; font-size: 3em; font-weight: bold; transition: transform 0.3s ease; }
+    .queue-number.updated { animation: pulse 0.5s ease; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     .currently-serving { color: #dc3545; font-size: 1.2em; }
+    .position-info { color: #28a745; font-size: 1.1em; margin-top: 10px; }
 
     .status-card {
         border: 1px solid #e5e7eb;
@@ -70,9 +76,7 @@
     .status-card .wait-time { font-size: 1.8em; color: #28a745; margin-top: 5px; display: block; }
     .status-card .label-small { font-size: 0.95em; color: #777; margin-top: 10px; }
     .status-card .status-text { font-weight: 700; color: #36489e; }
-
-    .progress-bar { background-color: #e0e0e0; border-radius: 10px; height: 14px; margin-top: 15px; overflow: hidden; }
-    .progress-fill { height: 100%; background-color: #36489e; width: 0%; border-radius: 10px; transition: width 0.4s ease; }
+    .status-card .ahead-text { font-size: 0.9em; color: #555; margin-top: 5px; }
 
     .order-items-list { list-style: none; padding: 0; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; }
     .order-items-list li { padding: 15px 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; background-color: #fff; font-size: 1em; }
@@ -96,6 +100,8 @@
     .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(54,72,158,0.35); }
 
     .no-order-msg { font-size: 1.1em; color: #555; text-align: center; margin-bottom: 20px; }
+    .loading { animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 
 <div class="page-container">
@@ -107,46 +113,86 @@
     </div>
 
     <div class="main-content">
-        {% if current_order %}
-            <section class="queue-number-section">
-                <h2>Your Queue Number</h2>
-                <div class="queue-number">#{{ current_order.queue_number }}</div>
-                <p class="currently-serving">Currently Serving: <strong>#{{ currently_serving }}</strong></p>
-            </section>
-
-           <section class="status-card">
-                    <p class="label">Estimated Wait Time</p>
-                    <strong class="wait-time">{{ estimated_wait|default:"3-5 days" }}</strong>
-                    <p class="label-small">Status: <span class="status-text">{{ current_order.status }}</span></p>
-                    <div class="progress-bar">
-                        {% with progress=current_order.queue_number|add:'-1' %}
-                            <div class="progress-fill" style="width: {{ progress|divisibleby:currently_serving|default:0 }}%;"></div>
-                        {% endwith %}
-                    </div>
-                </section>
-
-
-            <section>
-                <h3 style="color:#36489e; margin-bottom:12px; font-weight:700;">Your Order Items:</h3>
-                <ul class="order-items-list">
-                    {% for item in current_order.items.all %}
-                        <li><span>{{ item.medicine.name }}</span><strong>Qty: {{ item.quantity }}</strong></li>
-                    {% endfor %}
-                </ul>
-            </section>
-
-            <section class="actions">
-                <a href="{% url 'main_menu' %}" class="btn btn-primary">
-                    <i class="fas fa-home"></i> Return to Main Menu
-                </a>
-            </section>
-
-        {% else %}
-            <p class="no-order-msg">You do not have an active order in the queue.</p>
-            <a href="{% url 'medicine_list' %}" class="btn btn-primary" style="max-width: 300px; margin: 0 auto; display:block;">
-                <i class="fas fa-prescription-bottle-alt"></i> Browse Medicines
-            </a>
-        {% endif %}
+        <div id="queue-content">
+            <!-- Content will be dynamically updated by JS -->
+            <p class="no-order-msg">Loading queue status... <i class="fas fa-spinner loading"></i></p>
+        </div>
     </div>
 </div>
+
+<script>
+    let lastQueueNumber = null;
+
+    // Function to fetch and update queue status
+    async function updateQueueStatus() {
+        try {
+            const response = await fetch('{% url "queue_status_api" %}');
+            if (!response.ok) throw new Error('Network error');
+            const data = await response.json();
+
+            const contentDiv = document.getElementById('queue-content');
+
+            if (data.queue_number) {
+                // Check if queue number changed for animation
+                const queueNumberDiv = document.querySelector('.queue-number');
+                if (lastQueueNumber !== null && lastQueueNumber !== data.queue_number) {
+                    queueNumberDiv.classList.add('updated');
+                    setTimeout(() => queueNumberDiv.classList.remove('updated'), 500);
+                }
+                lastQueueNumber = data.queue_number;
+
+                let alertHtml = '';
+                if (data.is_almost_turn) {
+                    alertHtml = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Your order is almost ready!</div>';
+                }
+
+                contentDiv.innerHTML = `
+                    ${alertHtml}
+                    <section class="queue-number-section">
+                        <h2>Your Queue Number</h2>
+                        <div class="queue-number">#${data.queue_number}</div>
+                        <p class="currently-serving">Currently Serving: <strong>#${data.currently_serving}</strong></p>
+                        <p class="position-info">You are <strong>${data.position}${data.position === 1 ? 'st' : data.position === 2 ? 'nd' : data.position === 3 ? 'rd' : 'th'}</strong> in line (${data.total_ahead} orders ahead)</p>
+                    </section>
+
+                    <section class="status-card">
+                        <p class="label">Estimated Wait Time</p>
+                        <strong class="wait-time">${data.estimated_wait}</strong>
+                        <p class="label-small">Status: <span class="status-text">${data.status}</span></p>
+                        <p class="ahead-text">${data.total_ahead} orders ahead of you</p>
+                    </section>
+
+                    <section>
+                        <h3 style="color:#36489e; margin-bottom:12px; font-weight:700;">Your Order Items:</h3>
+                        <ul class="order-items-list">
+                            ${data.items.map(item => `<li><span>${item.name}</span><strong>Qty: ${item.quantity}</strong></li>`).join('')}
+                        </ul>
+                    </section>
+
+                    <section class="actions">
+                        <a href="{% url 'main_menu' %}" class="btn btn-primary">
+                            <i class="fas fa-home"></i> Return to Main Menu
+                        </a>
+                    </section>
+                `;
+            } else {
+                // No active order
+                contentDiv.innerHTML = `
+                    <p class="no-order-msg">You do not have an active order in the queue.</p>
+                    <a href="{% url 'medicine_list' %}" class="btn btn-primary" style="max-width: 300px; margin: 0 auto; display:block;">
+                        <i class="fas fa-prescription-bottle-alt"></i> Browse Medicines
+                    </a>
+                `;
+            }
+        } catch (error) {
+            console.error('Error fetching queue status:', error);
+            document.getElementById('queue-content').innerHTML = '<p class="no-order-msg">Error loading queue status. Retrying in 5 seconds... <i class="fas fa-spinner loading"></i></p>';
+        }
+    }
+
+    // Update immediately on load, then every 5 seconds
+    updateQueueStatus();
+    setInterval(updateQueueStatus, 5000);
+</script>
+
 {% endblock %}
