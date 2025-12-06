@@ -5,10 +5,10 @@
 
 {% block content %}
 
-<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
+
 /* ———————– MAIN CONTAINER ———————– */
 .announcements-container {
     width: 100%;
@@ -27,14 +27,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: relative;
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
+.header-left { display: flex; align-items: center; gap: 15px; }
 
 .back-button {
     padding: 12px;
@@ -57,7 +52,7 @@
 }
 
 /* ———————– BUTTONS ———————– */
-.red-btn, .green-btn, .gray-btn {
+.green-btn, .gray-btn {
     padding: 14px 22px;
     border-radius: 12px;
     color: #fff;
@@ -67,7 +62,6 @@
     display:flex;
     align-items:center;
     gap: 8px;
-    transition: all .3s ease;
     text-decoration: none;
 }
 
@@ -82,13 +76,17 @@
     border-left: 6px solid #dc3545;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     animation: fadeIn .3s ease-out;
+
+    cursor:pointer;
+    transition: all .2s ease;
 }
 
-.card-header {
-    display:flex;
-    justify-content:space-between;
-    margin-bottom: 12px;
+.announcement-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.12);
 }
+
+.card-header { display:flex; justify-content:space-between; margin-bottom: 12px; }
 
 .announcement-title {
     font-size: 1.3rem;
@@ -96,26 +94,64 @@
     color:#dc3545;
 }
 
-/* ———————– MODAL ———————– */
+/* PREVIEW */
+.announcement-preview {
+    color:#2c3e50;
+    line-height:1.6;
+}
+
+/* ———————– SEE MORE BUTTON ———————– */
+.see-more-btn {
+    background:none;
+    border:none;
+    color:#dc3545;
+    cursor:pointer;
+    font-weight:600;
+    margin-top:10px;
+}
+.see-more-btn:hover { text-decoration: underline; }
+
+/* ———————– MODERN MODAL ———————– */
 .modal-overlay {
-    display:none;
     position:fixed;
     top:0; left:0;
     width:100%; height:100%;
-    background: rgba(0,0,0,0.6);
+    background:rgba(0,0,0,0.6);
+    display:none;
     justify-content:center;
     align-items:center;
-    z-index:1000;
+    z-index:2000;
 }
 
 .modal-content {
     background:#fff;
-    padding: 35px;
+    padding:35px 40px;
     border-radius:18px;
-    width:500px;
+    width:650px;
     max-width:90%;
-    max-height:85vh;
+    max-height:80vh;
     overflow-y:auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    animation: fadeIn .25s ease-out;
+}
+
+.modal-title {
+    font-size:1.8rem;
+    font-weight:700;
+    color:#dc3545;
+    margin-bottom:15px;
+}
+
+.modal-body {
+    font-size:1rem;
+    line-height:1.65;
+    white-space:normal;
+    color:#2c3e50;
+}
+
+@keyframes fadeIn {
+    from { opacity:0; transform:scale(0.95); }
+    to   { opacity:1;   transform:scale(1);   }
 }
 
 </style>
@@ -126,28 +162,20 @@
     <header class="announcements-header">
         <div class="header-left">
             {% if is_admin %}
-            <a href="{% url 'admin_menu' %}" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-            </a>
+            <a href="{% url 'admin_menu' %}" class="back-button"><i class="fas fa-arrow-left"></i></a>
             {% else %}
-            <a href="{% url 'main_menu' %}" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-            </a>
+            <a href="{% url 'main_menu' %}" class="back-button"><i class="fas fa-arrow-left"></i></a>
             {% endif %}
             <h1 class="header-title">Official Announcements</h1>
         </div>
 
         {% if is_admin %}
         <div style="display:flex; gap:12px;">
-            <!-- NEW ARCHIVED POSTS BUTTON -->
-            <a href="{% url 'archived_announcements' %}"
-               class="gray-btn">
+            <a href="{% url 'archived_announcements' %}" class="gray-btn">
                 <i class="fas fa-archive"></i> Archived Posts
             </a>
 
-            <!-- NEW POST BUTTON -->
-            <button onclick="document.getElementById('addPostModal').style.display='flex'"
-                    class="green-btn">
+            <button onclick="document.getElementById('addPostModal').style.display='flex'" class="green-btn">
                 <i class="fas fa-plus-circle"></i> Add New Post
             </button>
         </div>
@@ -158,9 +186,7 @@
     {% if messages %}
     {% for message in messages %}
     <div style="margin:20px; padding:18px;
-        border-radius:12px;
-        font-weight:600;
-        text-align:center;
+        border-radius:12px; font-weight:600; text-align:center;
         background: {% if 'success' in message.tags %}#d4edda{% else %}#f8d7da{% endif %};
         color: {% if 'success' in message.tags %}#155724{% else %}#721c24{% endif %};
         border: 2px solid {% if 'success' in message.tags %}#28a745{% else %}#dc3545{% endif %};">
@@ -172,67 +198,52 @@
     <!-- MAIN CONTENT -->
     <main style="padding:35px; background:#f8f9fa;">
 
-        <div class="announcements-grid" style="
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(450px,1fr));
-            gap:25px;">
+        <div class="announcements-grid"
+             style="display:grid; grid-template-columns:repeat(auto-fill,minmax(450px,1fr)); gap:25px;">
 
             {% for post in announcements %}
-            <div class="announcement-card">
+            <div class="announcement-card"
+                 data-title="{{ post.title }}"
+                 data-content="{{ post.content }}">
 
                 <div class="card-header">
                     <h3 class="announcement-title">{{ post.title }}</h3>
 
-                    <span style="
-                        background:#e8ecf4;
-                        padding:6px 12px;
-                        border-radius:20px;
-                        font-size:.85rem;
-                        color:#2c3e50;">
-                        <i class="far fa-calendar-alt"></i>
-                        {{ post.date_posted|date:"M j, Y" }}
+                    <span style="background:#e8ecf4; padding:6px 12px; border-radius:20px; font-size:.85rem; color:#2c3e50;">
+                        <i class="far fa-calendar-alt"></i> {{ post.date_posted|date:"M j, Y" }}
                     </span>
                 </div>
 
-                <p style="color:#2c3e50; line-height:1.6;">{{ post.content }}</p>
+                <p class="announcement-preview">{{ post.content|truncatechars:180 }}</p>
 
-                <div style="
-                    margin-top:18px;
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    padding-top:15px;
-                    border-top:2px solid #e8ecf4;">
+                <button class="see-more-btn"
+                        data-title="{{ post.title }}"
+                        data-content="{{ post.content }}">
+                    See More
+                </button>
+
+                <div style="margin-top:18px; display:flex; justify-content:space-between;
+                            align-items:center; padding-top:15px; border-top:2px solid #e8ecf4;">
 
                     <span style="color:#7c8db5; font-size:.85rem;">
-                        <i class="far fa-clock"></i>
-                        Posted {{ post.date_posted|timesince }} ago
+                        <i class="far fa-clock"></i> Posted {{ post.date_posted|timesince }} ago
                     </span>
 
                     {% if is_admin %}
                     <div style="display:flex; gap:10px;">
 
-                        <!-- EDIT BUTTON -->
-                        <button onclick="confirmEdit('{{ post.id }}')"
-                                class="green-btn"
-                                style="padding:10px 14px;">
+                        <button onclick="confirmEdit('{{ post.id }}')" class="green-btn" style="padding:10px 14px;">
                             <i class="fas fa-edit"></i> Edit
                         </button>
 
-                        <!-- ARCHIVE BUTTON -->
-                        <button onclick="confirmArchive('{{ post.id }}')"
-                                class="gray-btn"
-                                style="padding:10px 16px; background: #6c757d;">
+                        <button onclick="confirmArchive('{{ post.id }}')" class="gray-btn" style="padding:10px 16px;">
                             <i class="fas fa-archive"></i> Archive
                         </button>
 
-                        <!-- HIDDEN FORMS -->
                         <form id="edit-form-{{ post.id }}" action="{% url 'edit_post' post.id %}" method="get"></form>
 
-                        <form id="archive-form-{{ post.id }}"
-                              action="{% url 'archive_post' post.id %}"
-                              method="post"
-                              style="display:none;">
+                        <form id="archive-form-{{ post.id }}" action="{% url 'archive_post' post.id %}"
+                              method="post" style="display:none;">
                             {% csrf_token %}
                         </form>
 
@@ -240,45 +251,47 @@
                     {% endif %}
                 </div>
             </div>
-            {% empty %}
-            <div style="
-                text-align:center;
-                padding:60px;
-                grid-column:1/-1;">
-                <i class="fas fa-inbox" style="font-size:4rem; color:#dee2e6;"></i>
-                <p style="font-size:1.3rem; color:#777;">No announcements yet.</p>
-            </div>
             {% endfor %}
+
         </div>
     </main>
 </div>
 
-<!-- ADD POST MODAL -->
+
+<!-- ———————– VIEW FULL ANNOUNCEMENT MODAL ———————– -->
+<div id="viewAnnouncementModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="modal-title"></h2>
+        <div id="modalBody" class="modal-body"></div>
+
+        <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+            <button class="gray-btn close-modal">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ———————– ADD POST MODAL ———————– -->
 {% if is_admin %}
 <div id="addPostModal" class="modal-overlay">
     <div class="modal-content">
 
-        <h2 style="margin-bottom:20px; color:#dc3545;">New Announcement</h2>
+        <h2 style="color:#dc3545; margin-bottom:20px;">New Announcement</h2>
 
         <form action="{% url 'add_post' %}" method="post">
             {% csrf_token %}
 
             <label>Title</label>
-            <input type="text" name="title"
-                   required
+            <input type="text" name="title" required
                    style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:2px solid #ddd;">
 
             <label>Content</label>
-            <textarea name="content"
-                      required
+            <textarea name="content" required
                       style="width:100%; padding:12px; height:120px; border-radius:10px; border:2px solid #ddd;"></textarea>
 
             <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
-                <button type="button"
-                        class="gray-btn"
-                        onclick="document.getElementById('addPostModal').style.display='none'">
-                    Cancel
-                </button>
+                <button type="button" class="gray-btn"
+                        onclick="document.getElementById('addPostModal').style.display='none'">Cancel</button>
 
                 <button type="submit" class="green-btn">
                     <i class="fas fa-paper-plane"></i> Submit
@@ -289,8 +302,41 @@
 </div>
 {% endif %}
 
-<!-- JS -->
+
 <script>
+
+/* ———————– CLICKABLE CARD + SEE MORE ———————– */
+const modal = document.getElementById("viewAnnouncementModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalBody = document.getElementById("modalBody");
+const closeModalBtn = document.querySelector(".close-modal");
+
+document.querySelectorAll(".see-more-btn, .announcement-card").forEach(item => {
+    item.addEventListener("click", function (e) {
+
+        // Prevent card click when clicking edit/archive buttons
+        if (e.target.closest(".green-btn") || e.target.closest(".gray-btn")) return;
+
+        const title = this.dataset.title;
+        const content = this.dataset.content;
+
+        modalTitle.innerText = title;
+
+        // FIX — restores line breaks and removes \u000D\u000A
+        modalBody.innerHTML = content.replace(/(?:\r\n|\r|\n)/g, "<br>");
+
+        modal.style.display = "flex";
+    });
+});
+
+closeModalBtn.addEventListener("click", () => modal.style.display = "none");
+
+modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.style.display = "none";
+});
+
+
+/* ———————– EXISTING ADMIN ACTIONS ———————– */
 function confirmEdit(id) {
     Swal.fire({
         title: "Edit Announcement?",
@@ -314,10 +360,6 @@ function confirmArchive(id) {
     });
 }
 
-window.onclick = function(e) {
-    const modal = document.getElementById('addPostModal');
-    if (e.target === modal) modal.style.display = "none";
-};
 </script>
 
 {% endblock %}

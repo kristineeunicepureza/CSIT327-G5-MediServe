@@ -6,273 +6,197 @@
 {% block content %}
 
 <style>
-    .announcements-container {
-        width: 100%;
-        max-width: 1400px;
-        margin: 40px auto;
-        animation: fadeInUp 0.6s ease-out;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        border-radius: 20px;
-        overflow: hidden;
-        background: #ffffff;
-    }
+/* ———————————————————— CONTAINER ———————————————————— */
+.announcements-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 40px auto;
+    animation: fadeInUp 0.6s ease-out;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    background: #ffffff;
+}
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 
-    .announcements-header {
-        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
-        padding: 30px 40px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 4px 20px rgba(54, 72, 158, 0.2);
-        position: relative;
-        overflow: hidden;
-    }
+/* ———————————————————— HEADER ———————————————————— */
+.announcements-header {
+    background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+    padding: 30px 40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 
-    .announcements-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 400px;
-        height: 400px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-    }
+.back-button {
+    padding: 12px;
+    background-color: rgba(255,255,255,0.2);
+    color: #ffffff;
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+.back-button:hover { transform: translateX(-3px); }
 
-    .header-left {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        position: relative;
-        z-index: 1;
-    }
+.header-title {
+    font-size: 1.8rem;
+    color: #ffffff;
+    font-weight: 700;
+}
 
-    .back-button {
-        padding: 12px;
-        background-color: rgba(255, 255, 255, 0.2);
-        color: #ffffff;
-        border-radius: 12px;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
+/* ———————————————————— MAIN CONTENT ———————————————————— */
+.announcements-main {
+    padding: 30px 40px 40px;
+    background: #f8f9fa;
+}
 
-    .back-button:hover {
-        background-color: rgba(255, 255, 255, 0.3);
-        transform: translateX(-3px);
-    }
+.intro-text {
+    color: #6c757d;
+    margin-bottom: 30px;
+    font-size: 1.05em;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
+    border-radius: 10px;
+    border-left: 4px solid #36489e;
+}
 
-    .header-title {
-        font-size: 1.8em;
-        color: #ffffff;
-        margin: 0;
-        font-weight: 700;
-    }
+/* ———————————————————— ANNOUNCEMENT CARDS ———————————————————— */
+.announcements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 25px;
+}
 
-    .announcements-main {
-        padding: 30px 40px 40px;
-        background: #f8f9fa;
-    }
+.announcement-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-left: 6px solid #36489e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.announcement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(54, 72, 158, 0.15);
+}
 
-    .intro-text {
-        color: #6c757d;
-        margin-bottom: 30px;
-        font-size: 1.05em;
-        padding: 15px 20px;
-        background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
-        border-radius: 10px;
-        border-left: 4px solid #36489e;
-    }
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
 
-    .announcements-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-        gap: 25px;
-        max-height: 65vh;
-        overflow-y: auto;
-    }
+.announcement-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #36489e;
+}
 
-    .announcement-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        border-left: 6px solid #36489e;
-        transition: all 0.3s ease;
-        animation: scaleIn 0.4s ease-out;
-    }
+.date-badge {
+    background-color: #e6e9f0;
+    color: #36489e;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
 
-    @keyframes scaleIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
+.announcement-content {
+    color: #2c3e50;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
 
-    .announcement-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(54, 72, 158, 0.15);
-    }
+.card-footer {
+    border-top: 2px solid #e8ecf4;
+    padding-top: 12px;
+}
 
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 15px;
-        gap: 15px;
-    }
+.time-ago {
+    color: #7c8db5;
+    font-size: 0.85em;
+    font-style: italic;
+}
 
-    .announcement-title {
-        font-size: 1.3em;
-        color: #36489e;
-        font-weight: 700;
-        margin: 0;
-        flex: 1;
-    }
+/* ———————————————————— MODAL ———————————————————— */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
 
-    .date-badge {
-        background-color: #e6e9f0;
-        color: #36489e;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        white-space: nowrap;
-    }
+.modal-content {
+    background: #fff;
+    padding: 35px 40px;
+    border-radius: 18px;
+    width: 650px;
+    max-width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.25);
+    animation: fadeIn .25s ease-out;
+}
 
-    .announcement-content {
-        color: #2c3e50;
-        line-height: 1.6;
-        margin: 15px 0;
-        font-size: 1em;
-    }
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #36489e;
+    margin-bottom: 15px;
+}
 
-    .card-footer {
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 2px solid #e8ecf4;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+.modal-body {
+    font-size: 1rem;
+    line-height: 1.65;
+    white-space: normal;
+    color: #2c3e50;
+}
 
-    .time-ago {
-        color: #7c8db5;
-        font-size: 0.85em;
-        font-style: italic;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
+.close-modal {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: #fff;
+    border-radius: 12px;
+    cursor: pointer;
+    border: none;
+}
 
-    .empty-state {
-        text-align: center;
-        padding: 80px 40px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        border-radius: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        grid-column: 1 / -1;
-    }
-
-    .empty-icon {
-        font-size: 4em;
-        color: #dee2e6;
-        margin-bottom: 20px;
-    }
-
-    .empty-title {
-        font-size: 1.3em;
-        color: #6c757d;
-        font-weight: 600;
-    }
-
-    /* Scrollbar Styling */
-    .announcements-grid::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    .announcements-grid::-webkit-scrollbar-track {
-        background: #f1f3f5;
-        border-radius: 10px;
-    }
-
-    .announcements-grid::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
-        border-radius: 10px;
-    }
-
-    .announcements-grid::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #5c74e3 0%, #7a8ee8 100%);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1024px) {
-        .announcements-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .announcements-header {
-            padding: 20px 25px;
-            flex-direction: column;
-            gap: 15px;
-            align-items: flex-start;
-        }
-
-        .header-title {
-            font-size: 1.4em;
-        }
-
-        .announcements-main {
-            padding: 20px 25px;
-        }
-
-        .card-header {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .card-footer {
-            flex-direction: column;
-            gap: 15px;
-            align-items: flex-start;
-        }
-    }
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1;   transform: scale(1); }
+}
 </style>
 
+
+
 <div class="announcements-container">
+
     <!-- HEADER -->
     <header class="announcements-header">
-        <div class="header-left">
-            <a href="{% url 'main_menu' %}" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <h1 class="header-title">Official Announcements</h1>
-        </div>
+        <a href="{% url 'main_menu' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="header-title">Official Announcements</h1>
     </header>
 
     <!-- MAIN CONTENT -->
@@ -282,35 +206,76 @@
         </div>
 
         <div class="announcements-grid">
-            {% if announcements %}
-                {% for a in announcements %}
-                    <div class="announcement-card">
-                        <div class="card-header">
-                            <h3 class="announcement-title">{{ a.title }}</h3>
-                            <span class="date-badge">
-                                <i class="far fa-calendar-alt"></i>
-                                {{ a.date_posted|date:"M j, Y" }}
-                            </span>
-                        </div>
+            {% for a in announcements %}
+            <div class="announcement-card"
+                 data-title="{{ a.title }}"
+                 data-content="{{ a.content }}">
 
-                        <p class="announcement-content">{{ a.content }}</p>
-
-                        <div class="card-footer">
-                            <span class="time-ago">
-                                <i class="far fa-clock"></i>
-                                Posted {{ a.date_posted|timesince }} ago
-                            </span>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-inbox empty-icon"></i>
-                    <p class="empty-title">No announcements available at the moment.</p>
+                <div class="card-header">
+                    <h3 class="announcement-title">{{ a.title }}</h3>
+                    <span class="date-badge">
+                        <i class="far fa-calendar-alt"></i>
+                        {{ a.date_posted|date:"M j, Y" }}
+                    </span>
                 </div>
-            {% endif %}
+
+                <p class="announcement-content">
+                    {{ a.content|truncatechars:180 }}
+                </p>
+
+                <div class="card-footer">
+                    <span class="time-ago">
+                        <i class="far fa-clock"></i>
+                        Posted {{ a.date_posted|timesince }} ago
+                    </span>
+                </div>
+
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-inbox empty-icon"></i>
+                <p class="empty-title">No announcements available at the moment.</p>
+            </div>
+            {% endfor %}
         </div>
     </main>
 </div>
+
+
+<!-- ———————————————————— MODAL ELEMENT ———————————————————— -->
+<div id="viewAnnouncementModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="modal-title"></h2>
+        <div id="modalBody" class="modal-body"></div>
+
+        <button class="close-modal" id="closeAnnouncementModal">Close</button>
+    </div>
+</div>
+
+
+<script>
+// ===================== CLICKABLE CARD OPEN MODAL =====================
+const modal = document.getElementById("viewAnnouncementModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalBody = document.getElementById("modalBody");
+const closeModalBtn = document.getElementById("closeAnnouncementModal");
+
+document.querySelectorAll(".announcement-card").forEach(card => {
+    card.addEventListener("click", function () {
+        modalTitle.innerText = this.dataset.title;
+
+        // Fix newlines, remove \u000D\u000A, keep layout
+        modalBody.innerHTML = this.dataset.content.replace(/(?:\r\n|\r|\n)/g, "<br>");
+
+        modal.style.display = "flex";
+    });
+});
+
+closeModalBtn.addEventListener("click", () => modal.style.display = "none");
+
+modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.style.display = "none";
+});
+</script>
 
 {% endblock %}
