@@ -1,0 +1,480 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Archived Medicine Batches{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .archived-container {
+        width: 100%;
+        max-width: 1600px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Header - Gray Theme for Archive */
+    .archived-header {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        padding: 30px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(108, 117, 125, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .archived-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .back-button {
+        padding: 12px;
+        background-color: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        color: #fff;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid rgba(255,255,255,0.3);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+        background-color: rgba(255,255,255,0.3);
+        transform: translateX(-3px);
+    }
+
+    .header-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
+
+    .archive-count {
+        background: rgba(255,255,255,0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        color: #fff;
+        border: 2px solid rgba(255,255,255,0.3);
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Messages */
+    .message-alert {
+        margin: 20px 40px;
+        padding: 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-align: center;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-success {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #28a745;
+    }
+
+    .message-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 2px solid #dc3545;
+    }
+
+    .message-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 2px solid #ffc107;
+    }
+
+    /* Main Content */
+    .archived-main {
+        padding: 35px 40px;
+        background: #f8f9fa;
+    }
+
+    .intro-text {
+        color: #6c757d;
+        margin-bottom: 30px;
+        font-size: 1.05em;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        border-radius: 10px;
+        border-left: 4px solid #6c757d;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Search Section */
+    .search-section {
+        margin-bottom: 30px;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 12px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 2px solid #e8ecf4;
+        border-radius: 10px;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #6c757d;
+        box-shadow: 0 0 0 4px rgba(108, 117, 125, 0.1);
+    }
+
+    .btn-search {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    /* Table Styles */
+    .archived-table-container {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .archived-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .archived-table thead {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .archived-table thead th {
+        padding: 18px 15px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .archived-table tbody tr {
+        border-bottom: 1px solid #e8ecf4;
+        transition: all 0.2s ease;
+    }
+
+    .archived-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .archived-table tbody td {
+        padding: 16px 15px;
+        font-size: 0.95em;
+        color: #2c3e50;
+    }
+
+    .batch-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        background: linear-gradient(135deg, #e8ecf5 0%, #d9e2ec 100%);
+        color: #495057;
+    }
+
+    .badge-archived {
+        background: #e0e0e0;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        color: #495057;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .badge-expired {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-restore {
+        padding: 8px 14px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: #fff;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85em;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-restore:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+    }
+
+    .empty-icon {
+        font-size: 4em;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+
+    .empty-title {
+        font-size: 1.3em;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .archived-container {
+            margin: 20px;
+        }
+
+        .archived-header {
+            padding: 20px 25px;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .archived-main {
+            padding: 25px;
+        }
+    }
+</style>
+
+<div class="archived-container">
+    <!-- HEADER -->
+    <header class="archived-header">
+        <div class="header-left">
+            <a href="{% url 'medicine_stock' %}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="header-title">Archived Medicine Batches</h1>
+        </div>
+        <div class="archive-count">
+            <i class="fas fa-archive"></i>
+            {{ total_archived }} Archived
+        </div>
+    </header>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="message-alert {% if 'success' in message.tags %}message-success{% elif 'error' in message.tags %}message-error{% else %}message-warning{% endif %}">
+            <i class="fas {% if 'success' in message.tags %}fa-check-circle{% elif 'error' in message.tags %}fa-exclamation-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- MAIN CONTENT -->
+    <main class="archived-main">
+        <div class="intro-text">
+            <i class="fas fa-info-circle"></i>
+            <span><strong>Archived batches</strong> are hidden from stock and cannot be ordered. You can restore them at any time. Batches are automatically archived when they expire.</span>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <form method="GET" class="search-form">
+                <input type="text"
+                       name="search"
+                       value="{{ search_query }}"
+                       placeholder="Search by medicine name, brand, or batch ID..."
+                       class="search-input">
+                <button type="submit" class="btn-search">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Archived Table -->
+        <div class="archived-table-container">
+            {% if archived_batches %}
+                <table class="archived-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-barcode"></i> Batch ID</th>
+                            <th><i class="fas fa-pills"></i> Medicine</th>
+                            <th><i class="fas fa-building"></i> Brand</th>
+                            <th><i class="fas fa-tag"></i> Category</th>
+                            <th><i class="fas fa-calendar-times"></i> Expiry Date</th>
+                            <th><i class="fas fa-boxes"></i> Quantity</th>
+                            <th><i class="fas fa-archive"></i> Status</th>
+                            <th><i class="fas fa-calendar-alt"></i> Archived</th>
+                            <th><i class="fas fa-cog"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for batch in archived_batches %}
+                        <tr>
+                            <td><span class="batch-badge">{{ batch.batch_id }}</span></td>
+                            <td><strong>{{ batch.medicine.name }}</strong></td>
+                            <td>{{ batch.medicine.brand|default:"-" }}</td>
+                            <td>{{ batch.medicine.category|default:"-" }}</td>
+                            <td>{{ batch.expiry_date|date:"M d, Y" }}</td>
+                            <td><strong>{{ batch.quantity_available }} units</strong></td>
+                            <td>
+                                {% if batch.is_expired %}
+                                    <span class="badge-expired">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Expired
+                                    </span>
+                                {% else %}
+                                    <span class="badge-archived">
+                                        <i class="fas fa-archive"></i>
+                                        Archived
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ batch.archived_at|date:"M d, Y" }}</td>
+                            <td>
+                                <button onclick="confirmRestore('{{ batch.id }}', '{{ batch.medicine.name }}', '{{ batch.batch_id }}', {{ batch.is_expired|yesno:'true,false' }})"
+                                        class="btn-restore">
+                                    <i class="fas fa-undo"></i> Restore
+                                </button>
+
+                                <!-- Hidden form for restore -->
+                                <form id="restore-form-{{ batch.id }}"
+                                      action="{% url 'restore_batch' batch.id %}"
+                                      method="post"
+                                      style="display:none;">
+                                    {% csrf_token %}
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-box-open empty-icon"></i>
+                    <p class="empty-title">No archived batches.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script>
+function confirmRestore(batchId, medicineName, batchNumber, isExpired) {
+    let warningText = `Are you sure you want to restore <strong>${medicineName}</strong> from <strong>${batchNumber}</strong>?<br><br>
+                       <small style="color: #6c757d;">This will move it back to active stock and make it available for ordering.</small>`;
+
+    if (isExpired) {
+        warningText = `⚠️ <strong>Warning:</strong> This batch is <strong>EXPIRED</strong>!<br><br>
+                      Are you sure you want to restore <strong>${medicineName}</strong> (${batchNumber})?<br><br>
+                      <small style="color: #dc3545;">The batch will be automatically archived again if it's still expired.</small>`;
+    }
+
+    Swal.fire({
+        title: isExpired ? 'Restore Expired Batch?' : 'Restore Batch?',
+        html: warningText,
+        icon: isExpired ? 'warning' : 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-undo"></i> Yes, Restore',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('restore-form-' + batchId).submit();
+        }
+    });
+}
+</script>
+
+{% endblock %}
