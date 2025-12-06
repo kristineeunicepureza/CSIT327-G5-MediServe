@@ -512,8 +512,8 @@
             <div class="order-card {% if order.status == 'Completed' %}completed{% endif %}" data-order-id="{{ order.id }}" data-status="{{ order.status }}">
                 <div class="order-header">
                 <div>
-                    <!-- Display Queue Number instead of Order ID -->
-                    <h3 class="order-queue">Queue #{{ order.queue_number }}</h3>
+                    <!-- Display Order Number -->
+                    <h3 class="order-queue">Order #{{ order.id }}</h3>
 
                     <p class="order-driver">
                         <i class="fas fa-user"></i>

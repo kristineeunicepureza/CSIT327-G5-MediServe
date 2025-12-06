@@ -33,6 +33,7 @@ class Order(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     queue_number = models.PositiveIntegerField(null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
 
     class Meta:
         db_table = "tblorders"
@@ -43,77 +44,58 @@ class Order(models.Model):
 
     def assign_queue_number(self):
         """
-        Assign queue number with priority for Senior Citizens and PWD.
-        Priority users ALWAYS go to the front of the queue, even pushing regular users back.
+        Assign queue number with PRIORITY override for Senior Citizens and PWD.
+        When a priority user orders, ALL existing regular users get pushed down.
+
+        Final queue order:
+        - Queue #1, #2, #3... = All priority users (Senior/PWD) in order of placement
+        - Queue #N+1, #N+2... = All regular users in order of placement
         """
-        # Get all active orders in queue (Pending or Processing), excluding self
-        pending_orders = Order.objects.filter(
-            status__in=['Pending', 'Processing'],
-            queue_number__isnull=False  # Only orders with queue numbers
-        ).exclude(pk=self.pk).order_by('queue_number')
+        # Get ALL active orders (Pending or Processing), excluding self - including those without queue numbers yet
+        all_pending = Order.objects.filter(
+            status__in=['Pending', 'Processing']
+        ).exclude(pk=self.pk).order_by('created_at')
 
-        # Check if current user is priority (Senior Citizen or PWD)
-        is_priority = self.user.senior_citizen_id or self.user.pwd_id
+        # Separate priority and regular users by their ORIGINAL order
+        # Priority users have uploaded senior_citizen_id OR pwd_id files (not empty strings)
+        priority_orders = all_pending.filter(
+            models.Q(user__senior_citizen_id__isnull=False, user__senior_citizen_id__gt='') |
+            models.Q(user__pwd_id__isnull=False, user__pwd_id__gt='')
+        ).order_by('created_at')
 
+        regular_orders = all_pending.filter(
+            models.Q(user__senior_citizen_id__isnull=True) | models.Q(user__senior_citizen_id=''),
+            models.Q(user__pwd_id__isnull=True) | models.Q(user__pwd_id='')
+        ).order_by('created_at')
+
+        # Check if current user is priority
+        is_priority = self.is_priority_user()
+
+        # START RECALCULATING: All queue numbers reset
+        queue_num = 1
+
+        # PHASE 1: Assign numbers to ALL existing priority users
+        for order in priority_orders:
+            order.queue_number = queue_num
+            order.save(update_fields=['queue_number'])
+            queue_num += 1
+
+        # PHASE 2: If current user is priority, insert them NOW
         if is_priority:
-            # Priority users: ALWAYS insert at position 1 (top of queue)
-            # Find ALL regular (non-priority) users in queue
-            regular_orders = pending_orders.filter(
-                user__senior_citizen_id__isnull=True,
-                user__pwd_id__isnull=True
-            ).order_by('queue_number')
+            self.queue_number = queue_num
+            queue_num += 1
 
-            # Find ALL priority users in queue
-            priority_orders = pending_orders.filter(
-                models.Q(user__senior_citizen_id__isnull=False) |
-                models.Q(user__pwd_id__isnull=False)
-            ).order_by('queue_number')
+        # PHASE 3: Assign numbers to ALL regular users (they get pushed down)
+        for order in regular_orders:
+            order.queue_number = queue_num
+            order.save(update_fields=['queue_number'])
+            queue_num += 1
 
-            if regular_orders.exists():
-                # There are regular users in the queue
-                # Insert this priority user right after the last priority user
-                # OR at position 1 if no priority users exist
+        # Save self with correct queue number
+        if not is_priority:
+            self.queue_number = queue_num
 
-                if priority_orders.exists():
-                    # Put after the last priority user
-                    last_priority = priority_orders.last()
-                    insert_position = last_priority.queue_number + 1
-                    self.queue_number = insert_position
-
-                    # Shift all orders AT or AFTER this position by +1
-                    orders_to_shift = pending_orders.filter(
-                        queue_number__gte=insert_position
-                    ).order_by('queue_number')
-
-                    for order in orders_to_shift:
-                        order.queue_number += 1
-                        order.save()
-                else:
-                    # No priority users, insert at position 1 (front of queue)
-                    self.queue_number = 1
-
-                    # Shift ALL orders by +1
-                    for order in pending_orders.order_by('queue_number'):
-                        order.queue_number += 1
-                        order.save()
-            else:
-                # Only priority users in queue (or no orders at all)
-                if priority_orders.exists():
-                    last_priority = priority_orders.last()
-                    self.queue_number = last_priority.queue_number + 1
-                else:
-                    # No orders at all, start at 1
-                    self.queue_number = 1
-        else:
-            # Regular users: Always append to the end
-            if pending_orders.exists():
-                last_order = pending_orders.order_by('-queue_number').first()
-                self.queue_number = last_order.queue_number + 1
-            else:
-                # No orders at all
-                self.queue_number = 1
-
-        self.save()
+        self.save(update_fields=['queue_number'])
 
     def remove_from_queue(self):
         """
@@ -167,8 +149,11 @@ class Order(models.Model):
     def is_priority_user(self):
         """
         Helper method to check if the order belongs to a priority user.
+        Checks if senior_citizen_id or pwd_id files are actually uploaded.
         """
-        return bool(self.user.senior_citizen_id or self.user.pwd_id)
+        has_senior_id = bool(self.user.senior_citizen_id and self.user.senior_citizen_id.name)
+        has_pwd_id = bool(self.user.pwd_id and self.user.pwd_id.name)
+        return has_senior_id or has_pwd_id
 
 
 class OrderItem(models.Model):

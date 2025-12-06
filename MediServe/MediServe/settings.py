@@ -77,8 +77,9 @@ if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True
+            conn_max_age=0,  # Disable persistent connections for Supabase pooler
+            ssl_require=True,
+            conn_health_checks=True  # Enable connection health checks
         )
     }
 else:
@@ -93,7 +94,10 @@ else:
             'PORT': '6543',
             'OPTIONS': {
                 'sslmode': 'require',
+                'connect_timeout': 10,  # 10 second connection timeout
             },
+            'CONN_MAX_AGE': 0,  # Disable persistent connections for Supabase pooler
+            'CONN_HEALTH_CHECKS': True,  # Enable connection health checks
         }
     }
 

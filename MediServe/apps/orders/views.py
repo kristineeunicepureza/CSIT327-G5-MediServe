@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
-from django.db import transaction
+from django.db import transaction, models
 from django.http import JsonResponse
 from django.db.models import F, Max, Q
 from apps.orders.models import Order, OrderItem
@@ -28,17 +28,24 @@ def add_to_order(request, medicine_id):
             defaults={"created_at": timezone.now()}
         )
 
-        item, item_created = OrderItem.objects.get_or_create(
-            order=order,
-            medicine=medicine,
-            defaults={"quantity": quantity, "special_request": special_request}
-        )
-
-        if not item_created:
+        # Check if item already exists
+        try:
+            item = OrderItem.objects.get(order=order, medicine=medicine)
+            # Item exists, increment quantity
             item.quantity += quantity
             if special_request:
                 item.special_request = special_request
             item.save()
+            item_created = False
+        except OrderItem.DoesNotExist:
+            # Item doesn't exist, create it
+            item = OrderItem.objects.create(
+                order=order,
+                medicine=medicine,
+                quantity=quantity,
+                special_request=special_request
+            )
+            item_created = True
 
         messages.success(request, f"✅ Added {quantity} × {medicine.name} to your order.")
         return redirect("order_list")
@@ -87,11 +94,11 @@ def order_checkout(request):
         order.status = "Processing"
         order.save()
 
-        # Show priority message if applicable
+        # Show priority message if applicable (green for positive messages)
         if order.is_priority_user():
             messages.success(
                 request,
-                f"✅ Your order has been placed with PRIORITY (Senior Citizen/PWD)! "
+                f"✅ Your order has been placed with PRIORITY (Senior Citizen/Person with Disability)! "
                 f"You are Queue #{order.queue_number}. Check your queue status below."
             )
         else:
@@ -264,6 +271,15 @@ def delivery_page(request):
                 messages.success(request, f"✅ Order #{order_id} is now being processed.")
 
             elif action == 'ship' and order.status == 'Processing':
+                # Validate: Driver must be assigned before shipping
+                if not order.driver:
+                    messages.error(
+                        request,
+                        f"❌ Cannot ship Order #{order_id} without a driver assigned. "
+                        f"Please assign a driver first."
+                    )
+                    return redirect('delivery_page')
+
                 order.status = 'Shipped'
                 order.save()
                 # Remove from queue when shipped (but order remains visible)
@@ -275,6 +291,11 @@ def delivery_page(request):
                 order.completed_at = timezone.now()
                 order.save()
                 messages.success(request, f"🏁 Order #{order_id} marked as completed!")
+
+            elif action == 'archive' and order.status == 'Completed':
+                order.is_archived = True
+                order.save()
+                messages.success(request, f"📦 Order #{order_id} has been archived.")
 
             elif action == 'cancel' and order.status in ['Pending', 'Processing']:
                 order.status = 'Cancelled'
@@ -297,11 +318,11 @@ def delivery_page(request):
 
         return redirect('delivery_page')
 
-    # Get all orders except completed ones
-    # Priority orders (with queue_number) will appear first, sorted by queue_number
-    orders = Order.objects.exclude(status='Completed').order_by(
-        'queue_number',  # Orders in queue first (nulls last in most DBs)
-        '-created_at'  # Then by creation time
+    # Get all orders except archived ones
+    # Sort by queue_number ascending (Queue #1, #2, #3... in order)
+    # NULL queue_number will go to end
+    orders = Order.objects.filter(is_archived=False).order_by(
+        models.F('queue_number').asc(nulls_last=True)
     )
 
     drivers = Order.DRIVER_CHOICES
