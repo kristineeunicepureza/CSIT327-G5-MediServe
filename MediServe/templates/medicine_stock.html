@@ -4,6 +4,9 @@
 {% block title %}Medicine Stock Management (FEFO){% endblock %}
 
 {% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
     .medicine-container {
         width: 100%;
@@ -84,8 +87,14 @@
         font-weight: 700;
     }
 
-    .add-medicine-btn {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    .header-actions {
+        display: flex;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .add-medicine-btn, .archived-btn {
         color: #ffffff;
         padding: 14px 24px;
         border: none;
@@ -97,14 +106,35 @@
         align-items: center;
         gap: 8px;
         transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .add-medicine-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        position: relative;
-        z-index: 1;
     }
 
     .add-medicine-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .archived-btn {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .archived-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .archived-count {
+        background: rgba(255, 255, 255, 0.3);
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        margin-left: 5px;
     }
 
     .message-alert {
@@ -137,6 +167,12 @@
         background-color: #f8d7da;
         color: #721c24;
         border: 2px solid #dc3545;
+    }
+
+    .message-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 2px solid #17a2b8;
     }
 
     .filter-section {
@@ -304,11 +340,9 @@
         gap: 8px;
     }
 
-    .btn-delete {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        color: #ffffff;
+    .btn-edit, .btn-archive {
         border: none;
-        padding: 8px 12px;
+        padding: 8px 14px;
         border-radius: 8px;
         cursor: pointer;
         font-size: 0.85em;
@@ -317,14 +351,28 @@
         align-items: center;
         gap: 6px;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        color: #ffffff;
     }
 
-    .btn-delete:hover {
+    .btn-edit {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+    }
+
+    .btn-edit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
     }
 
+    .btn-archive {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-archive:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+    }
     /* Modal Styles */
     .modal-overlay {
         display: none;
@@ -633,7 +681,12 @@
             font-size: 1.4em;
         }
 
-        .add-medicine-btn {
+        .header-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .add-medicine-btn, .archived-btn {
             width: 100%;
             justify-content: center;
         }
@@ -660,15 +713,24 @@
             <h1 class="header-title">Medicine Stock Management (FEFO)</h1>
         </div>
 
-        <button onclick="openBatchModal()" class="add-medicine-btn">
-            <i class="fas fa-shipping-fast"></i> Add New Batch
-        </button>
+        <div class="header-actions">
+            <button onclick="openBatchModal()" class="add-medicine-btn">
+                <i class="fas fa-shipping-fast"></i> Add New Batch
+            </button>
+
+            <a href="{% url 'archived_medicines' %}" class="archived-btn">
+                <i class="fas fa-archive"></i> View Archived
+                {% if archived_count > 0 %}
+                    <span class="archived-count">{{ archived_count }}</span>
+                {% endif %}
+            </a>
+        </div>
     </header>
 
     <!-- MESSAGES -->
     {% if messages %}
         {% for message in messages %}
-            <div class="message-alert {% if 'success' in message.tags %}message-success{% elif 'error' in message.tags %}message-error{% endif %}">
+            <div class="message-alert {% if 'success' in message.tags %}message-success{% elif 'error' in message.tags %}message-error{% else %}message-info{% endif %}">
                 {{ message }}
             </div>
         {% endfor %}
@@ -751,9 +813,20 @@
                         <td>{{ batch.date_received|date:"M d, Y" }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button onclick="openDeleteModal('{{ batch.id }}', '{{ batch.medicine.name }}', '{{ batch.batch_id }}')" class="btn-delete">
-                                    <i class="fas fa-trash-alt"></i> Delete
+                                <a href="{% url 'edit_medicine' batch.id %}" class="btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button onclick="confirmArchive('{{ batch.id }}', '{{ batch.medicine.name }}', '{{ batch.batch_id }}')" class="btn-archive">
+                                    <i class="fas fa-archive"></i> Archive
                                 </button>
+
+                                <!-- Hidden form for archive -->
+                                <form id="archive-form-{{ batch.id }}"
+                                      action="{% url 'archive_batch' batch.id %}"
+                                      method="post"
+                                      style="display:none;">
+                                    {% csrf_token %}
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -769,7 +842,6 @@
         </table>
     </div>
 </div>
-
 <!-- ADD NEW BATCH MODAL - AUTO-GENERATED BATCH ID -->
 <div id="addBatchModal" class="modal-overlay">
     <div class="modal-content">
@@ -1045,10 +1117,23 @@ function closeBatchModal() {
     document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 }
 
-function openDeleteModal(batchId, medicineName, batchNumber) {
-    if (confirm(`⚠️ Are you sure you want to delete ${medicineName} from ${batchNumber}?\n\nThis action cannot be undone.`)) {
-        window.location.href = `/medicine/delete/${batchId}/`;
-    }
+// ARCHIVE CONFIRMATION (SweetAlert2)
+function confirmArchive(batchId, medicineName, batchNumber) {
+    Swal.fire({
+        title: 'Archive Batch?',
+        html: `Are you sure you want to archive <strong>${medicineName}</strong> from <strong>${batchNumber}</strong>?<br><br>
+               <small style="color: #6c757d;">Archived batches will be hidden from stock but can be restored later from the archive.</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#6c757d',
+        cancelButtonColor: '#dc3545',
+        confirmButtonText: '<i class="fas fa-archive"></i> Yes, Archive',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('archive-form-' + batchId).submit();
+        }
+    });
 }
 
 // Close modal when clicking outside
