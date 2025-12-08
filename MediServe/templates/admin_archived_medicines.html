@@ -14,7 +14,7 @@
         margin: 0;
         background: #ffffff;
         border-radius: 0;
-        overflow: hidden;
+        overflow: visible;
         box-shadow: none;
         animation: fadeInUp 0.6s ease-out;
         min-height: 100vh;
@@ -150,38 +150,37 @@
     .archived-main {
         padding: 35px 40px;
         background: #f8f9fa;
-    }
-
-    .intro-text {
-        color: #6c757d;
-        margin-bottom: 30px;
-        font-size: 1.05em;
-        padding: 15px 20px;
-        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-        border-radius: 10px;
-        border-left: 4px solid #6c757d;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        position: relative;
+        overflow: visible;
     }
 
     /* Search Section */
     .search-section {
         margin-bottom: 30px;
+        display: flex;
+        gap: 15px;
+        position: relative;
+        z-index: 50;
+        flex-wrap: wrap;
     }
 
     .search-form {
         display: flex;
-        gap: 12px;
+        gap: 15px;
+        flex: 1;
+        align-items: stretch;
+        min-width: 100%;
     }
 
     .search-input {
-        flex: 1;
-        padding: 12px 16px;
+        flex: 3;
+        min-width: 400px;
+        padding: 14px 20px;
         border: 2px solid #e8ecf4;
         border-radius: 10px;
-        font-size: 0.95em;
+        font-size: 1em;
         transition: all 0.3s ease;
+        background: white;
     }
 
     .search-input:focus {
@@ -190,20 +189,75 @@
         box-shadow: 0 0 0 4px rgba(108, 117, 125, 0.1);
     }
 
-    .btn-search {
-        padding: 12px 24px;
-        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-        color: white;
-        border: none;
+    .filter-select {
+        flex: 1.5;
+        min-width: 250px;
+        max-width: 350px;
+        padding: 14px 20px;
+        border: 2px solid #e8ecf4;
+        border-radius: 10px;
+        font-size: 1em;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c757d' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        padding-right: 40px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #6c757d;
+        box-shadow: 0 0 0 4px rgba(108, 117, 125, 0.1);
+    }
+
+    .filter-select option {
+        padding: 12px;
+        font-size: 1em;
+        background: white;
+        color: #2c3e50;
+    }
+
+    .filter-select option:hover {
+        background: #f8f9fa;
+    }
+
+    .btn-search, .btn-reset {
+        padding: 14px 28px;
         border-radius: 10px;
         cursor: pointer;
         font-weight: 600;
         transition: all 0.3s ease;
+        white-space: nowrap;
+        font-size: 1em;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-search {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        border: none;
     }
 
     .btn-search:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-reset {
+        background: #e9ecef;
+        color: #495057;
+        border: 2px solid #ced4da;
+        text-decoration: none;
+    }
+
+    .btn-reset:hover {
+        background: #dee2e6;
+        border-color: #adb5bd;
     }
 
     /* Table Styles */
@@ -236,16 +290,18 @@
     .archived-table tbody tr {
         border-bottom: 1px solid #e8ecf4;
         transition: all 0.2s ease;
+        opacity: 0.85;
     }
 
     .archived-table tbody tr:hover {
         background-color: #f8f9fa;
+        opacity: 1;
     }
 
     .archived-table tbody td {
         padding: 16px 15px;
         font-size: 0.95em;
-        color: #2c3e50;
+        color: #495057;
     }
 
     .batch-badge {
@@ -271,20 +327,21 @@
     }
 
     .badge-expired {
-        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-        color: #721c24;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: #fff;
         padding: 6px 12px;
         border-radius: 20px;
         font-size: 0.85em;
-        font-weight: 600;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
     }
 
-    .btn-restore {
+    .btn-delete {
         padding: 8px 14px;
-        background: linear-gradient(135deg, #28a745, #20c997);
+        background: linear-gradient(135deg, #dc3545, #c82333);
         color: #fff;
         border-radius: 8px;
         border: none;
@@ -295,12 +352,13 @@
         align-items: center;
         gap: 6px;
         font-size: 0.85em;
-        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
     }
 
-    .btn-restore:hover {
+    .btn-delete:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.5);
+        background: linear-gradient(135deg, #c82333, #bd2130);
     }
 
     /* Empty State */
@@ -321,6 +379,11 @@
         font-weight: 600;
     }
 
+    .empty-subtitle {
+        color: #adb5bd;
+        margin-top: 10px;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .archived-container {
@@ -336,6 +399,26 @@
 
         .archived-main {
             padding: 25px;
+        }
+
+        .search-section {
+            flex-direction: column;
+        }
+
+        .search-form {
+            flex-direction: column;
+        }
+
+        .search-input,
+        .filter-select {
+            min-width: 100%;
+            max-width: 100%;
+        }
+
+        .btn-search,
+        .btn-reset {
+            width: 100%;
+            justify-content: center;
         }
     }
 </style>
@@ -367,22 +450,31 @@
 
     <!-- MAIN CONTENT -->
     <main class="archived-main">
-        <div class="intro-text">
-            <i class="fas fa-info-circle"></i>
-            <span><strong>Archived batches</strong> are hidden from stock and cannot be ordered. You can restore them at any time. Batches are automatically archived when they expire.</span>
-        </div>
-
-        <!-- Search Section -->
+        <!-- Search & Filter Section -->
         <div class="search-section">
             <form method="GET" class="search-form">
                 <input type="text"
                        name="search"
                        value="{{ search_query }}"
-                       placeholder="Search by medicine name, brand, or batch ID..."
+                       placeholder="🔍 Search by medicine name, brand, or batch ID..."
                        class="search-input">
+
+                <select name="category" class="filter-select">
+                    <option value="">📁 All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>
+                            {{ cat }}
+                        </option>
+                    {% endfor %}
+                </select>
+
                 <button type="submit" class="btn-search">
-                    <i class="fas fa-search"></i> Search
+                    <i class="fas fa-check"></i> Apply
                 </button>
+
+                <a href="{% url 'archived_medicines' %}" class="btn-reset">
+                    <i class="fas fa-redo"></i> Reset
+                </a>
             </form>
         </div>
 
@@ -398,7 +490,7 @@
                             <th><i class="fas fa-tag"></i> Category</th>
                             <th><i class="fas fa-calendar-times"></i> Expiry Date</th>
                             <th><i class="fas fa-boxes"></i> Quantity</th>
-                            <th><i class="fas fa-archive"></i> Status</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
                             <th><i class="fas fa-calendar-alt"></i> Archived</th>
                             <th><i class="fas fa-cog"></i> Actions</th>
                         </tr>
@@ -413,10 +505,10 @@
                             <td>{{ batch.expiry_date|date:"M d, Y" }}</td>
                             <td><strong>{{ batch.quantity_available }} units</strong></td>
                             <td>
-                                {% if batch.is_expired %}
+                                {% if batch.expiry_date < today %}
                                     <span class="badge-expired">
                                         <i class="fas fa-exclamation-triangle"></i>
-                                        Expired
+                                        EXPIRED
                                     </span>
                                 {% else %}
                                     <span class="badge-archived">
@@ -425,16 +517,22 @@
                                     </span>
                                 {% endif %}
                             </td>
-                            <td>{{ batch.archived_at|date:"M d, Y" }}</td>
                             <td>
-                                <button onclick="confirmRestore('{{ batch.id }}', '{{ batch.medicine.name }}', '{{ batch.batch_id }}', {{ batch.is_expired|yesno:'true,false' }})"
-                                        class="btn-restore">
-                                    <i class="fas fa-undo"></i> Restore
+                                {% if batch.archived_at %}
+                                    {{ batch.archived_at|date:"M d, Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button onclick="confirmDelete('{{ batch.id }}', '{{ batch.medicine.name }}', '{{ batch.batch_id }}', {% if batch.expiry_date < today %}true{% else %}false{% endif %})"
+                                        class="btn-delete">
+                                    <i class="fas fa-trash"></i> Delete
                                 </button>
 
-                                <!-- Hidden form for restore -->
-                                <form id="restore-form-{{ batch.id }}"
-                                      action="{% url 'restore_batch' batch.id %}"
+                                <!-- Hidden form for delete -->
+                                <form id="delete-form-{{ batch.id }}"
+                                      action="{% url 'delete_archived_batch' batch.id %}"
                                       method="post"
                                       style="display:none;">
                                     {% csrf_token %}
@@ -446,8 +544,9 @@
                 </table>
             {% else %}
                 <div class="empty-state">
-                    <i class="fas fa-box-open empty-icon"></i>
-                    <p class="empty-title">No archived batches.</p>
+                    <i class="fas fa-archive empty-icon"></i>
+                    <p class="empty-title">No archived batches found.</p>
+                    <p class="empty-subtitle">Archived batches will appear here.</p>
                 </div>
             {% endif %}
         </div>
@@ -455,31 +554,60 @@
 </div>
 
 <script>
-function confirmRestore(batchId, medicineName, batchNumber, isExpired) {
-    let warningText = `Are you sure you want to restore <strong>${medicineName}</strong> from <strong>${batchNumber}</strong>?<br><br>
-                       <small style="color: #6c757d;">This will move it back to active stock and make it available for ordering.</small>`;
-
-    if (isExpired) {
-        warningText = `⚠️ <strong>Warning:</strong> This batch is <strong>EXPIRED</strong>!<br><br>
-                      Are you sure you want to restore <strong>${medicineName}</strong> (${batchNumber})?<br><br>
-                      <small style="color: #dc3545;">The batch will be automatically archived again if it's still expired.</small>`;
-    }
+function confirmDelete(batchId, medicineName, batchNumber, isExpired) {
+    let warningText = `
+        <div style="text-align: left; margin: 15px 0;">
+            <p style="margin-bottom: 10px;"><strong>Batch:</strong> ${batchNumber}</p>
+            <p style="margin-bottom: 10px;"><strong>Medicine:</strong> ${medicineName}</p>
+            ${isExpired ? '<p style="color: #dc3545; font-weight: 600; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i> Status: EXPIRED</p>' : ''}
+        </div>
+        <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107; margin-top: 15px;">
+            <p style="margin: 0; color: #856404; font-size: 0.9em;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Warning:</strong> This action is <strong>PERMANENT</strong> and cannot be undone.
+                The batch will be completely removed from the database.
+            </p>
+        </div>
+    `;
 
     Swal.fire({
-        title: isExpired ? 'Restore Expired Batch?' : 'Restore Batch?',
+        title: '⚠️ Permanently Delete Batch?',
         html: warningText,
-        icon: isExpired ? 'warning' : 'question',
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#28a745',
+        confirmButtonColor: '#dc3545',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: '<i class="fas fa-undo"></i> Yes, Restore',
-        cancelButtonText: 'Cancel'
+        confirmButtonText: '<i class="fas fa-trash"></i> Yes, Delete Permanently',
+        cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+        customClass: {
+            confirmButton: 'swal-btn-danger',
+            cancelButton: 'swal-btn-secondary'
+        }
     }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById('restore-form-' + batchId).submit();
+            document.getElementById('delete-form-' + batchId).submit();
         }
     });
 }
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const messages = document.querySelectorAll('.message-alert');
+    messages.forEach(function(message) {
+        message.style.transition = 'opacity 0.5s ease';
+        message.style.opacity = '0';
+        setTimeout(() => message.remove(), 500);
+    });
+}, 5000);
 </script>
+
+<style>
+.swal-btn-danger {
+    font-weight: 600 !important;
+}
+.swal-btn-secondary {
+    font-weight: 600 !important;
+}
+</style>
 
 {% endblock %}

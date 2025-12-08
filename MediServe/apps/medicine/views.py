@@ -10,16 +10,17 @@ from .forms import MedicineForm, MedicineBatchEditForm
 
 
 # -------------------------------------------------------------------
-# AUTO-ARCHIVE EXPIRED BATCHES (Run before displaying stock)
+# AUTO-ARCHIVE DISABLED - Manual archive only per user requirement
 # -------------------------------------------------------------------
-def auto_archive_expired_batches():
-    """Automatically archive expired batches"""
-    try:
-        count = MedicineBatch.auto_archive_expired()
-        return count
-    except Exception as e:
-        print(f"Error in auto_archive_expired_batches: {e}")
-        return 0
+# User wants manual archive only, so auto-archive is commented out
+# def auto_archive_expired_batches():
+#     """Automatically archive expired batches"""
+#     try:
+#         count = MedicineBatch.auto_archive_expired()
+#         return count
+#     except Exception as e:
+#         print(f"Error in auto_archive_expired_batches: {e}")
+#         return 0
 
 
 # -------------------------------------------------------------------
@@ -63,16 +64,16 @@ def medicine_stock(request):
     Medicine stock management (FEFO batch view) with archive system.
 
     Shows only ACTIVE batches.
-    Auto-archives expired batches on page load.
+    NO auto-archive - manual archive only.
     """
 
-    # AUTO-ARCHIVE EXPIRED BATCHES
-    archived_count = auto_archive_expired_batches()
-    if archived_count > 0:
-        messages.info(
-            request,
-            f'🗄️ {archived_count} expired batch(es) have been automatically archived.'
-        )
+    # ❌ AUTO-ARCHIVE DISABLED - User wants manual archive only
+    # archived_count = auto_archive_expired_batches()
+    # if archived_count > 0:
+    #     messages.info(
+    #         request,
+    #         f'🗄️ {archived_count} expired batch(es) have been automatically archived.'
+    #     )
 
     # Get all ACTIVE batches sorted by expiry date (FEFO)
     batches = MedicineBatch.objects.filter(
@@ -111,7 +112,7 @@ def medicine_stock(request):
         status='active'
     ).values_list('category', flat=True).distinct()
 
-    # Count archived batches for header button
+    # Count archived batches for header button badge
     archived_count_display = MedicineBatch.objects.filter(status='archived').count()
 
     # Handle POST - Add New Batch
@@ -286,17 +287,19 @@ def medicine_stock(request):
         'category_filter': category_filter,
         'stock_filter': stock_filter,
         'archived_count': archived_count_display,
+        'today': date.today(),  # Add today's date for expired badge in template
     })
 
 
 # -------------------------------------------------------------------
-# NEW: Archived Medicines/Batches View
+# NEW: Archived Medicines/Batches View (READ-ONLY - NO RESTORE)
 # -------------------------------------------------------------------
 @login_required
 def archived_medicines(request):
     """
     Display archived medicine batches.
     Admin only.
+    PERMANENT ARCHIVE - NO RESTORE OPTION.
     """
     if not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, '❌ Access denied. Admins only.')
@@ -305,10 +308,12 @@ def archived_medicines(request):
     # Get all archived batches
     archived_batches = MedicineBatch.objects.filter(
         status='archived'
-    ).select_related('medicine').order_by('-archived_at')
+    ).select_related('medicine').order_by('expiry_date', '-archived_at')
 
     # Search functionality
     search_query = request.GET.get('search', '')
+    category_filter = request.GET.get('category', '')
+
     if search_query:
         archived_batches = archived_batches.filter(
             Q(medicine__name__icontains=search_query) |
@@ -316,22 +321,32 @@ def archived_medicines(request):
             Q(batch_id__icontains=search_query)
         )
 
+    if category_filter:
+        archived_batches = archived_batches.filter(medicine__category__iexact=category_filter)
+
+    # Get unique categories for filter
+    categories = Medicine.objects.values_list('category', flat=True).distinct()
+
     context = {
         'archived_batches': archived_batches,
         'total_archived': archived_batches.count(),
         'search_query': search_query,
+        'category_filter': category_filter,
+        'categories': categories,
+        'today': date.today(),  # For showing EXPIRED tag
     }
 
     return render(request, 'admin_archived_medicines.html', context)
 
 
 # -------------------------------------------------------------------
-# NEW: Archive Batch
+# NEW: Archive Batch (PERMANENT - NO RESTORE)
 # -------------------------------------------------------------------
 @login_required
 def archive_batch(request, batch_id):
     """
-    Archive a medicine batch.
+    Archive a medicine batch PERMANENTLY.
+    Once archived, it cannot be restored.
     Admin only.
     """
     if not (request.user.is_staff or request.user.is_superuser):
@@ -356,12 +371,12 @@ def archive_batch(request, batch_id):
                 )
                 return redirect('medicine_stock')
 
-            # Archive the batch
+            # Archive the batch (permanent)
             batch.archive()
 
             messages.success(
                 request,
-                f'🗄️ Batch {batch.batch_id} ({batch.medicine.name}) has been archived successfully.'
+                f'🗄️ Batch {batch.batch_id} ({batch.medicine.name}) has been archived permanently.'
             )
 
         except MedicineBatch.DoesNotExist:
@@ -373,12 +388,27 @@ def archive_batch(request, batch_id):
 
 
 # -------------------------------------------------------------------
-# NEW: Restore Batch
+# REMOVED: Restore Batch Function
+# User requirement: Archived batches cannot be restored
+# -------------------------------------------------------------------
+# @login_required
+# def restore_batch(request, batch_id):
+#     """
+#     DISABLED: Restore functionality removed per user requirement.
+#     Archived batches are permanent and cannot be restored.
+#     """
+#     messages.error(request, '❌ Restore functionality is not available. Archived batches are permanent.')
+#     return redirect('archived_medicines')
+
+
+# -------------------------------------------------------------------
+# NEW: Delete Archived Batch (Permanent deletion from database)
 # -------------------------------------------------------------------
 @login_required
-def restore_batch(request, batch_id):
+def delete_archived_batch(request, batch_id):
     """
-    Restore an archived medicine batch.
+    Permanently delete an archived batch from the database.
+    This is irreversible.
     Admin only.
     """
     if not (request.user.is_staff or request.user.is_superuser):
@@ -389,31 +419,21 @@ def restore_batch(request, batch_id):
         try:
             batch = get_object_or_404(MedicineBatch, id=batch_id, status='archived')
 
-            # Check if batch is expired
-            if batch.is_expired:
-                messages.warning(
-                    request,
-                    f'⚠️ Warning: Batch {batch.batch_id} is expired (Expiry: {batch.expiry_date.strftime("%B %d, %Y")}). It will be auto-archived again if still expired.'
-                )
+            medicine_name = batch.medicine.name
+            batch_number = batch.batch_id
 
-            # Restore the batch
-            batch.restore()
-
-            # Also ensure the medicine is active
-            if batch.medicine.status == 'archived':
-                batch.medicine.status = 'active'
-                batch.medicine.archived_at = None
-                batch.medicine.save()
+            # Permanently delete the batch
+            batch.delete()
 
             messages.success(
                 request,
-                f'✅ Batch {batch.batch_id} ({batch.medicine.name}) has been restored successfully.'
+                f'🗑️ Batch {batch_number} ({medicine_name}) has been permanently deleted from the database.'
             )
 
         except MedicineBatch.DoesNotExist:
-            messages.error(request, '❌ Batch not found!')
+            messages.error(request, '❌ Batch not found or not archived!')
         except Exception as e:
-            messages.error(request, f'❌ Error restoring batch: {str(e)}')
+            messages.error(request, f'❌ Error deleting batch: {str(e)}')
 
     return redirect('archived_medicines')
 

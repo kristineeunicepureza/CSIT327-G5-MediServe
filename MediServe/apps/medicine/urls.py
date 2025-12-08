@@ -14,16 +14,17 @@ urlpatterns = [
     # Admin stock management
     path('admin/medicine-stock/', views.medicine_stock, name='medicine_stock'),
 
-    # NEW: Archive management (admin only)
+    # Archive management (admin only) - UPDATED
     path('admin/archived/', views.archived_medicines, name='archived_medicines'),
     path('admin/archive/<int:batch_id>/', views.archive_batch, name='archive_batch'),
-    path('admin/restore/<int:batch_id>/', views.restore_batch, name='restore_batch'),
+    path('admin/archived/delete/<int:batch_id>/', views.delete_archived_batch, name='delete_archived_batch'),  # NEW
+    # path('admin/restore/<int:batch_id>/', views.restore_batch, name='restore_batch'),  # COMMENTED OUT
 
     # Edit medicine/batch (admin only)
     path('edit/<int:id>/', views.edit_medicine, name='edit_medicine'),
     path('edit-batch/<str:batch_id>/', views.edit_batch, name='edit_batch'),
 
-    # DEPRECATED: Delete (kept for backward compatibility, redirects to info message)
+    # DEPRECATED: Delete (kept for backward compatibility)
     path('delete/<int:id>/', views.delete_medicine, name='delete_medicine'),
 
     # Distribution history (admin only)
