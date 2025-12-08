@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from django.db import transaction, models
 from django.http import JsonResponse
-from django.db.models import F, Max, Q
+from django.db.models import F, Max, Q, Case, When, Value, IntegerField
 from apps.orders.models import Order, OrderItem
 from apps.medicine.models import Medicine
 
@@ -320,9 +320,13 @@ def delivery_page(request):
 
     # Get all orders except archived ones
     # Sort by queue_number ascending (Queue #1, #2, #3... in order)
-    # NULL queue_number will go to end
-    orders = Order.objects.filter(is_archived=False).order_by(
-        models.F('queue_number').asc(nulls_last=True)
+    # Orders with queue_number come first, then orders without (NULL)
+    orders = Order.objects.filter(is_archived=False).select_related('user').order_by(
+        Case(
+            When(queue_number__isnull=True, then=Value(999999)),
+            default=F('queue_number'),
+            output_field=IntegerField()
+        )
     )
 
     drivers = Order.DRIVER_CHOICES
