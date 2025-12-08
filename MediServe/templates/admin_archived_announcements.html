@@ -11,12 +11,15 @@
 /* Container */
 .archived-container {
     width: 100%;
-    max-width: 1400px;
-    margin: 40px auto;
+    max-width: 100vw;
+    margin: 0;
     background: #ffffff;
-    border-radius: 20px;
+    border-radius: 0;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: none;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header */
@@ -26,6 +29,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header-left {
