@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from django.db import transaction, models
 from django.http import JsonResponse
-from django.db.models import F, Max, Q, Case, When, Value, IntegerField
+from django.db.models import F, Max, Q
 from apps.orders.models import Order, OrderItem
 from apps.medicine.models import Medicine
 
@@ -319,15 +319,19 @@ def delivery_page(request):
         return redirect('delivery_page')
 
     # Get all orders except archived ones
-    # Sort by queue_number ascending (Queue #1, #2, #3... in order)
-    # Orders with queue_number come first, then orders without (NULL)
-    orders = Order.objects.filter(is_archived=False).select_related('user').order_by(
-        Case(
-            When(queue_number__isnull=True, then=Value(999999)),
-            default=F('queue_number'),
-            output_field=IntegerField()
-        )
-    )
+    # Split into orders with queue numbers and without, then combine
+    orders_with_queue = Order.objects.filter(
+        is_archived=False,
+        queue_number__isnull=False
+    ).select_related('user').order_by('queue_number')
+    
+    orders_without_queue = Order.objects.filter(
+        is_archived=False,
+        queue_number__isnull=True
+    ).select_related('user').order_by('-created_at')
+    
+    # Combine: queued orders first, then non-queued
+    orders = list(orders_with_queue) + list(orders_without_queue)
 
     drivers = Order.DRIVER_CHOICES
 
