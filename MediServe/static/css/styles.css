@@ -97,7 +97,7 @@ textarea:focus {
     font-size: 1.1em;
     font-weight: 600;
     cursor: pointer;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: background-color var(--transition-smooth), opacity var(--transition-smooth);
     white-space: nowrap;
 }
@@ -124,6 +124,28 @@ textarea:focus {
 
 .btn i, .btn-secondary i {
     margin-right: 8px;
+}
+
+/* ========================================
+   FIX: Remove underline from buttons/links
+   ======================================== */
+a.btn, a.btn-secondary,
+a[class*="btn"] {
+    text-decoration: none !important;
+}
+
+a.btn:hover, a.btn-secondary:hover,
+a.btn:link, a.btn:visited,
+a.btn:active, a.btn-secondary:active {
+    text-decoration: none !important;
+}
+
+/* Remove underline from Edit buttons in tables */
+table a.btn,
+table a.btn-secondary,
+.actions a,
+[class*="action"] a {
+    text-decoration: none !important;
 }
 
 .messages-container {
@@ -175,3 +197,13 @@ textarea:focus {
         min-height: auto;
     }
 }
+
+
+
+
+
+
+
+
+
+

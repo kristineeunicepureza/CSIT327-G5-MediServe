@@ -28,23 +28,29 @@ def auto_archive_expired_batches():
 @login_required
 def get_next_batch_id(request):
     """Return the next available batch ID in sequence."""
-    # Get the last batch by numeric order
-    last_batch = MedicineBatch.objects.filter(
+    # Get all batch IDs and extract the numeric part
+    all_batches = MedicineBatch.objects.filter(
         batch_id__startswith='BATCH-'
-    ).order_by('-batch_id').first()
+    ).values_list('batch_id', flat=True)
 
-    if last_batch:
-        try:
-            # Extract number from BATCH-XXX format
-            last_number = int(last_batch.batch_id.split('-')[1])
-            next_number = last_number + 1
-        except (IndexError, ValueError):
+    if all_batches:
+        # Extract numbers from BATCH-XXX format
+        numbers = []
+        for batch in all_batches:
+            try:
+                num = int(batch.split('-')[1])
+                numbers.append(num)
+            except (IndexError, ValueError):
+                continue
+
+        if numbers:
+            next_number = max(numbers) + 1  # ✅ Numeric max - correct
+        else:
             next_number = 1
     else:
         next_number = 1
 
-    next_batch_id = f'BATCH-{next_number:03d}'  # Format as BATCH-001, BATCH-002, etc.
-
+    next_batch_id = f'BATCH-{next_number:03d}'
     return JsonResponse({'next_batch_id': next_batch_id})
 
 
@@ -111,16 +117,24 @@ def medicine_stock(request):
     # Handle POST - Add New Batch
     if request.method == 'POST':
         try:
-            # AUTO-GENERATE BATCH ID
-            last_batch = MedicineBatch.objects.filter(
+            # AUTO-GENERATE BATCH ID with proper numeric sorting
+            all_batches = MedicineBatch.objects.filter(
                 batch_id__startswith='BATCH-'
-            ).order_by('-batch_id').first()
+            ).values_list('batch_id', flat=True)
 
-            if last_batch:
-                try:
-                    last_number = int(last_batch.batch_id.split('-')[1])
-                    next_number = last_number + 1
-                except (IndexError, ValueError):
+            if all_batches:
+                # Extract numbers from BATCH-XXX format
+                numbers = []
+                for batch in all_batches:
+                    try:
+                        num = int(batch.split('-')[1])
+                        numbers.append(num)
+                    except (IndexError, ValueError):
+                        continue
+
+                if numbers:
+                    next_number = max(numbers) + 1  # ✅ Numeric max - correct
+                else:
                     next_number = 1
             else:
                 next_number = 1
