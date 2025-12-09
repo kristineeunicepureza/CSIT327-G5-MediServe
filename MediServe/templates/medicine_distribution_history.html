@@ -138,7 +138,7 @@
 
     .filter-form {
         display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+        grid-template-columns: 2fr 1fr 1fr 1fr auto;
         gap: 15px;
         align-items: flex-end;
     }
@@ -169,12 +169,35 @@
         font-size: 0.95em;
         transition: all 0.3s ease;
         background-color: #ffffff;
+        cursor: pointer;
     }
 
     .filter-input:focus, .filter-select:focus {
         outline: none;
         border-color: #dc3545;
         box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+
+    /* Dropdown styling - hide scrollbar but allow scrolling */
+    .filter-select {
+        cursor: pointer;
+        /* For Firefox */
+        scrollbar-width: none;
+        /* For IE and Edge */
+        -ms-overflow-style: none;
+    }
+
+    /* For Chrome, Safari and Opera */
+    .filter-select::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Adjust dropdown menu width when opened */
+    .filter-select option {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .filter-actions {
@@ -365,7 +388,7 @@
         .filter-form {
             grid-template-columns: 1fr 1fr;
         }
-        
+
         .filter-actions {
             grid-column: 1 / -1;
         }
@@ -427,8 +450,8 @@
             <p class="stat-label">Medicines Distributed</p>
         </div>
         <div class="stat-card">
-            <p class="stat-value">{{ unique_recipients }}</p>
-            <p class="stat-label">Unique Recipients</p>
+            <p class="stat-value">{{ recipients_count }}</p>
+            <p class="stat-label">Recipients</p>
         </div>
         <div class="stat-card">
             <p class="stat-value">{{ top_medicines.count }}</p>
@@ -443,7 +466,7 @@
                 <label class="filter-label">
                     <i class="fas fa-search"></i> Search
                 </label>
-                <input type="text" name="search" value="{{ search_query }}" 
+                <input type="text" name="search" value="{{ search_query }}"
                        placeholder="Search by user name, email, or medicine..." class="filter-input">
             </div>
 
@@ -470,20 +493,6 @@
                     {% for medicine in all_medicines %}
                         <option value="{{ medicine.id }}" {% if medicine_filter == medicine.id|stringformat:"s" %}selected{% endif %}>
                             {{ medicine.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">
-                    <i class="fas fa-user"></i> Recipient
-                </label>
-                <select name="user" class="filter-select">
-                    <option value="">All Users</option>
-                    {% for user in all_users %}
-                        <option value="{{ user.id }}" {% if user_filter == user.id|stringformat:"s" %}selected{% endif %}>
-                            {{ user.first_name }} {{ user.last_name }}
                         </option>
                     {% endfor %}
                 </select>
@@ -550,7 +559,7 @@
                 <i class="fas fa-history empty-icon"></i>
                 <h3 class="empty-title">No medicine distribution records found</h3>
                 <p class="empty-text">
-                    {% if search_query or date_from or date_to or medicine_filter or user_filter %}
+                    {% if search_query or date_from or date_to or medicine_filter %}
                         Try adjusting your filters to see more results.
                     {% else %}
                         No distributions have been completed yet.

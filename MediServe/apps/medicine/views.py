@@ -10,34 +10,25 @@ from .forms import MedicineForm, MedicineBatchEditForm
 
 
 # -------------------------------------------------------------------
-# AUTO-ARCHIVE DISABLED - Manual archive only per user requirement
-# -------------------------------------------------------------------
-# User wants manual archive only, so auto-archive is commented out
-# def auto_archive_expired_batches():
-#     """Automatically archive expired batches"""
-#     try:
-#         count = MedicineBatch.auto_archive_expired()
-#         return count
-#     except Exception as e:
-#         print(f"Error in auto_archive_expired_batches: {e}")
-#         return 0
-
-
-# -------------------------------------------------------------------
-# Get Next Batch ID (AJAX endpoint for auto-generation)
+# UPDATED: Get Next Batch ID - EXCLUDES ARCHIVED BATCHES
 # -------------------------------------------------------------------
 @login_required
 def get_next_batch_id(request):
-    """Return the next available batch ID in sequence."""
-    # Get all batch IDs and extract the numeric part
-    all_batches = MedicineBatch.objects.filter(
+    """
+    Return the next available batch ID in sequence.
+    EXCLUDES ARCHIVED BATCHES - archived batch numbers cannot be reused.
+
+    Example: If BATCH-007 is archived, the next batch will be BATCH-008
+    """
+    # Check if there are ANY batches (including archived) to continue numbering
+    all_batches_ever = MedicineBatch.objects.filter(
         batch_id__startswith='BATCH-'
     ).values_list('batch_id', flat=True)
 
-    if all_batches:
-        # Extract numbers from BATCH-XXX format
+    if all_batches_ever:
+        # Extract numbers from ALL batches (active + archived)
         numbers = []
-        for batch in all_batches:
+        for batch in all_batches_ever:
             try:
                 num = int(batch.split('-')[1])
                 numbers.append(num)
@@ -45,7 +36,8 @@ def get_next_batch_id(request):
                 continue
 
         if numbers:
-            next_number = max(numbers) + 1  # ✅ Numeric max - correct
+            # Next batch ID is max + 1 (includes archived in the count)
+            next_number = max(numbers) + 1
         else:
             next_number = 1
     else:
@@ -56,24 +48,16 @@ def get_next_batch_id(request):
 
 
 # -------------------------------------------------------------------
-# Admin: Medicine Stock (FEFO Batch View) - WITH ARCHIVE SYSTEM
+# Admin: Medicine Stock (FEFO Batch View) - UPDATED BATCH ID GENERATION
 # -------------------------------------------------------------------
 @login_required
 def medicine_stock(request):
     """
     Medicine stock management (FEFO batch view) with archive system.
-
     Shows only ACTIVE batches.
-    NO auto-archive - manual archive only.
-    """
 
-    # ❌ AUTO-ARCHIVE DISABLED - User wants manual archive only
-    # archived_count = auto_archive_expired_batches()
-    # if archived_count > 0:
-    #     messages.info(
-    #         request,
-    #         f'🗄️ {archived_count} expired batch(es) have been automatically archived.'
-    #     )
+    UPDATED: Batch ID generation excludes archived batches
+    """
 
     # Get all ACTIVE batches sorted by expiry date (FEFO)
     batches = MedicineBatch.objects.filter(
@@ -112,21 +96,27 @@ def medicine_stock(request):
         status='active'
     ).values_list('category', flat=True).distinct()
 
-    # Count archived batches for header button badge
+    # Count archived batches for header button
     archived_count_display = MedicineBatch.objects.filter(status='archived').count()
+
+    # Add today's date for expired badge check
+    today = date.today()
 
     # Handle POST - Add New Batch
     if request.method == 'POST':
         try:
-            # AUTO-GENERATE BATCH ID with proper numeric sorting
-            all_batches = MedicineBatch.objects.filter(
+            # ✅ UPDATED: AUTO-GENERATE BATCH ID - Continues numbering after archived batches
+            # Example: If BATCH-007 is archived, next will be BATCH-008
+
+            # Get ALL batch IDs (including archived ones)
+            all_batches_ever = MedicineBatch.objects.filter(
                 batch_id__startswith='BATCH-'
             ).values_list('batch_id', flat=True)
 
-            if all_batches:
-                # Extract numbers from BATCH-XXX format
+            if all_batches_ever:
+                # Extract numbers from ALL batches (active + archived)
                 numbers = []
-                for batch in all_batches:
+                for batch in all_batches_ever:
                     try:
                         num = int(batch.split('-')[1])
                         numbers.append(num)
@@ -134,7 +124,8 @@ def medicine_stock(request):
                         continue
 
                 if numbers:
-                    next_number = max(numbers) + 1  # ✅ Numeric max - correct
+                    # Next batch ID is max + 1 (includes archived in the count)
+                    next_number = max(numbers) + 1
                 else:
                     next_number = 1
             else:
@@ -175,9 +166,6 @@ def medicine_stock(request):
             except ValueError:
                 messages.error(request, '❌ Invalid date format! Please use the date picker.')
                 return redirect('medicine_stock')
-
-            # Get today's date
-            today = date.today()
 
             # Date validation
             if date_received > today:
@@ -248,7 +236,7 @@ def medicine_stock(request):
                         brand=brand if brand else None,
                         category=category if category else None,
                         description=description if description else None,
-                        status='active'  # Explicitly set as active
+                        status='active'
                     )
                     messages.info(request, f'ℹ️ New medicine "{medicine.name}" created.')
 
@@ -261,7 +249,7 @@ def medicine_stock(request):
                     quantity_received=quantity,
                     quantity_available=quantity,
                     quantity_dispensed=0,
-                    status='active'  # Explicitly set as active
+                    status='active'
                 )
 
                 messages.success(
@@ -287,19 +275,18 @@ def medicine_stock(request):
         'category_filter': category_filter,
         'stock_filter': stock_filter,
         'archived_count': archived_count_display,
-        'today': date.today(),  # Add today's date for expired badge in template
+        'today': today,
     })
 
 
 # -------------------------------------------------------------------
-# NEW: Archived Medicines/Batches View (READ-ONLY - NO RESTORE)
+# UPDATED: Archived Medicines View - With category filter and today
 # -------------------------------------------------------------------
 @login_required
 def archived_medicines(request):
     """
     Display archived medicine batches.
     Admin only.
-    PERMANENT ARCHIVE - NO RESTORE OPTION.
     """
     if not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, '❌ Access denied. Admins only.')
@@ -324,8 +311,10 @@ def archived_medicines(request):
     if category_filter:
         archived_batches = archived_batches.filter(medicine__category__iexact=category_filter)
 
-    # Get unique categories for filter
-    categories = Medicine.objects.values_list('category', flat=True).distinct()
+    # Get unique categories for filter dropdown
+    categories = Medicine.objects.filter(
+        id__in=MedicineBatch.objects.filter(status='archived').values_list('medicine_id', flat=True)
+    ).values_list('category', flat=True).distinct()
 
     context = {
         'archived_batches': archived_batches,
@@ -333,20 +322,19 @@ def archived_medicines(request):
         'search_query': search_query,
         'category_filter': category_filter,
         'categories': categories,
-        'today': date.today(),  # For showing EXPIRED tag
+        'today': date.today(),
     }
 
     return render(request, 'admin_archived_medicines.html', context)
 
 
 # -------------------------------------------------------------------
-# NEW: Archive Batch (PERMANENT - NO RESTORE)
+# Archive Batch
 # -------------------------------------------------------------------
 @login_required
 def archive_batch(request, batch_id):
     """
-    Archive a medicine batch PERMANENTLY.
-    Once archived, it cannot be restored.
+    Archive a medicine batch.
     Admin only.
     """
     if not (request.user.is_staff or request.user.is_superuser):
@@ -371,7 +359,7 @@ def archive_batch(request, batch_id):
                 )
                 return redirect('medicine_stock')
 
-            # Archive the batch (permanent)
+            # Archive the batch
             batch.archive()
 
             messages.success(
@@ -388,21 +376,7 @@ def archive_batch(request, batch_id):
 
 
 # -------------------------------------------------------------------
-# REMOVED: Restore Batch Function
-# User requirement: Archived batches cannot be restored
-# -------------------------------------------------------------------
-# @login_required
-# def restore_batch(request, batch_id):
-#     """
-#     DISABLED: Restore functionality removed per user requirement.
-#     Archived batches are permanent and cannot be restored.
-#     """
-#     messages.error(request, '❌ Restore functionality is not available. Archived batches are permanent.')
-#     return redirect('archived_medicines')
-
-
-# -------------------------------------------------------------------
-# NEW: Delete Archived Batch (Permanent deletion from database)
+# UPDATED: Delete Archived Batch (Permanent)
 # -------------------------------------------------------------------
 @login_required
 def delete_archived_batch(request, batch_id):
@@ -439,7 +413,7 @@ def delete_archived_batch(request, batch_id):
 
 
 # -------------------------------------------------------------------
-# NEW: Edit Medicine (Batch Information)
+# Edit Medicine (Batch Information)
 # -------------------------------------------------------------------
 @login_required
 def edit_medicine(request, id):
@@ -530,7 +504,6 @@ def edit_batch(request, batch_id):
 
 # -------------------------------------------------------------------
 # DEPRECATED: Delete Medicine Batch (replaced with archive)
-# This is kept for backward compatibility but redirects to archive
 # -------------------------------------------------------------------
 @login_required
 def delete_medicine(request, id):
@@ -546,8 +519,7 @@ def delete_medicine(request, id):
 
 
 # -------------------------------------------------------------------
-# Medicine Distribution History - EXCLUDES ADMIN USERS
-# (UNCHANGED - keeping existing code)
+# UPDATED: Medicine Distribution History - REMOVED RECIPIENT FILTER
 # -------------------------------------------------------------------
 @login_required
 def medicine_distribution_history(request):
@@ -555,6 +527,11 @@ def medicine_distribution_history(request):
     View medicine distribution history.
     Only shows distributions to NON-ADMIN users (regular community members).
     Admin only view.
+
+    UPDATED:
+    - Changed "Unique Recipients" to "Recipients"
+    - Removed recipient filter dropdown
+    - Only search bar remains for filtering recipients
     """
     from apps.orders.models import Order, OrderItem
     from apps.accounts.models import Account
@@ -576,7 +553,7 @@ def medicine_distribution_history(request):
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
     medicine_filter = request.GET.get('medicine', '')
-    user_filter = request.GET.get('user', '')
+    # ❌ REMOVED: user_filter = request.GET.get('user', '')
 
     # Search by user name, email, or medicine name
     if search_query:
@@ -599,9 +576,9 @@ def medicine_distribution_history(request):
     if medicine_filter:
         completed_orders = completed_orders.filter(items__medicine__id=medicine_filter).distinct()
 
-    # User filter
-    if user_filter:
-        completed_orders = completed_orders.filter(user__id=user_filter)
+    # ❌ REMOVED: User filter
+    # if user_filter:
+    #     completed_orders = completed_orders.filter(user__id=user_filter)
 
     # Get statistics - ONLY for non-admin users
     total_distributions = completed_orders.count()
@@ -611,7 +588,8 @@ def medicine_distribution_history(request):
         order__user__is_superuser=False
     ).aggregate(total=Sum('quantity'))['total'] or 0
 
-    unique_recipients = completed_orders.values('user').distinct().count()
+    # ✅ CHANGED: "unique_recipients" → "recipients_count" for clarity
+    recipients_count = completed_orders.values('user').distinct().count()
 
     # Get most distributed medicines - ONLY for non-admin users
     top_medicines = OrderItem.objects.filter(
@@ -622,26 +600,28 @@ def medicine_distribution_history(request):
         total_qty=Sum('quantity')
     ).order_by('-total_qty')[:5]
 
-    # Get all medicines and ONLY non-admin users for filter dropdowns
+    # Get all medicines for filter dropdown
     all_medicines = Medicine.objects.all().order_by('name')
-    all_users = Account.objects.filter(
-        is_staff=False,
-        is_superuser=False
-    ).order_by('first_name', 'last_name')
+
+    # ❌ REMOVED: Get all non-admin users for filter dropdown
+    # all_users = Account.objects.filter(
+    #     is_staff=False,
+    #     is_superuser=False
+    # ).order_by('first_name', 'last_name')
 
     context = {
         'completed_orders': completed_orders,
         'total_distributions': total_distributions,
         'total_medicines_distributed': total_medicines_distributed,
-        'unique_recipients': unique_recipients,
+        'recipients_count': recipients_count,  # ✅ Changed variable name
         'top_medicines': top_medicines,
         'all_medicines': all_medicines,
-        'all_users': all_users,
+        # ❌ REMOVED: 'all_users': all_users,
         'search_query': search_query,
         'date_from': date_from,
         'date_to': date_to,
         'medicine_filter': medicine_filter,
-        'user_filter': user_filter,
+        # ❌ REMOVED: 'user_filter': user_filter,
     }
 
     return render(request, 'medicine_distribution_history.html', context)
@@ -649,7 +629,6 @@ def medicine_distribution_history(request):
 
 # -------------------------------------------------------------------
 # Medicine List (Public Browse) - ONLY SHOW ACTIVE MEDICINES
-# (UPDATED to filter by status='active')
 # -------------------------------------------------------------------
 @login_required
 def medicine_list(request):
@@ -689,7 +668,7 @@ def medicine_list(request):
         medicine.batch_list = MedicineBatch.objects.filter(
             medicine=medicine,
             quantity_available__gt=0,
-            status='active'  # Only active batches
+            status='active'
         ).order_by('expiry_date', 'batch_id').values_list('batch_id', flat=True).distinct()
         medicines_list.append(medicine)
 
@@ -718,7 +697,6 @@ def medicine_list(request):
 
 # -------------------------------------------------------------------
 # Medicine Info Page - ONLY SHOW IF ACTIVE
-# (UPDATED to check status)
 # -------------------------------------------------------------------
 @login_required
 def medicine_info(request, medicine_id):
@@ -729,7 +707,6 @@ def medicine_info(request, medicine_id):
 
 # -------------------------------------------------------------------
 # Add medicine to order - ONLY ACTIVE MEDICINES
-# (UPDATED to check status)
 # -------------------------------------------------------------------
 @login_required
 def add_to_order(request, medicine_id):
@@ -784,7 +761,7 @@ def add_to_order(request, medicine_id):
 
 
 # -------------------------------------------------------------------
-# Medicine History and Records (Placeholder views - UNCHANGED)
+# Medicine History and Records (Placeholder views)
 # -------------------------------------------------------------------
 @login_required
 def medicine_history(request):
