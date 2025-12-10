@@ -64,7 +64,7 @@
 
             <div style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);
                         padding: 15px 25px; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3);">
-                <p style="font-size: 2em; font-weight: 700; color: #fff; margin: 0;">{{ orders.count }}</p>
+                <p style="font-size: 2em; font-weight: 700; color: #fff; margin: 0;">{{ orders|length }}</p>
                 <p style="font-size: 0.85em; color: rgba(255, 255, 255, 0.9); margin: 5px 0 0 0;">Total Orders</p>
             </div>
         </div>
@@ -161,6 +161,20 @@
             <span>Completed</span>
             <span style="background: #dee2e6; padding: 4px 12px; 
                          border-radius: 20px; font-size: 0.85em;" id="completedCount">0</span>
+        </button>
+
+        <!-- Tab 5: Archived -->
+        <button onclick="switchTab('archived')" id="archivedTab"
+                style="flex: 1; min-width: 200px; padding: 18px 30px; border: none;
+                       background: #f8f9fa; color: #6c757d;
+                       font-size: 1.05em; font-weight: 600;
+                       border-radius: 12px 12px 0 0; cursor: pointer;
+                       transition: all 0.3s ease; display: flex; align-items: center;
+                       justify-content: center; gap: 10px;">
+            <i class="fas fa-archive"></i>
+            <span>Archived</span>
+            <span style="background: #dee2e6; padding: 4px 12px; 
+                         border-radius: 20px; font-size: 0.85em;" id="archivedCount">0</span>
         </button>
     </div>
 
@@ -829,6 +843,120 @@
         </div>
     </div>
 
+    <!-- ARCHIVED TAB (Archived Orders) -->
+    <div id="archivedContent" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr);
+                    gap: 24px; margin-bottom: 40px; max-height: 70vh; overflow-y: auto; overflow-x: hidden;
+                    padding-right: 10px;">
+            {% for order in archived_orders %}
+                <div style="background: #fff; border-radius: 16px;
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                            border-left: 5px solid #6c757d;
+                            transition: all 0.3s ease;
+                            position: relative;
+                            overflow: hidden;
+                            opacity: 0.9;">
+
+                    <!-- Status Badge - TOP RIGHT -->
+                    <div style="position: absolute; top: 15px; right: 15px; z-index: 10;
+                                background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+                                color: #495057; padding: 10px 18px; border-radius: 25px;
+                                font-weight: 700; font-size: 0.9em;
+                                box-shadow: 0 3px 12px rgba(108, 117, 125, 0.3);
+                                display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-archive"></i>
+                        Archived
+                    </div>
+
+                    <!-- Order Header -->
+                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                                padding: 20px 24px; padding-top: 55px; border-bottom: 2px solid #e8ecf1;">
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0; font-size: 1.4em; color: #1a202c; font-weight: 700;
+                                       display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-receipt" style="color: #6c757d;"></i>
+                                Order #{{ order.id }}
+                            </h3>
+                        </div>
+
+                        <!-- Customer Info Grid -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em;">
+                                <i class="fas fa-user" style="color: #6c757d; width: 16px;"></i>
+                                <span>{{ order.user.full_name }}</span>
+                                {% if order.user.senior_citizen_id %}
+                                    <span style="background: #ffc107; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 700;">SENIOR CITIZEN</span>
+                                {% elif order.user.pwd_id %}
+                                    <span style="background: #ffc107; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 700;">PERSON WITH DISABILITY</span>
+                                {% endif %}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em;">
+                                <i class="fas fa-envelope" style="color: #6c757d; width: 16px;"></i>
+                                <span>{{ order.user.email }}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em; grid-column: 1 / -1;">
+                                <i class="fas fa-map-marker-alt" style="color: #6c757d; width: 16px;"></i>
+                                <span>{{ order.user.house_number }} {{ order.user.street }}, {{ order.user.barangay }}, {{ order.user.municipality }}, {{ order.user.province }}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em;">
+                                <i class="fas fa-calendar-alt" style="color: #6c757d; width: 16px;"></i>
+                                <span>Archived: {{ order.completed_at|date:"M d, Y h:i A" }}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; color: #4a5568; font-size: 0.9em;">
+                                <i class="fas fa-truck" style="color: #6c757d; width: 16px;"></i>
+                                <span><strong>Driver:</strong> {{ order.driver|default:"Not assigned" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Body -->
+                    <div style="padding: 24px;">
+                        <!-- Order Items -->
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+                                    padding: 20px; border-radius: 12px;">
+                            <div style="font-weight: 700; color: #2d3748; margin-bottom: 15px;
+                                        display: flex; align-items: center; gap: 8px; font-size: 1.05em;">
+                                <i class="fas fa-pills" style="color: #6c757d;"></i>
+                                Order Items
+                            </div>
+
+                            {% for item in order.items.all %}
+                                <div style="display: flex; justify-content: space-between; align-items: center;
+                                            padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                                    <span style="font-weight: 600; color: #2d3748;">💊 {{ item.medicine.name }}</span>
+                                    <span style="background: white; padding: 4px 12px; border-radius: 20px;
+                                                 font-weight: 600; color: #6c757d; font-size: 0.9em;">× {{ item.quantity }}</span>
+                                </div>
+                            {% endfor %}
+
+                            <div style="text-align: right; font-size: 1.1em; font-weight: 700;
+                                        margin-top: 15px; padding-top: 15px; border-top: 2px solid #cbd5e0; color: #2d3748;">
+                                <i class="fas fa-box"></i> Total Items: {{ order.items.count }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 40px;
+                            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+                            border-radius: 16px; border: 2px dashed #cbd5e0;">
+                    <div style="width: 100px; height: 100px; margin: 0 auto 20px;
+                                background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+                                border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-archive" style="font-size: 3em; color: #6c757d;"></i>
+                    </div>
+                    <h3 style="font-size: 1.4em; color: #2d3748; margin-bottom: 10px; font-weight: 600;">
+                        No Archived Orders
+                    </h3>
+                    <p style="color: #718096; font-size: 1em; margin: 0;">
+                        Archived orders will appear here for record keeping.
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -837,11 +965,13 @@
         const completionTab = document.getElementById('completionTab');
         const cancelledTab = document.getElementById('cancelledTab');
         const completedTab = document.getElementById('completedTab');
+        const archivedTab = document.getElementById('archivedTab');
         
         const queueContent = document.getElementById('queueContent');
         const completionContent = document.getElementById('completionContent');
         const cancelledContent = document.getElementById('cancelledContent');
         const completedContent = document.getElementById('completedContent');
+        const archivedContent = document.getElementById('archivedContent');
 
         // Reset all tabs
         queueTab.style.background = '#f8f9fa';
@@ -860,11 +990,16 @@
         completedTab.style.color = '#6c757d';
         completedTab.style.boxShadow = 'none';
 
+        archivedTab.style.background = '#f8f9fa';
+        archivedTab.style.color = '#6c757d';
+        archivedTab.style.boxShadow = 'none';
+
         // Hide all content
         queueContent.style.display = 'none';
         completionContent.style.display = 'none';
         cancelledContent.style.display = 'none';
         completedContent.style.display = 'none';
+        archivedContent.style.display = 'none';
 
         // Activate selected tab
         if (tab === 'queue') {
@@ -887,6 +1022,11 @@
             completedTab.style.color = 'white';
             completedTab.style.boxShadow = '0 4px 15px rgba(40, 167, 69, 0.3)';
             completedContent.style.display = 'block';
+        } else if (tab === 'archived') {
+            archivedTab.style.background = 'linear-gradient(135deg, #6c757d 0%, #5a6268 100%)';
+            archivedTab.style.color = 'white';
+            archivedTab.style.boxShadow = '0 4px 15px rgba(108, 117, 125, 0.3)';
+            archivedContent.style.display = 'block';
         }
     }
 
@@ -895,11 +1035,13 @@
         const completionOrders = document.querySelectorAll('#completionContent > div > div[style*="border-left: 5px solid"]').length;
         const cancelledOrders = document.querySelectorAll('#cancelledContent > div > div[style*="border-left: 5px solid"]').length;
         const completedOrders = document.querySelectorAll('#completedContent > div > div[style*="border-left: 5px solid"]').length;
+        const archivedOrders = document.querySelectorAll('#archivedContent > div > div[style*="border-left: 5px solid"]').length;
         
         document.getElementById('queueCount').textContent = queueOrders;
         document.getElementById('completionCount').textContent = completionOrders;
         document.getElementById('cancelledCount').textContent = cancelledOrders;
         document.getElementById('completedCount').textContent = completedOrders;
+        document.getElementById('archivedCount').textContent = archivedOrders;
         
         // Auto-switch to first non-empty tab
         if (queueOrders === 0 && completionOrders > 0) {

@@ -333,10 +333,16 @@ def delivery_page(request):
     # Combine: queued orders first, then non-queued
     orders = list(orders_with_queue) + list(orders_without_queue)
 
+    # Get archived orders
+    archived_orders = Order.objects.filter(
+        is_archived=True
+    ).select_related('user').order_by('-completed_at')
+
     drivers = Order.DRIVER_CHOICES
 
     context = {
         'orders': orders,
+        'archived_orders': archived_orders,
         'drivers': drivers,
     }
 
