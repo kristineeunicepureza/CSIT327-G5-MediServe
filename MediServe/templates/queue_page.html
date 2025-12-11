@@ -14,7 +14,6 @@
         margin: 0;
         background-color: #fff;
         border-radius: 0;
-        box-shadow: none;
         min-height: 100vh;
         overflow: hidden;
         display: flex;
@@ -34,7 +33,8 @@
     }
 
     .btn-back {
-        width: 45px; height: 45px;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
         display: flex;
         justify-content: center;
@@ -46,9 +46,16 @@
         text-decoration: none;
         transition: 0.3s;
     }
-    .btn-back:hover { background-color: rgba(255,255,255,0.3); transform: translateX(-3px); }
+    .btn-back:hover {
+        background-color: rgba(255,255,255,0.3);
+        transform: translateX(-3px);
+    }
 
-    .page-title { font-size: 1.8em; font-weight: 600; color: #fff; }
+    .page-title {
+        font-size: 1.8em;
+        font-weight: 600;
+        color: #fff;
+    }
 
     /* Main content */
     .main-content {
@@ -59,14 +66,49 @@
         flex: 1;
     }
 
-    .alert { padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; }
-    .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    /* SUCCESS MESSAGE (NEW DESIGN) */
+    .alert-success {
+        background-color: #e8f9ee;
+        color: #1e7e34;
+        border: 2px solid #28a745;
+        padding: 18px 22px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        max-width: 600px;
+        margin: 0 auto 25px auto;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
 
-    .queue-number-section { text-align: center; }
+    .queue-number-section { text-align: center; margin-top: 10px; }
     .queue-number-section h2 { color: #36489e; margin-bottom: 15px; font-weight: 700; font-size: 1.8em; }
-    .queue-number { background-color: #36489e; color: #fff; width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; font-size: 3em; font-weight: bold; transition: transform 0.3s ease; }
+
+    .queue-number {
+        background-color: #36489e;
+        color: #fff;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        margin: 0 auto 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 3em;
+        font-weight: bold;
+        transition: transform 0.3s ease;
+    }
+
     .queue-number.updated { animation: pulse 0.5s ease; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
     .currently-serving { color: #dc3545; font-size: 1.2em; }
     .position-info { color: #28a745; font-size: 1.1em; margin-top: 10px; }
 
@@ -76,6 +118,8 @@
         background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
         padding: 25px;
         box-shadow: 0 4px 20px rgba(54,72,158,0.08);
+        max-width: 600px;
+        margin: 20px auto;
     }
     .status-card .label { font-weight: 700; color: #36489e; }
     .status-card .wait-time { font-size: 1.8em; color: #28a745; margin-top: 5px; display: block; }
@@ -83,10 +127,32 @@
     .status-card .status-text { font-weight: 700; color: #36489e; }
     .status-card .ahead-text { font-size: 0.9em; color: #555; margin-top: 5px; }
 
-    .order-items-list { list-style: none; padding: 0; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; }
-    .order-items-list li { padding: 15px 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; background-color: #fff; font-size: 1em; }
+    .order-items-list {
+        list-style: none;
+        padding: 0;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        max-width: 600px;
+        margin: 10px auto;
+    }
+    .order-items-list li {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        background-color: #fff;
+        font-size: 1em;
+    }
 
-    .actions { display: flex; flex-direction: column; gap: 15px; align-items: center; margin-top: 25px; }
+    .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        margin-top: 25px;
+    }
+
     .btn {
         width: 100%;
         max-width: 400px;
@@ -103,10 +169,22 @@
         transition: all 0.3s ease;
         text-decoration: none;
     }
-    .btn-primary { background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%); color: #fff; box-shadow: 0 4px 15px rgba(54,72,158,0.25); }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(54,72,158,0.35); }
+    .btn-primary {
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(54,72,158,0.25);
+    }
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(54,72,158,0.35);
+    }
 
-    .no-order-msg { font-size: 1.1em; color: #555; text-align: center; margin-bottom: 20px; }
+    .no-order-msg {
+        font-size: 1.1em;
+        color: #555;
+        text-align: center;
+        margin-bottom: 20px;
+    }
     .loading { animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
@@ -121,7 +199,6 @@
 
     <div class="main-content">
         <div id="queue-content">
-            <!-- Content will be dynamically updated by JS -->
             <p class="no-order-msg">Loading queue status... <i class="fas fa-spinner loading"></i></p>
         </div>
     </div>
@@ -130,7 +207,6 @@
 <script>
     let lastQueueNumber = null;
 
-    // Function to fetch and update queue status
     async function updateQueueStatus() {
         try {
             const response = await fetch('{% url "queue_status_api" %}');
@@ -140,7 +216,7 @@
             const contentDiv = document.getElementById('queue-content');
 
             if (data.queue_number) {
-                // Check if queue number changed for animation
+                // Highlight queue number animation
                 const queueNumberDiv = document.querySelector('.queue-number');
                 if (lastQueueNumber !== null && lastQueueNumber !== data.queue_number) {
                     queueNumberDiv.classList.add('updated');
@@ -148,18 +224,23 @@
                 }
                 lastQueueNumber = data.queue_number;
 
+                // Success message
                 let alertHtml = '';
                 if (data.is_almost_turn) {
-                    alertHtml = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Your order is almost ready!</div>';
+                    alertHtml = `
+                        <div class="alert-success">
+                            <i class="fas fa-check-circle"></i> Your order is almost ready!
+                        </div>`;
                 }
 
                 contentDiv.innerHTML = `
                     ${alertHtml}
+
                     <section class="queue-number-section">
                         <h2>Your Queue Number</h2>
                         <div class="queue-number">#${data.queue_number}</div>
                         <p class="currently-serving">Currently Serving: <strong>#${data.currently_serving}</strong></p>
-                        <p class="position-info">You are <strong>${data.position}${data.position === 1 ? 'st' : data.position === 2 ? 'nd' : data.position === 3 ? 'rd' : 'th'}</strong> in line (${data.total_ahead} orders ahead)</p>
+                        <p class="position-info">You are <strong>${data.position}</strong> in line (${data.total_ahead} orders ahead)</p>
                     </section>
 
                     <section class="status-card">
@@ -170,7 +251,7 @@
                     </section>
 
                     <section>
-                        <h3 style="color:#36489e; margin-bottom:12px; font-weight:700;">Your Order Items:</h3>
+                        <h3 style="color:#36489e; margin-bottom:12px; font-weight:700; text-align:center;">Your Order Items:</h3>
                         <ul class="order-items-list">
                             ${data.items.map(item => `<li><span>${item.name}</span><strong>Qty: ${item.quantity}</strong></li>`).join('')}
                         </ul>
@@ -183,7 +264,6 @@
                     </section>
                 `;
             } else {
-                // No active order
                 contentDiv.innerHTML = `
                     <p class="no-order-msg">You do not have an active order in the queue.</p>
                     <div class="actions">
@@ -195,11 +275,11 @@
             }
         } catch (error) {
             console.error('Error fetching queue status:', error);
-            document.getElementById('queue-content').innerHTML = '<p class="no-order-msg">Error loading queue status. Retrying in 5 seconds... <i class="fas fa-spinner loading"></i></p>';
+            document.getElementById('queue-content').innerHTML =
+                '<p class="no-order-msg">Error loading queue status. Retrying in 5 seconds... <i class="fas fa-spinner loading"></i></p>';
         }
     }
 
-    // Update immediately on load, then every 5 seconds
     updateQueueStatus();
     setInterval(updateQueueStatus, 5000);
 </script>
