@@ -5,24 +5,34 @@
 
 {% block content %}
 <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f5f7fa; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        background: #f5f7fa;
+    }
 
     .page-container {
         width: 100vw;
         margin: 0;
         background-color: #fff;
         border-radius: 0;
+        box-shadow: none;
         min-height: 100vh;
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
     }
 
-    /* Header */
+    /* Compact Header */
     .page-header {
-        padding: 25px 30px;
+        padding: 18px 25px;
         background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
         display: flex;
         align-items: center;
@@ -30,135 +40,327 @@
         position: sticky;
         top: 0;
         z-index: 100;
+        box-shadow: 0 2px 8px rgba(54, 72, 158, 0.15);
     }
 
     .btn-back {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: rgba(255,255,255,0.2);
+        background-color: rgba(255, 255, 255, 0.2);
         color: #fff;
+        font-size: 1em;
         font-weight: bold;
         border: none;
         text-decoration: none;
-        transition: 0.3s;
+        transition: all 0.3s ease;
     }
+
     .btn-back:hover {
-        background-color: rgba(255,255,255,0.3);
+        background-color: rgba(255, 255, 255, 0.35);
         transform: translateX(-3px);
     }
 
     .page-title {
-        font-size: 1.8em;
-        font-weight: 600;
+        font-size: 1.4em;
+        font-weight: 700;
         color: #fff;
-    }
-
-    /* Main content */
-    .main-content {
-        padding: 30px;
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-        flex: 1;
-    }
-
-    /* SUCCESS MESSAGE (NEW DESIGN) */
-    .alert-success {
-        background-color: #e8f9ee;
-        color: #1e7e34;
-        border: 2px solid #28a745;
-        padding: 18px 22px;
-        border-radius: 14px;
-        font-weight: 600;
-        font-size: 1rem;
         display: flex;
         align-items: center;
         gap: 10px;
-        justify-content: center;
-        max-width: 600px;
-        margin: 0 auto 25px auto;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     }
 
-    .queue-number-section { text-align: center; margin-top: 10px; }
-    .queue-number-section h2 { color: #36489e; margin-bottom: 15px; font-weight: 700; font-size: 1.8em; }
+    /* Main content - INCREASED GAP */
+    .main-content {
+        padding: 20px 20px 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 25px; /* INCREASED from 18px */
+        flex: 1;
+        max-width: 700px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    /* Success Alert with MORE BOTTOM SPACE */
+    .alert {
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 35px; /* INCREASED from 30px */
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideDown 0.5s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 2px solid #28a745;
+    }
+
+    .alert-icon {
+        font-size: 1.5em;
+        color: #28a745;
+        flex-shrink: 0;
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-content strong {
+        display: block;
+        font-size: 1em;
+        margin-bottom: 3px;
+    }
+
+    .alert-content span {
+        font-size: 0.9em;
+    }
+
+    /* Queue Number Section - ADDED BOTTOM MARGIN */
+    .queue-number-section {
+        text-align: center;
+        background: #ffffff;
+        padding: 25px 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.1);
+        border: 1px solid #e8eef5;
+        margin-bottom: 10px; /* ADDED */
+    }
+
+    .queue-number-section h2 {
+        color: #36489e;
+        margin-bottom: 15px;
+        font-weight: 700;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
 
     .queue-number {
-        background-color: #36489e;
+        background: #36489e;
         color: #fff;
-        width: 140px;
-        height: 140px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
-        margin: 0 auto 10px;
+        margin: 0 auto 15px;
         display: flex;
         justify-content: center;
         align-items: center;
         font-size: 3em;
-        font-weight: bold;
+        font-weight: 800;
         transition: transform 0.3s ease;
+        box-shadow: 0 8px 25px rgba(54, 72, 158, 0.25);
+        border: 4px solid #5c74e3;
     }
 
-    .queue-number.updated { animation: pulse 0.5s ease; }
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+    .queue-number.updated {
+        animation: bounceScale 0.6s ease;
     }
 
-    .currently-serving { color: #dc3545; font-size: 1.2em; }
-    .position-info { color: #28a745; font-size: 1.1em; margin-top: 10px; }
+    @keyframes bounceScale {
+        0%, 100% { transform: scale(1); }
+        25% { transform: scale(1.08); }
+        50% { transform: scale(0.95); }
+        75% { transform: scale(1.03); }
+    }
 
+    .currently-serving {
+        color: #28a745;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .currently-serving strong {
+        color: #1e7e34;
+        font-size: 1.1em;
+        font-weight: 700;
+    }
+
+    .position-info {
+        color: #36489e;
+        font-size: 1em;
+        margin-top: 8px;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    .position-info strong {
+        color: #36489e;
+        font-weight: 700;
+    }
+
+    .position-info .sub-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+        display: block;
+    }
+
+    /* Status Card - ADDED BOTTOM MARGIN */
     .status-card {
-        border: 1px solid #e5e7eb;
+        background: #ffffff;
         border-radius: 16px;
-        background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
-        padding: 25px;
-        box-shadow: 0 4px 20px rgba(54,72,158,0.08);
-        max-width: 600px;
-        margin: 20px auto;
+        padding: 22px;
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.1);
+        border: 1px solid #e8eef5;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 10px; /* ADDED */
     }
-    .status-card .label { font-weight: 700; color: #36489e; }
-    .status-card .wait-time { font-size: 1.8em; color: #28a745; margin-top: 5px; display: block; }
-    .status-card .label-small { font-size: 0.95em; color: #777; margin-top: 10px; }
-    .status-card .status-text { font-weight: 700; color: #36489e; }
-    .status-card .ahead-text { font-size: 0.9em; color: #555; margin-top: 5px; }
+
+    .status-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.15);
+    }
+
+    .status-card .label {
+        font-weight: 700;
+        color: #36489e;
+        font-size: 0.95em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-card .wait-time {
+        font-size: 2em;
+        color: #28a745;
+        margin-top: 8px;
+        display: block;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .status-card .label-small {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #f0f4f8;
+    }
+
+    .status-card .status-text {
+        font-weight: 700;
+        color: #28a745;
+        font-size: 1em;
+    }
+
+    .status-card .ahead-text {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Order Items Section - ADDED BOTTOM MARGIN */
+    .order-section {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.1);
+        border: 1px solid #e8eef5;
+        margin-bottom: 10px; /* ADDED */
+    }
+
+    .order-section h3 {
+        color: #36489e;
+        margin-bottom: 15px;
+        font-weight: 700;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
     .order-items-list {
         list-style: none;
         padding: 0;
-        border-radius: 16px;
+        border-radius: 10px;
         overflow: hidden;
-        border: 1px solid #e5e7eb;
-        max-width: 600px;
-        margin: 10px auto;
+        border: 1px solid #e8eef5;
     }
+
     .order-items-list li {
-        padding: 15px 20px;
-        border-bottom: 1px solid #e5e7eb;
+        padding: 14px 18px;
+        border-bottom: 1px solid #e8eef5;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         background-color: #fff;
+        font-size: 0.95em;
+        transition: all 0.25s ease;
+    }
+
+    .order-items-list li:last-child {
+        border-bottom: none;
+    }
+
+    .order-items-list li:hover {
+        background-color: #f8fafc;
+        padding-left: 22px;
+    }
+
+    .order-items-list li .item-name {
+        font-weight: 500;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .order-items-list li .item-name i {
+        color: #36489e;
         font-size: 1em;
     }
 
+    .order-items-list li .item-quantity {
+        color: #36489e;
+        font-weight: 700;
+        background-color: #e8eef5;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+    }
+
+    /* Actions Section - INCREASED SPACING */
     .actions {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
         align-items: center;
-        margin-top: 25px;
+        margin-top: 15px; /* INCREASED from 5px */
+        padding-bottom: 25px; /* INCREASED from 5px */
     }
 
     .btn {
         width: 100%;
-        max-width: 400px;
-        padding: 16px;
-        font-size: 1.1em;
-        font-weight: 600;
+        max-width: 450px;
+        padding: 15px 25px;
+        font-size: 1em;
+        font-weight: 700;
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -169,24 +371,106 @@
         transition: all 0.3s ease;
         text-decoration: none;
     }
+
     .btn-primary {
-        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        background: #36489e;
         color: #fff;
-        box-shadow: 0 4px 15px rgba(54,72,158,0.25);
-    }
-    .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(54,72,158,0.35);
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.25);
     }
 
+    .btn-primary:hover:not(:disabled) {
+        background: #2d3a82;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.35);
+    }
+
+    .btn-primary:active {
+        transform: translateY(-1px);
+    }
+
+    /* No Order Message */
     .no-order-msg {
-        font-size: 1.1em;
-        color: #555;
+        font-size: 1.05em;
+        color: #666;
         text-align: center;
         margin-bottom: 20px;
+        background: #ffffff;
+        padding: 35px 25px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.1);
+        border: 1px solid #e8eef5;
     }
-    .loading { animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .no-order-msg .icon {
+        font-size: 2.5em;
+        color: #36489e;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .no-order-msg strong {
+        display: block;
+        font-size: 1.15em;
+        color: #36489e;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    /* Loading Animation */
+    .loading {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        color: #36489e;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 15px 18px;
+        }
+
+        .page-title {
+            font-size: 1.2em;
+        }
+
+        .main-content {
+            padding: 15px 15px 0 15px;
+            gap: 20px; /* INCREASED from 15px */
+        }
+
+        .alert {
+            margin-bottom: 15px; /* INCREASED from 18px */
+        }
+
+        .queue-number {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5em;
+        }
+
+        .status-card .wait-time {
+            font-size: 1.8em;
+        }
+
+        .btn {
+            font-size: 0.95em;
+            padding: 13px 20px;
+        }
+
+        .order-section, .status-card, .queue-number-section {
+            padding: 18px 15px;
+        }
+
+        .actions {
+            padding-bottom: 20px; /* INCREASED from 8px */
+            margin-top: 10px;
+        }
+    }
 </style>
 
 <div class="page-container">
@@ -194,12 +478,20 @@
         <a href="{% url 'main_menu' %}" class="btn-back">
             <i class="fas fa-arrow-left"></i>
         </a>
-        <h1 class="page-title">Queue Status</h1>
+        <h1 class="page-title">
+            <i class="fas fa-clock"></i>
+            Queue Status
+        </h1>
     </div>
 
     <div class="main-content">
         <div id="queue-content">
-            <p class="no-order-msg">Loading queue status... <i class="fas fa-spinner loading"></i></p>
+            <!-- Content will be dynamically updated by JS -->
+            <p class="no-order-msg">
+                <i class="fas fa-spinner loading"></i>
+                <br><br>
+                Loading your queue status...
+            </p>
         </div>
     </div>
 </div>
@@ -207,6 +499,7 @@
 <script>
     let lastQueueNumber = null;
 
+    // Function to fetch and update queue status
     async function updateQueueStatus() {
         try {
             const response = await fetch('{% url "queue_status_api" %}');
@@ -216,72 +509,140 @@
             const contentDiv = document.getElementById('queue-content');
 
             if (data.queue_number) {
-                // Highlight queue number animation
+                // Check if queue number changed for animation
                 const queueNumberDiv = document.querySelector('.queue-number');
-                if (lastQueueNumber !== null && lastQueueNumber !== data.queue_number) {
+                if (queueNumberDiv && lastQueueNumber !== null && lastQueueNumber !== data.queue_number) {
                     queueNumberDiv.classList.add('updated');
-                    setTimeout(() => queueNumberDiv.classList.remove('updated'), 500);
+                    setTimeout(() => queueNumberDiv.classList.remove('updated'), 600);
                 }
                 lastQueueNumber = data.queue_number;
 
-                // Success message
                 let alertHtml = '';
                 if (data.is_almost_turn) {
                     alertHtml = `
-                        <div class="alert-success">
-                            <i class="fas fa-check-circle"></i> Your order is almost ready!
-                        </div>`;
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle alert-icon"></i>
+                            <div class="alert-content">
+                                <strong>Almost Ready!</strong>
+                                <span>Your order is being prepared. Please be ready for pickup.</span>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 contentDiv.innerHTML = `
                     ${alertHtml}
 
                     <section class="queue-number-section">
-                        <h2>Your Queue Number</h2>
+                        <h2>
+                            <i class="fas fa-ticket-alt"></i>
+                            Your Queue Number
+                        </h2>
                         <div class="queue-number">#${data.queue_number}</div>
-                        <p class="currently-serving">Currently Serving: <strong>#${data.currently_serving}</strong></p>
-                        <p class="position-info">You are <strong>${data.position}</strong> in line (${data.total_ahead} orders ahead)</p>
+                        <p class="currently-serving">
+                            Currently Serving: <strong>#${data.currently_serving}</strong>
+                        </p>
+                        <p class="position-info">
+                            You are <strong>${getOrdinalSuffix(data.position)}</strong> in line
+                            <span class="sub-text">(${data.total_ahead} ${data.total_ahead === 1 ? 'order' : 'orders'} ahead)</span>
+                        </p>
                     </section>
 
                     <section class="status-card">
-                        <p class="label">Estimated Wait Time</p>
+                        <p class="label">
+                            <i class="fas fa-hourglass-half"></i>
+                            Estimated Wait Time
+                        </p>
                         <strong class="wait-time">${data.estimated_wait}</strong>
-                        <p class="label-small">Status: <span class="status-text">${data.status}</span></p>
-                        <p class="ahead-text">${data.total_ahead} orders ahead of you</p>
+                        <p class="label-small">
+                            Status: <span class="status-text"><i class="fas fa-check-circle"></i> ${data.status}</span>
+                        </p>
+                        <p class="ahead-text">
+                            <i class="fas fa-users"></i>
+                            ${data.total_ahead} ${data.total_ahead === 1 ? 'order' : 'orders'} ahead of you
+                        </p>
                     </section>
 
-                    <section>
-                        <h3 style="color:#36489e; margin-bottom:12px; font-weight:700; text-align:center;">Your Order Items:</h3>
+                    <section class="order-section">
+                        <h3>
+                            <i class="fas fa-list-ul"></i>
+                            Your Order Items
+                        </h3>
                         <ul class="order-items-list">
-                            ${data.items.map(item => `<li><span>${item.name}</span><strong>Qty: ${item.quantity}</strong></li>`).join('')}
+                            ${data.items.map(item => `
+                                <li>
+                                    <span class="item-name">
+                                        <i class="fas fa-pills"></i>
+                                        ${item.name}
+                                    </span>
+                                    <span class="item-quantity">Qty: ${item.quantity}</span>
+                                </li>
+                            `).join('')}
                         </ul>
                     </section>
 
                     <section class="actions">
                         <a href="{% url 'main_menu' %}" class="btn btn-primary">
-                            <i class="fas fa-home"></i> Return to Main Menu
+                            <i class="fas fa-home"></i>
+                            Return to Main Menu
                         </a>
                     </section>
                 `;
             } else {
+                // No active order
                 contentDiv.innerHTML = `
-                    <p class="no-order-msg">You do not have an active order in the queue.</p>
+                    <p class="no-order-msg">
+                        <i class="fas fa-inbox icon"></i>
+                        <strong>No Active Orders</strong>
+                        You don't have any orders in the queue right now.
+                    </p>
                     <div class="actions">
                         <a href="{% url 'medicine_list' %}" class="btn btn-primary">
-                            <i class="fas fa-prescription-bottle-alt"></i> Browse Medicines
+                            <i class="fas fa-prescription-bottle-alt"></i>
+                            Browse Medicines
                         </a>
                     </div>
                 `;
             }
         } catch (error) {
             console.error('Error fetching queue status:', error);
-            document.getElementById('queue-content').innerHTML =
-                '<p class="no-order-msg">Error loading queue status. Retrying in 5 seconds... <i class="fas fa-spinner loading"></i></p>';
+            document.getElementById('queue-content').innerHTML = `
+                <p class="no-order-msg">
+                    <i class="fas fa-exclamation-triangle icon" style="color: #ffc107;"></i>
+                    <strong style="color: #856404;">Connection Error</strong>
+                    Unable to load queue status. Retrying in 5 seconds...
+                    <br><br>
+                    <i class="fas fa-spinner loading"></i>
+                </p>
+            `;
         }
     }
 
+    // Helper function to get ordinal suffix (1st, 2nd, 3rd, etc.)
+    function getOrdinalSuffix(position) {
+        const j = position % 10;
+        const k = position % 100;
+
+        if (j === 1 && k !== 11) {
+            return position + 'st';
+        }
+        if (j === 2 && k !== 12) {
+            return position + 'nd';
+        }
+        if (j === 3 && k !== 13) {
+            return position + 'rd';
+        }
+        return position + 'th';
+    }
+
+    // Update immediately on load, then every 5 seconds
     updateQueueStatus();
-    setInterval(updateQueueStatus, 5000);
+    const updateInterval = setInterval(updateQueueStatus, 5000);
+
+    // Clear interval when leaving page
+    window.addEventListener('beforeunload', () => {
+        clearInterval(updateInterval);
+    });
 </script>
 
 {% endblock %}
