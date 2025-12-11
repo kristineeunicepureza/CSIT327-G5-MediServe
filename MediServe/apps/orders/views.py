@@ -170,7 +170,8 @@ def order_checkout(request):
                 f"Check your queue status below."
             )
 
-        return redirect("queue_status")
+        # Redirect to queue status for THIS specific order
+        return redirect("queue_status_order", order_id=order.id)
 
     except Order.DoesNotExist:
         messages.warning(request, "⚠️ No items in your cart.")
@@ -178,11 +179,21 @@ def order_checkout(request):
 
 
 @login_required
-def queue_status(request):
-    current_order = Order.objects.filter(
-        user=request.user,
-        status__in=['Pending', 'Processing']
-    ).first()
+def queue_status(request, order_id=None):
+    # If order_id provided, get that specific order
+    # Otherwise get the first active order for the user
+    if order_id:
+        current_order = get_object_or_404(
+            Order,
+            id=order_id,
+            user=request.user,
+            status__in=['Pending', 'Processing']
+        )
+    else:
+        current_order = Order.objects.filter(
+            user=request.user,
+            status__in=['Pending', 'Processing']
+        ).first()
 
     serving_order = Order.objects.filter(
         status__in=['Pending', 'Processing']
@@ -225,10 +236,23 @@ def queue_status(request):
 # Updated API (returns additional fields including priority status)
 @login_required
 def queue_status_api(request):
-    current_order = Order.objects.filter(
-        user=request.user,
-        status__in=['Pending', 'Processing']
-    ).first()
+    # Get order_id from GET parameter
+    order_id = request.GET.get('order_id')
+    
+    if order_id:
+        try:
+            current_order = Order.objects.get(
+                id=order_id,
+                user=request.user,
+                status__in=['Pending', 'Processing']
+            )
+        except Order.DoesNotExist:
+            return JsonResponse({'error': 'Order not found'}, status=404)
+    else:
+        current_order = Order.objects.filter(
+            user=request.user,
+            status__in=['Pending', 'Processing']
+        ).first()
 
     serving_order = Order.objects.filter(
         status__in=['Pending', 'Processing']
@@ -349,6 +373,33 @@ def delivery_page(request):
                 messages.success(request, f"🚚 Order #{order_id} is out for delivery!")
 
             elif action == 'complete' and order.status == 'Shipped':
+                # Deduct stock from medicine batches (FEFO - First Expire, First Out)
+                from apps.medicine.models import MedicineBatch
+                
+                for item in order.items.all():
+                    remaining_qty = item.quantity
+                    
+                    # Get batches ordered by expiry date (FEFO)
+                    batches = MedicineBatch.objects.filter(
+                        medicine=item.medicine,
+                        status='active',
+                        quantity_available__gt=0
+                    ).order_by('expiry_date', 'batch_id')
+                    
+                    for batch in batches:
+                        if remaining_qty <= 0:
+                            break
+                        
+                        if batch.quantity_available >= remaining_qty:
+                            # This batch has enough stock
+                            batch.dispense(remaining_qty)
+                            remaining_qty = 0
+                        else:
+                            # Use all available from this batch
+                            dispensed = batch.quantity_available
+                            batch.dispense(dispensed)
+                            remaining_qty -= dispensed
+                
                 order.status = 'Completed'
                 order.completed_at = timezone.now()
                 order.save()
@@ -461,6 +512,33 @@ def mark_order_completed(request, order_id):
         try:
             order = Order.objects.get(id=order_id)
             if order.status == 'Shipped':
+                # Deduct stock from medicine batches (FEFO - First Expire, First Out)
+                from apps.medicine.models import MedicineBatch
+                
+                for item in order.items.all():
+                    remaining_qty = item.quantity
+                    
+                    # Get batches ordered by expiry date (FEFO)
+                    batches = MedicineBatch.objects.filter(
+                        medicine=item.medicine,
+                        status='active',
+                        quantity_available__gt=0
+                    ).order_by('expiry_date', 'batch_id')
+                    
+                    for batch in batches:
+                        if remaining_qty <= 0:
+                            break
+                        
+                        if batch.quantity_available >= remaining_qty:
+                            # This batch has enough stock
+                            batch.dispense(remaining_qty)
+                            remaining_qty = 0
+                        else:
+                            # Use all available from this batch
+                            dispensed = batch.quantity_available
+                            batch.dispense(dispensed)
+                            remaining_qty -= dispensed
+                
                 order.status = 'Completed'
                 order.completed_at = timezone.now()
                 order.save()

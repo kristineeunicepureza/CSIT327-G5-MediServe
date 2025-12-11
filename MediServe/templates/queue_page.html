@@ -498,11 +498,16 @@
 
 <script>
     let lastQueueNumber = null;
+    
+    // Get order_id from URL if available
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order_id') || '{{ current_order.id }}';
 
     // Function to fetch and update queue status
     async function updateQueueStatus() {
         try {
-            const response = await fetch('{% url "queue_status_api" %}');
+            const url = orderId ? '{% url "queue_status_api" %}?order_id=' + orderId : '{% url "queue_status_api" %}';
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Network error');
             const data = await response.json();
 

@@ -128,15 +128,19 @@ class Order(models.Model):
         """
         if self.status not in ['Pending', 'Processing']:
             return None
+        
+        if not self.queue_number:
+            return None
 
-        # Get all active orders ordered by queue_number
-        active_orders = Order.objects.filter(
-            status__in=['Pending', 'Processing']
-        ).order_by('queue_number', 'created_at')
+        # Count how many orders are ahead (have lower queue_number)
+        orders_ahead = Order.objects.filter(
+            status__in=['Pending', 'Processing'],
+            queue_number__isnull=False,
+            queue_number__lt=self.queue_number
+        ).count()
 
-        for position, order in enumerate(active_orders, start=1):
-            if order.pk == self.pk:
-                return position
+        # Position is orders ahead + 1 (this order)
+        return orders_ahead + 1
 
         return None
 

@@ -573,9 +573,9 @@
                     {% endfor %}
                 </div>
 
-                <!-- Queue Status Button -->
+                <!-- Queue Status Button - Per Order -->
                 <div class="order-actions">
-                    <a href="{% url 'queue_status' %}" class="btn-queue">
+                    <a href="{% url 'queue_status_order' order.id %}" class="btn-queue">
                         <i class="fas fa-users"></i>
                         View Queue Status
                     </a>
