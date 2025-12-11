@@ -5,98 +5,66 @@
 
 {% block content %}
 <style>
-    /* Keyframe Animations */
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
-        }
-        50% {
-            transform: scale(1.05);
-            box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
-        }
-    }
-
-    @keyframes shimmer {
-        0% {
-            background-position: -1000px 0;
-        }
-        100% {
-            background-position: 1000px 0;
-        }
-    }
-
-    @keyframes float {
-        0%, 100% {
-            transform: translateY(0px);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-
     body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
         margin: 0;
         padding: 0;
+        background: #f0f2f8;
+        min-height: 100vh;
+        width: 100%;
+        overflow-x: hidden;
     }
 
+    /* =====================================================================
+       FULLSCREEN PAGE LAYOUT
+    ===================================================================== */
     .main-container {
         width: 100%;
-        max-width: 100vw;
+        max-width: 100%;
         margin: 0;
-        animation: fadeInUp 0.6s ease-out;
-        box-shadow: none;
-        border-radius: 0;
-        overflow: hidden;
+        padding: 0;
         background: #ffffff;
-        position: relative;
-        min-height: 100vh;
+        animation: fadeInUp 0.5s ease-out;
     }
 
     @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
+    /* =====================================================================
+       HEADER (FULL WIDTH)
+    ===================================================================== */
     .main-header {
+        width: 100%;
         background: linear-gradient(135deg, #36489e 0%, #4a5fb8 100%);
-        padding: 25px 30px;
+        padding: 35px 55px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 8px 32px rgba(54, 72, 158, 0.25);
+        box-sizing: border-box;
         position: relative;
         overflow: hidden;
-        backdrop-filter: blur(10px);
     }
 
     .main-header::before {
-        content: '';
+        content: "";
         position: absolute;
-        top: -50%;
+        top: -40%;
         right: -10%;
-        width: 500px;
-        height: 500px;
-        background: rgba(255, 255, 255, 0.1);
+        width: 450px;
+        height: 450px;
+        background: rgba(255, 255, 255, 0.12);
         border-radius: 50%;
     }
 
     .main-header::after {
-        content: '';
+        content: "";
         position: absolute;
-        bottom: -30%;
-        left: -5%;
-        width: 350px;
-        height: 350px;
-        background: rgba(255, 255, 255, 0.05);
+        bottom: -25%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.07);
         border-radius: 50%;
     }
 
@@ -104,917 +72,374 @@
         display: flex;
         align-items: center;
         gap: 20px;
-        position: relative;
-        z-index: 1;
+        z-index: 2;
     }
 
     .logo-section img {
-        width: 80px;
+        width: 180px;
         height: auto;
-        filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+        filter: drop-shadow(0 3px 6px rgba(255,255,255,0.3));
     }
 
     .header-badge {
         display: inline-block;
-        background: rgba(255, 255, 255, 0.2);
-        color: #ffffff;
         padding: 6px 14px;
         border-radius: 20px;
-        font-size: 0.8em;
+        background: rgba(255,255,255,0.25);
+        border: 1px solid rgba(255,255,255,0.4);
+        color: white;
+        font-size: 0.8rem;
+        margin-bottom: 7px;
         font-weight: 600;
-        text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .main-header h1 {
-        font-size: 2.4em;
-        color: #FFFFFF;
-        margin: 0 0 10px 0;
+        margin: 0;
+        font-size: 2.1rem;
+        color: white;
         font-weight: 800;
-        letter-spacing: -0.5px;
-        line-height: 1.2;
     }
 
     .main-subtitle {
-        color: rgba(255, 255, 255, 0.95);
-        font-size: 1.08em;
         margin: 0;
-        font-weight: 400;
-        line-height: 1.5;
-        letter-spacing: 0.3px;
+        font-size: 1rem;
+        color: rgba(255,255,255,0.9);
     }
 
     .btn-logout {
-        background: rgba(255, 255, 255, 0.15);
-        color: #FFFFFF;
-        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255,255,255,0.18);
+        color: white;
         padding: 14px 28px;
-        font-weight: 600;
         border-radius: 12px;
         text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        position: relative;
-        z-index: 1;
-        font-size: 1em;
-        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255,255,255,0.35);
+        z-index: 2;
+        font-weight: 600;
+        transition: .2s;
     }
 
     .btn-logout:hover {
-        background: rgba(255, 255, 255, 0.25);
-        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255,255,255,0.3);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     }
 
+    /* =====================================================================
+       MAIN CONTENT — FULL WIDTH & FULL HEIGHT
+    ===================================================================== */
     .main-content {
-        padding: 30px 30px 60px 30px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        min-height: calc(100vh - 180px);
-        overflow-y: auto;
+        width: 100%;
+        padding: 30px 50px;
+        box-sizing: border-box;
     }
 
-    /* Scrollbar Styling */
-    .main-content::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    .main-content::-webkit-scrollbar-track {
-        background: #f1f3f5;
-        border-radius: 10px;
-    }
-
-    .main-content::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #36489e 0%, #4a5fb8 100%);
-        border-radius: 10px;
-    }
-
-    .main-content::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #2a3875 0%, #36489e 100%);
-    }
-
+    /* =====================================================================
+       WELCOME SECTION
+    ===================================================================== */
     .welcome-section {
-        margin-bottom: 20px;
-        padding: 20px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        border-left: 6px solid #36489e;
-        animation: slideIn 0.5s ease-out;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
+        width: 100%;
+        background: white;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+        border-left: 5px solid #36489e;
+        margin-bottom: 25px;
     }
 
     .welcome-section h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 800;
         color: #2c3e50;
-        font-size: 1.5em;
-        margin: 0 0 6px 0;
-        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
 
-    .welcome-section h2 i {
-        color: #36489e;
-        font-size: 0.9em;
+    /* =====================================================================
+       CONTENT WRAPPER (ANNOUNCEMENT + QUICK ACTIONS)
+       → FIXED TO SAME HEIGHT
+    ===================================================================== */
+    .content-wrapper {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        width: 100%;
+        gap: 30px;
+        align-items: stretch;
     }
 
-    .welcome-section p {
-        color: #6c757d;
-        font-size: 0.95em;
-        margin: 0;
+    .content-wrapper > div {
+        height: 100%;
     }
 
+    /* =====================================================================
+       ANNOUNCEMENT — FULL HEIGHT
+    ===================================================================== */
     .announcement-banner {
-        border: none;
-        padding: 20px;
+        height: 100%;
+        padding: 25px;
+        background: linear-gradient(135deg, #fff8e1 0%, #ffe9b3 100%);
         border-radius: 16px;
-        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
         border-left: 6px solid #ffc107;
-        animation: slideIn 0.6s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .announcement-banner::before {
-        content: '';
-        position: absolute;
-        top: -20px;
-        right: -20px;
-        width: 150px;
-        height: 150px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
+        box-shadow: 0 4px 18px rgba(255,193,7,0.25);
+        display: flex;
+        flex-direction: column;
     }
 
     .announcement-banner-header {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 12px;
-        position: relative;
-        z-index: 1;
+        margin-bottom: 15px;
     }
 
     .announcement-icon {
-        width: 40px;
-        height: 40px;
-        background: #ffc107;
-        color: #ffffff;
+        width: 42px;
+        height: 42px;
         border-radius: 12px;
+        background: #ffc107;
+        color: white;
         display: flex;
-        align-items: center;
         justify-content: center;
-        font-size: 1.2em;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        align-items: center;
     }
 
-    .announcement-banner strong {
-        color: #f57c00;
-        font-size: 1.15em;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .announcement-banner p {
-        font-size: 0.95em;
+    .announcement-content {
+        font-size: 1rem;
         color: #5d4037;
-        margin: 0;
-        line-height: 1.6;
-        padding-left: 52px;
+        line-height: 1.7;
+        white-space: pre-line;
+        flex-grow: 1;
+    }
+
+    .announcement-content p { margin-bottom: 12px; }
+
+    .announcement-content li {
+        list-style: none;
+        padding-left: 22px;
+        margin-bottom: 6px;
         position: relative;
-        z-index: 1;
+    }
+
+    .announcement-content li::before {
+        content: "✔";
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: #36489e;
+        font-weight: bold;
     }
 
     .announcement-date {
-        font-size: 0.85em;
+        margin-top: 15px;
+        font-size: 0.86rem;
         color: #8d6e63;
-        padding-left: 52px;
-        margin-top: 8px;
+    }
+
+    /* =====================================================================
+       QUICK ACTIONS — MATCH HEIGHT WITH ANNOUNCEMENT
+    ===================================================================== */
+    .quick-wrapper {
+        height: 100%;
         display: flex;
-        align-items: center;
-        gap: 6px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .section-header {
-        margin-bottom: 20px;
-    }
-
-    .section-title {
-        color: #2c3e50;
-        font-size: 1.3em;
-        margin: 0 0 5px 0;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .section-title i {
-        color: #36489e;
-    }
-
-    .section-subtitle {
-        color: #6c757d;
-        font-size: 0.95em;
-        margin: 0;
+        flex-direction: column;
     }
 
     .main-menu-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 18px;
-        max-width: 100%;
-        padding: 0 30px 30px 30px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+        flex-grow: 1;
     }
 
+    /* =====================================================================
+       UPDATED CARD STYLES (BIGGER TEXT)
+    ===================================================================== */
     .main-card {
-        background: #ffffff;
-        padding: 20px 18px;
-        border-radius: 16px;
+        background: white;
+        padding: 30px 28px;
+        border-radius: 12px;
+        border: 2px solid #e8ecf4;
         text-decoration: none;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        display: block;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
-        border: 2px solid transparent;
-        position: relative;
-        animation: scaleIn 0.4s ease-out;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    @keyframes scaleIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
+        transition: .2s;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        font-size: 1.08rem;
+        font-weight: 600;
+        color: #36489e;
     }
 
     .main-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
-        border-color: currentColor;
-    }
-
-    .main-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 100%);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        pointer-events: none;
-    }
-
-    .main-card:hover::before {
-        opacity: 1;
+        transform: translateY(-4px);
+        border-color: #007bff;
     }
 
     .main-card-header {
         display: flex;
-        align-items: center;
         gap: 15px;
-        width: 100%;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
+    /* Bigger icons */
     .main-card-icon {
-        width: 55px;
-        height: 55px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.6em;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-        flex-shrink: 0;
-        position: relative;
-    }
-
-    .main-card:hover .main-card-icon {
-        transform: scale(1.15) rotate(5deg);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-    }
-
-    .main-card-header-text {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .main-card-title {
-        font-size: 1.18em;
-        font-weight: 700;
-        margin: 0 0 4px 0;
-        color: #2c3e50;
-        line-height: 1.3;
-        letter-spacing: -0.2px;
-    }
-
-    .main-card-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.7em;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        opacity: 0.9;
-    }
-
-    .main-card-description {
-        font-size: 0.88em;
-        color: #6c757d;
-        margin: 0 0 12px 0;
-        line-height: 1.6;
-        letter-spacing: 0.2px;
-    }
-
-    .main-card-footer {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #6c757d;
-        font-size: 0.85em;
-        font-weight: 600;
-    }
-
-    .main-card:hover .main-card-footer {
-        color: currentColor;
-    }
-
-    .main-card-footer i {
-        transition: transform 0.3s ease;
-    }
-
-    .main-card:hover .main-card-footer i {
-        transform: translateX(4px);
-    }
-
-    /* --- CARD THEMES ------------------------------------------------- */
-
-    /* Medicines */
-    .card-medicines {
-        color: #dc3545;
-    }
-    .card-medicines .main-card-icon {
-        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-        color: #c62828;
-    }
-    .card-medicines .main-card-badge {
-        background: #ffebee;
-        color: #c62828;
-    }
-    .card-medicines:hover {
-        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.22);
-    }
-
-    /* Order */
-    .card-order {
-        color: #28a745;
-    }
-    .card-order .main-card-icon {
-        background: linear-gradient(135deg, #e6ffea 0%, #c8e6c9 100%);
-        color: #2e7d32;
-    }
-    .card-order .main-card-badge {
-        background: #e6ffea;
-        color: #2e7d32;
-    }
-    .card-order:hover {
-        box-shadow: 0 8px 30px rgba(40, 167, 69, 0.22);
-    }
-
-    /* Delivery */
-    .card-delivery {
-        color: #007bff;
-    }
-    .card-delivery .main-card-icon {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        color: #1565c0;
-    }
-    .card-delivery .main-card-badge {
+        width: 65px;
+        height: 65px;
         background: #e3f2fd;
         color: #1565c0;
-    }
-    .card-delivery:hover {
-        box-shadow: 0 8px 30px rgba(0, 123, 255, 0.22);
-    }
-
-    /* History */
-    .card-history {
-        color: #6f42c1;
-    }
-    .card-history .main-card-icon {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-        color: #6a1b9a;
-    }
-    .card-history .main-card-badge {
-        background: #f3e5f5;
-        color: #6a1b9a;
-    }
-    .card-history:hover {
-        box-shadow: 0 8px 30px rgba(111, 66, 193, 0.22);
-    }
-
-    /* Announcements */
-    .card-announcements {
-        color: #ffc107;
-    }
-    .card-announcements .main-card-icon {
-        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-        color: #f57f17;
-    }
-    .card-announcements .main-card-badge {
-        background: #fff8e1;
-        color: #f57f17;
-    }
-    .card-announcements:hover {
-        box-shadow: 0 8px 30px rgba(255, 193, 7, 0.22);
-    }
-
-    /* Profile */
-    .card-profile {
-        color: #17a2b8;
-    }
-    .card-profile .main-card-icon {
-        background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
-        color: #00838f;
-    }
-    .card-profile .main-card-badge {
-        background: #e0f7fa;
-        color: #00838f;
-    }
-    .card-profile:hover {
-        box-shadow: 0 8px 30px rgba(23, 162, 184, 0.22);
-    }
-
-    /* Loading Screen Styles */
-    .loading-screen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        display: none;
+        border-radius: 12px;
+        display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 100;
-        flex-direction: column;
-        border-radius: 20px;
+        font-size: 1.8rem;
     }
 
-    .loading-screen.active {
-        display: flex;
+    /* Bigger card title */
+    .main-card-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #2c3e50;
     }
 
-    .medicine-loader {
-        position: relative;
-        width: 120px;
-        height: 120px;
-        margin-bottom: 30px;
-    }
-
-    /* Pill Animation */
-    .pill {
-        position: absolute;
-        width: 80px;
-        height: 40px;
-        border-radius: 20px;
-        background: linear-gradient(90deg, #ff6b6b 50%, #36489e 50%);
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        animation: rotatePill 2s ease-in-out infinite;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .pill::before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 0;
-        width: 2px;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.1);
-        transform: translateX(-50%);
-    }
-
-    @keyframes rotatePill {
-        0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-        25% { transform: translate(-50%, -50%) rotate(90deg) scale(1.1); }
-        50% { transform: translate(-50%, -50%) rotate(180deg) scale(1); }
-        75% { transform: translate(-50%, -50%) rotate(270deg) scale(1.1); }
-    }
-
-    /* Floating Pills */
-    .floating-pills {
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .floating-pill {
-        position: absolute;
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        opacity: 0.6;
-        animation: float 3s ease-in-out infinite;
-    }
-
-    .floating-pill:nth-child(1) {
-        background: #4ecdc4;
-        top: 0;
-        left: 50%;
-        animation-delay: 0s;
-    }
-
-    .floating-pill:nth-child(2) {
-        background: #ff6b6b;
-        top: 50%;
-        right: 0;
-        animation-delay: 0.5s;
-    }
-
-    .floating-pill:nth-child(3) {
-        background: #ffe66d;
-        bottom: 0;
-        left: 50%;
-        animation-delay: 1s;
-    }
-
-    .floating-pill:nth-child(4) {
-        background: #95e1d3;
-        top: 50%;
-        left: 0;
-        animation-delay: 1.5s;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-        50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
-    }
-
-    .loading-text {
-        color: #36489e;
-        font-size: 1.5em;
-        font-weight: 600;
-        margin-bottom: 15px;
-        animation: fadeInOut 1.5s ease-in-out infinite;
-    }
-
-    .loading-subtext {
+    /* Bigger description */
+    .main-card-description {
+        margin: 6px 0 16px;
         color: #6c757d;
-        font-size: 1em;
+        font-size: 1.05rem;
+        line-height: 1.55;
     }
 
-    @keyframes fadeInOut {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
-    }
-
-    /* Progress Bar */
-    .progress-bar-container {
-        width: 250px;
-        height: 6px;
-        background: rgba(54, 72, 158, 0.2);
-        border-radius: 10px;
-        margin-top: 20px;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #36489e, #5c74e3);
-        border-radius: 10px;
-        animation: loadProgress 2s ease-in-out infinite;
-    }
-
-    @keyframes loadProgress {
-        0% { width: 0%; }
-        50% { width: 70%; }
-        100% { width: 100%; }
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1200px) {
-        .main-menu-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 768px) {
-        .main-container {
-            margin: 20px;
-            border-radius: 15px;
-        }
-
-        .main-header {
-            padding: 25px;
-            flex-direction: column;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        .header-left {
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .main-header h1 {
-            font-size: 1.6em;
-        }
-
-        .btn-logout {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .main-content {
-            padding: 25px 25px 35px 25px;
-        }
-
-        .welcome-section {
-            padding: 20px;
-        }
-
-        .announcement-banner {
-            padding: 20px;
-        }
-
-        .announcement-banner p,
-        .announcement-date {
-            padding-left: 0;
-        }
-
-        .main-menu-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .main-card {
-            padding: 25px 20px;
-        }
-
-        .medicine-loader {
-            width: 100px;
-            height: 100px;
-        }
-
-        .pill {
-            width: 60px;
-            height: 30px;
-        }
-
-        .loading-text {
-            font-size: 1.2em;
-        }
-    }
 </style>
 
 <div class="main-container">
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="medicine-loader">
-            <div class="floating-pills">
-                <div class="floating-pill"></div>
-                <div class="floating-pill"></div>
-                <div class="floating-pill"></div>
-                <div class="floating-pill"></div>
-            </div>
-            <div class="pill"></div>
-        </div>
-        <div class="loading-text">
-            <i class="fas fa-heartbeat"></i> Loading...
-        </div>
-        <div class="loading-subtext">Please wait</div>
-        <div class="progress-bar-container">
-            <div class="progress-bar"></div>
-        </div>
-    </div>
 
-    <!-- HEADER BAR -->
+    <!-- HEADER -->
     <header class="main-header">
         <div class="header-left">
-            <img src="{% static 'img/MediServe.png' %}" alt="MediServe Logo" class="logo-section">
+            <div class="logo-section">
+                <img src="{% static 'img/MediServe.png' %}">
+            </div>
+
             <div>
-                <span class="header-badge">
-                    <i class="fas fa-user"></i> User Portal
-                </span>
+                <span class="header-badge"><i class="fas fa-user"></i> User Portal</span>
                 <h1>MediServe</h1>
                 <p class="main-subtitle">Your Community Health Partner</p>
             </div>
         </div>
 
-        <a href="{% url 'logout' %}" class="btn-logout">
-            <i class="fas fa-sign-out-alt"></i> Log Out
-        </a>
+        <a href="{% url 'logout' %}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Log Out</a>
     </header>
 
+    <!-- MAIN CONTENT -->
     <div class="main-content">
-        <!-- WELCOME SECTION -->
+
         <div class="welcome-section">
-            <h2>
-                <i class="fas fa-hand-wave"></i>
-                Welcome Back, {{ user.first_name|default:"User" }}
-            </h2>
+            <h2><i class="fas fa-hand-wave"></i> Welcome Back, {{ user.first_name|default:'User' }}</h2>
             <p>Access your medicines, track deliveries, and stay updated with health information.</p>
         </div>
 
-        <!-- ANNOUNCEMENT BANNER -->
-        {% if latest_announcement %}
-        <div class="announcement-banner">
-            <div class="announcement-banner-header">
-                <div class="announcement-icon">
-                    <i class="fas fa-bullhorn"></i>
+        <div class="content-wrapper">
+
+            <!-- ANNOUNCEMENT -->
+            <div>
+                {% if latest_announcement %}
+                <div class="announcement-banner">
+
+                    <div class="announcement-banner-header">
+                        <div class="announcement-icon"><i class="fas fa-bullhorn"></i></div>
+                        <strong>{{ latest_announcement.title }}</strong>
+                    </div>
+
+                    <div class="announcement-content">
+                        {{ latest_announcement.content|linebreaks }}
+                    </div>
+
+                    <div class="announcement-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ latest_announcement.date_posted|date:"M d, Y" }}
+                    </div>
+
                 </div>
-                <strong>{{ latest_announcement.title }}</strong>
+                {% endif %}
             </div>
-            <p>{{ latest_announcement.content }}</p>
-            <p class="announcement-date">
-                <i class="fas fa-calendar-alt"></i> {{ latest_announcement.date_posted|date:"M d, Y" }}
-            </p>
-        </div>
-        {% else %}
-        <div class="announcement-banner">
-            <div class="announcement-banner-header">
-                <div class="announcement-icon">
-                    <i class="fas fa-info-circle"></i>
+
+            <!-- QUICK ACTIONS -->
+            <div class="quick-wrapper">
+                <h3 style="margin-bottom: 10px;">Quick Actions</h3>
+                <p style="margin-bottom: 18px; color:#6c757d;">What would you like to do today?</p>
+
+                <div class="main-menu-grid">
+
+                    <a href="{% url 'medicine_list' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-pills"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Browse Medicines</h3>
+                                <p class="main-card-description">Explore the available medicines</p>
+                            </div>
+                        </div>
+                        View Catalog →
+                    </a>
+
+                    <a href="{% url 'order_list' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-shopping-cart"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Current Order</h3>
+                                <p class="main-card-description">Manage your active order</p>
+                            </div>
+                        </div>
+                        View Cart →
+                    </a>
+
+                    <a href="{% url 'track_delivery' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-truck"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Track Delivery</h3>
+                                <p class="main-card-description">Monitor delivery status</p>
+                            </div>
+                        </div>
+                        Track Now →
+                    </a>
+
+                    <a href="{% url 'order_history' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-history"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Order History</h3>
+                                <p class="main-card-description">Review past orders</p>
+                            </div>
+                        </div>
+                        View History →
+                    </a>
+
+                    <a href="{% url 'view_announcements' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-bullhorn"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Announcements</h3>
+                                <p class="main-card-description">Read all health updates</p>
+                            </div>
+                        </div>
+                        Read All →
+                    </a>
+
+                    <a href="{% url 'profile_view' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-user-circle"></i></div>
+                            <div>
+                                <h3 class="main-card-title">My Profile</h3>
+                                <p class="main-card-description">Manage your account</p>
+                            </div>
+                        </div>
+                        View Profile →
+                    </a>
+
                 </div>
-                <strong>Welcome to MediServe!</strong>
             </div>
-            <p>Access free medicines and health services through our community health program.</p>
-        </div>
-        {% endif %}
-
-        <!-- SECTION HEADER -->
-        <div class="section-header">
-            <h3 class="section-title">
-                <i class="fas fa-th-large"></i>
-                Quick Actions
-            </h3>
-            <p class="section-subtitle">What would you like to do today?</p>
-        </div>
-
-        <!-- MAIN MENU GRID -->
-        <div class="main-menu-grid">
-
-            <!-- 1. Browse Medicines -->
-            <a href="{% url 'medicine_list' %}" class="main-card card-medicines">
-                <div class="main-card-header">
-                    <div class="main-card-icon">
-                        <i class="fas fa-pills"></i>
-                    </div>
-                    <div class="main-card-header-text">
-                        <h3 class="main-card-title">Browse Medicines</h3>
-                        <span class="main-card-badge">Catalog</span>
-                    </div>
-                </div>
-                <p class="main-card-description">Search and explore available medicines in our inventory</p>
-                <div class="main-card-footer">
-                    <span>View Catalog</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <!-- 2. Current Order -->
-            <a href="{% url 'order_list' %}" class="main-card card-order">
-                <div class="main-card-header">
-                    <div class="main-card-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="main-card-header-text">
-                        <h3 class="main-card-title">Current Order</h3>
-                        <span class="main-card-badge">Cart</span>
-                    </div>
-                </div>
-                <p class="main-card-description">View and manage your current medicine order</p>
-                <div class="main-card-footer">
-                    <span>View Cart</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <!-- 3. Track Delivery -->
-            <a href="{% url 'track_delivery' %}" class="main-card card-delivery">
-                <div class="main-card-header">
-                    <div class="main-card-icon">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <div class="main-card-header-text">
-                        <h3 class="main-card-title">Track Delivery</h3>
-                        <span class="main-card-badge">Status</span>
-                    </div>
-                </div>
-                <p class="main-card-description">Monitor the status of your medicine delivery</p>
-                <div class="main-card-footer">
-                    <span>Track Now</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <!-- 4. Order History -->
-            <a href="{% url 'order_history' %}" class="main-card card-history">
-                <div class="main-card-header">
-                    <div class="main-card-icon">
-                        <i class="fas fa-history"></i>
-                    </div>
-                    <div class="main-card-header-text">
-                        <h3 class="main-card-title">Order History</h3>
-                        <span class="main-card-badge">Records</span>
-                    </div>
-                </div>
-                <p class="main-card-description">View your past orders and delivery records</p>
-                <div class="main-card-footer">
-                    <span>View History</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <!-- 5. Announcements -->
-            <a href="{% url 'view_announcements' %}" class="main-card card-announcements">
-                <div class="main-card-header">
-                    <div class="main-card-icon">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <div class="main-card-header-text">
-                        <h3 class="main-card-title">Announcements</h3>
-                        <span class="main-card-badge">Updates</span>
-                    </div>
-                </div>
-                <p class="main-card-description">Stay updated with important health notices</p>
-                <div class="main-card-footer">
-                    <span>Read All</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <!-- 6. My Profile -->
-            <a href="{% url 'profile_view' %}" class="main-card card-profile">
-                <div class="main-card-header">
-                    <div class="main-card-icon">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <div class="main-card-header-text">
-                        <h3 class="main-card-title">My Profile</h3>
-                        <span class="main-card-badge">Account</span>
-                    </div>
-                </div>
-                <p class="main-card-description">Manage your account and medical documents</p>
-                <div class="main-card-footer">
-                    <span>View Profile</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
 
         </div>
     </div>
+
 </div>
-
-<script>
-    // Add click event to all main-card links
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.main-card');
-        const loadingScreen = document.getElementById('loadingScreen');
-
-        cards.forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Show loading screen
-                loadingScreen.classList.add('active');
-            });
-        });
-    });
-</script>
-
 {% endblock %}
