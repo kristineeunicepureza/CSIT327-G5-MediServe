@@ -1,6 +1,16 @@
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from datetime import date
+
+
+def validate_category(value):
+    """Prevent antibiotic category from being used"""
+    if value and 'antibiotic' in value.lower():
+        raise ValidationError(
+            'Antibiotics cannot be added to the system. '
+            'These require prescription and in-person consultation at the health center.'
+        )
 
 
 class Medicine(models.Model):
@@ -19,12 +29,18 @@ class Medicine(models.Model):
     # Existing fields
     name = models.CharField(max_length=255)
     brand = models.CharField(max_length=255, null=True, blank=True)
-    category = models.CharField(max_length=255, null=True, blank=True)
+    category = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        validators=[validate_category],
+        help_text='Note: Antibiotics are not allowed in the system'
+    )
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # NEW: Prescription and ordering restrictions
+    # Prescription and ordering restrictions
     prescription_type = models.CharField(
         max_length=20,
         choices=PRESCRIPTION_TYPE_CHOICES,
@@ -42,7 +58,7 @@ class Medicine(models.Model):
         help_text='Only non-prescription medicines can be ordered online'
     )
 
-    # Existing archive fields
+    # Archive fields
     status = models.CharField(
         max_length=20,
         choices=[('active', 'Active'), ('archived', 'Archived')],
@@ -57,8 +73,33 @@ class Medicine(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self):
+        """Additional validation at model level"""
+        super().clean()
+
+        # Prevent antibiotic in name
+        if self.name and 'antibiotic' in self.name.lower():
+            raise ValidationError({
+                'name': 'Antibiotics cannot be added to the system.'
+            })
+
+        # Prevent antibiotic in category
+        if self.category and 'antibiotic' in self.category.lower():
+            raise ValidationError({
+                'category': 'Antibiotics category is not allowed.'
+            })
+
+        # Prevent antibiotic in description
+        if self.description and 'antibiotic' in self.description.lower():
+            raise ValidationError({
+                'description': 'Please remove references to antibiotics.'
+            })
+
     def save(self, *args, **kwargs):
         """Override save to automatically set is_orderable based on prescription_type"""
+        # Run full clean before saving
+        self.full_clean()
+
         # Only non-prescription medicines can be ordered online
         self.is_orderable = (self.prescription_type == 'non_prescription')
         super().save(*args, **kwargs)
@@ -93,7 +134,7 @@ class Medicine(models.Model):
             status='active'  # Only consider active batches
         ).order_by('expiry_date', 'batch_id').first()
 
-    # NEW: Archive methods
+    # Archive methods
     def archive(self):
         """Archive this medicine and all its batches"""
         self.status = 'archived'
@@ -134,7 +175,7 @@ class MedicineBatch(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # NEW: Archive fields
+    # Archive fields
     status = models.CharField(
         max_length=20,
         choices=[('active', 'Active'), ('archived', 'Archived')],
@@ -181,7 +222,7 @@ class MedicineBatch(models.Model):
             return 0
         return (self.quantity_available / self.quantity_received) * 100
 
-    # NEW: Archive methods
+    # Archive methods
     def archive(self):
         """Archive this batch"""
         self.status = 'archived'
@@ -194,7 +235,7 @@ class MedicineBatch(models.Model):
         self.archived_at = None
         self.save()
 
-    # NEW: Auto-archive expired batches
+    # Auto-archive expired batches
     @classmethod
     def auto_archive_expired(cls):
         """Auto-archive all expired batches"""

@@ -9,6 +9,16 @@ from .models import Medicine, MedicineBatch
 from .forms import MedicineForm, MedicineBatchEditForm
 
 
+# Add this AFTER your imports, BEFORE any view functions
+
+def exclude_antibiotics(queryset):
+    """Filter out any medicines with 'antibiotic' in name, category, or description"""
+    from django.db.models import Q
+    return queryset.exclude(
+        Q(name__icontains='antibiotic') |
+        Q(category__icontains='antibiotic') |
+        Q(description__icontains='antibiotic')
+    )
 # -------------------------------------------------------------------
 # UPDATED: Medicine Catalog - Filter out prescription medicines
 # -------------------------------------------------------------------
@@ -16,21 +26,24 @@ from .forms import MedicineForm, MedicineBatchEditForm
 def medicine_catalog(request):
     """
     Display medicine catalog for users.
-    UPDATED: Only show non-prescription medicines that can be ordered online.
+    EXCLUDES antibiotics completely.
     """
-
-    # ✅ NEW: Only show non-prescription, orderable medicines
-    medicines = Medicine.objects.filter(
-        status='active',
-        prescription_type='non_prescription',  # Only non-prescription medicines
-        is_orderable=True  # Only orderable medicines
+    # Get non-prescription, orderable medicines, excluding antibiotics
+    medicines = exclude_antibiotics(
+        Medicine.objects.filter(
+            status='active',
+            prescription_type='non_prescription',
+            is_orderable=True
+        )
     ).order_by('name')
 
-    # Get unique categories for filter dropdown (only from orderable medicines)
-    categories = Medicine.objects.filter(
-        status='active',
-        prescription_type='non_prescription',
-        is_orderable=True
+    # Get unique categories (excluding antibiotics)
+    categories = exclude_antibiotics(
+        Medicine.objects.filter(
+            status='active',
+            prescription_type='non_prescription',
+            is_orderable=True
+        )
     ).values_list('category', flat=True).distinct().order_by('category')
 
     # Search and filtering
@@ -68,11 +81,12 @@ def medicine_catalog(request):
         'search_query': search_query,
         'category_filter': category_filter,
         'stock_filter': stock_filter,
-        'prescription_count': prescription_count,  # Show how many prescription meds are hidden
+        'prescription_count': prescription_count,
         'total_orderable': len(medicines),
     }
 
     return render(request, 'medicine_catalog.html', context)
+
 
 
 # -------------------------------------------------------------------
@@ -114,17 +128,18 @@ def get_next_batch_id(request):
 @login_required
 def medicine_stock(request):
     """
-    Medicine stock management with prescription type and order limits.
+    Medicine stock management - prevents antibiotic entry.
     Shows only ACTIVE batches.
     """
+    # Get all ACTIVE batches, excluding antibiotics
+    batches = exclude_antibiotics(
+        MedicineBatch.objects.filter(status='active').select_related('medicine')
+    ).order_by('expiry_date', 'batch_id')
 
-    # Get all ACTIVE batches sorted by expiry date (FEFO)
-    batches = MedicineBatch.objects.filter(
-        status='active'
-    ).select_related('medicine').order_by('expiry_date', 'batch_id')
-
-    # Get all active medicines for reference
-    all_medicines = Medicine.objects.filter(status='active').order_by('name')
+    # Get all active medicines (excluding antibiotics)
+    all_medicines = exclude_antibiotics(
+        Medicine.objects.filter(status='active')
+    ).order_by('name')
 
     # Search functionality
     search_query = request.GET.get('search', '')
@@ -150,12 +165,11 @@ def medicine_stock(request):
         elif stock_filter == 'high':
             batches = batches.filter(quantity_available__gt=50)
 
-    # Get unique categories for filter dropdown
-    categories = Medicine.objects.filter(
-        status='active'
+    # Get unique categories (excluding antibiotics)
+    categories = exclude_antibiotics(
+        Medicine.objects.filter(status='active')
     ).values_list('category', flat=True).distinct()
 
-    # Count archived batches
     archived_count_display = MedicineBatch.objects.filter(status='archived').count()
     today = date.today()
 
@@ -193,10 +207,32 @@ def medicine_stock(request):
             category = request.POST.get('category', '').strip()
             description = request.POST.get('description', '').strip()
             quantity_str = request.POST.get('quantity', '').strip()
-
-            # ✅ NEW: Get prescription and order limit fields
             prescription_type = request.POST.get('prescription_type', 'non_prescription')
             order_limit = request.POST.get('order_limit', '1_week')
+
+            # ✅ NEW: Prevent antibiotic entry
+            if 'antibiotic' in medicine_name.lower():
+                messages.error(
+                    request,
+                    '❌ Antibiotics cannot be added to the system. '
+                    'These require prescription and in-person consultation at the health center.'
+                )
+                return redirect('medicine_stock')
+
+            if category and 'antibiotic' in category.lower():
+                messages.error(
+                    request,
+                    '❌ Antibiotic category is not allowed. '
+                    'Please use a different category or visit the health center for antibiotics.'
+                )
+                return redirect('medicine_stock')
+
+            if description and 'antibiotic' in description.lower():
+                messages.error(
+                    request,
+                    '❌ Please remove references to antibiotics from the description.'
+                )
+                return redirect('medicine_stock')
 
             # Validation
             if not all([date_received_str, expiry_date_str, medicine_name, quantity_str]):
@@ -262,7 +298,7 @@ def medicine_stock(request):
                         updated_fields.append('order_limit')
 
                     if updated_fields:
-                        medicine.save()  # This will auto-set is_orderable
+                        medicine.save()
                         messages.info(request, f'ℹ️ Updated {", ".join(updated_fields)} for "{medicine.name}".')
                 else:
                     # Create new medicine
@@ -317,7 +353,6 @@ def medicine_stock(request):
         'archived_count': archived_count_display,
         'today': today,
     })
-
 
 # ... [Keep all other existing views like archived_medicines, archive_batch, etc.] ...
 
@@ -677,15 +712,16 @@ def medicine_distribution_history(request):
 def medicine_list(request):
     """
     Display list of medicines with search and filter capabilities.
-    In-stock medicines appear FIRST, out-of-stock medicines appear LAST.
-    ONLY SHOWS ACTIVE MEDICINES.
+    EXCLUDES antibiotics.
     """
-    # Get all ACTIVE medicines only
-    medicines = Medicine.objects.filter(status='active')
+    # Get all ACTIVE medicines, excluding antibiotics
+    medicines = exclude_antibiotics(
+        Medicine.objects.filter(status='active')
+    )
 
-    # Get unique categories for filter dropdown (from active medicines)
-    categories = Medicine.objects.filter(
-        status='active'
+    # Get unique categories (excluding antibiotics)
+    categories = exclude_antibiotics(
+        Medicine.objects.filter(status='active')
     ).values_list('category', flat=True).distinct().order_by('category')
     categories = [cat for cat in categories if cat]
 
@@ -704,10 +740,9 @@ def medicine_list(request):
     # Stock filter
     stock_filter = request.GET.get('stock', '')
 
-    # Convert to list and add batch information for each medicine
+    # Convert to list and add batch information
     medicines_list = []
     for medicine in medicines:
-        # Only get ACTIVE batches
         medicine.batch_list = MedicineBatch.objects.filter(
             medicine=medicine,
             quantity_available__gt=0,
@@ -724,7 +759,7 @@ def medicine_list(request):
         elif stock_filter == 'out-of-stock':
             medicines_list = [m for m in medicines_list if m.total_stock == 0]
 
-    # Sort: In-stock medicines FIRST, out-of-stock LAST
+    # Sort: In-stock first, out-of-stock last
     medicines_list.sort(key=lambda m: (m.total_stock == 0, m.name.lower()))
 
     context = {
@@ -743,8 +778,20 @@ def medicine_list(request):
 # -------------------------------------------------------------------
 @login_required
 def medicine_info(request, medicine_id):
-    """Medicine details page - only show if active."""
+    """Medicine details page - blocks if antibiotic detected"""
     medicine = get_object_or_404(Medicine, id=medicine_id, status='active')
+
+    # Check if this is an antibiotic (extra safety check)
+    if ('antibiotic' in medicine.name.lower() or
+            (medicine.category and 'antibiotic' in medicine.category.lower()) or
+            (medicine.description and 'antibiotic' in medicine.description.lower())):
+        messages.error(
+            request,
+            '❌ This medicine is not available for online ordering. '
+            'Please visit the health center for antibiotics.'
+        )
+        return redirect('medicine_list')
+
     return render(request, 'medicine_info.html', {'medicine': medicine})
 
 
