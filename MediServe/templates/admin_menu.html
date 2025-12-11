@@ -5,205 +5,298 @@
 
 {% block content %}
 <style>
-    /* ---------- Reset & base ---------- */
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; padding: 0; background: #ffffff; -webkit-font-smoothing:antialiased; }
-    a { color: inherit; }
+    body {
+        margin: 0;
+        padding: 0;
+        background: #f0f2f8;
+        min-height: 100vh;
+        width: 100%;
+        overflow-x: hidden;
+    }
 
-    /* ---------- Page container & header (match main menu style but red) ---------- */
+    /* =====================================================================
+       FULL PAGE LAYOUT
+    ===================================================================== */
     .main-container {
         width: 100%;
         max-width: 100%;
         margin: 0;
         padding: 0;
-        background: transparent;
+        background: #ffffff;
+        animation: fadeInUp .5s ease-out;
     }
 
+    @keyframes fadeInUp {
+        from { opacity:0; transform:translateY(20px); }
+        to { opacity:1; transform:translateY(0); }
+    }
+
+    /* =====================================================================
+       ADMIN HEADER (same structure as user header)
+    ===================================================================== */
     .main-header {
         width: 100%;
-        /* exact admin gradient you used */
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: linear-gradient(135deg, #dc3545 0%, #b31f2a 100%);
         padding: 35px 55px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         position: relative;
-        box-sizing: border-box;
         overflow: hidden;
-        /* ensure header touches top, no white gap */
-        margin: 0;
-        border-radius: 0;
-        box-shadow: 0 4px 18px rgba(200,20,30,0.08);
     }
 
-    /* same decorative circles used on main header */
-    .main-header::before{
-        content:"";
-        position:absolute;
-        top:-40%;
-        right:-10%;
-        width:450px; height:450px;
-        background: rgba(255,255,255,0.12);
-        border-radius:50%;
-    }
-    .main-header::after{
-        content:"";
-        position:absolute;
-        bottom:-25%;
-        left:-10%;
-        width:300px; height:300px;
-        background: rgba(255,255,255,0.07);
-        border-radius:50%;
+    .main-header::before {
+        content: "";
+        position: absolute;
+        top: -40%;
+        right: -10%;
+        width: 450px;
+        height: 450px;
+        background: rgba(255,255,255,0.13);
+        border-radius: 50%;
     }
 
-    .header-left { display:flex; gap:18px; align-items:center; z-index:2; }
-    .logo-section img { width:180px; height:auto; filter: drop-shadow(0 3px 6px rgba(255,255,255,0.2)); }
+    .main-header::after {
+        content: "";
+        position: absolute;
+        bottom: -25%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 50%;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        z-index: 2;
+    }
+
+    .logo-section img {
+        width: 180px;
+        height: auto;
+        filter: drop-shadow(0 3px 6px rgba(255,255,255,0.25));
+    }
+
     .header-badge {
-        display:inline-block;
-        padding:6px 14px;
-        border-radius:18px;
-        background: rgba(255,255,255,0.20);
-        border: 1px solid rgba(255,255,255,0.35);
-        color:#fff;
-        font-weight:600;
-        font-size:.85rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.25);
+        border: 1px solid rgba(255,255,255,0.4);
+        color: white;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
     }
-    .main-header h1 { margin:0; color:#fff; font-size:1.9rem; font-weight:800; }
-    .main-subtitle { margin:0; color: rgba(255,255,255,0.9); font-size:.95rem; }
+
+    .main-header h1 {
+        margin: 0;
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .main-subtitle {
+        margin: 0;
+        font-size: 1rem;
+        color: rgba(255,255,255,0.9);
+    }
 
     .btn-logout {
         background: rgba(255,255,255,0.18);
-        color: #fff;
-        padding: 10px 16px;
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.28);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 12px;
+        border: 2px solid rgba(255,255,255,0.35);
         text-decoration: none;
-        font-weight:600;
-        z-index:2;
+        font-weight: 600;
+        transition: .2s;
+        z-index: 2;
     }
-    .btn-logout:hover { transform: translateY(-2px); background: rgba(255,255,255,0.28); }
+    .btn-logout:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
 
-    /* ---------- Main content (spacing like main menu) ---------- */
+    /* =====================================================================
+       MAIN CONTENT
+    ===================================================================== */
     .main-content {
         width: 100%;
         padding: 30px 50px;
-        box-sizing: border-box;
     }
 
     .welcome-section {
         width: 100%;
-        background: #fff;
+        background: white;
         padding: 25px;
         border-radius: 14px;
         box-shadow: 0 4px 18px rgba(0,0,0,0.05);
         border-left: 5px solid #dc3545;
         margin-bottom: 25px;
     }
-    .welcome-section h2 { margin:0; font-size:1.4rem; font-weight:800; color:#2c3e50; display:flex; gap:10px; align-items:center; }
-    .welcome-section p { margin:8px 0 0; color:#6c757d; }
 
-    /* ---------- Content wrapper: left (announcement) + right (quick actions) ----------
-       We ensure the two columns start at the same top baseline and stretch evenly.
-    */
+    .welcome-section h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* =====================================================================
+       CONTENT WRAPPER (admin announcement + quick actions)
+    ===================================================================== */
     .content-wrapper {
         display: grid;
         grid-template-columns: 420px 1fr;
         gap: 30px;
         width: 100%;
-        align-items: start;    /* crucial to align both columns' top */
+        align-items: stretch;
     }
 
-    /* prevent default top margins inside each column from shifting layout */
-    .content-wrapper > div { margin: 0; padding: 0; }
-
-    .left-column, .right-column {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-        min-height: 0; /* allow correct stretching in grid */
-    }
-
-    /* ---------- Announcement (left) ---------- */
+    /* =====================================================================
+       ANNOUNCEMENT PANEL (same as main)
+    ===================================================================== */
     .announcement-banner {
+        height: 100%;
         padding: 25px;
-        background: linear-gradient(135deg, #fff8e1 0%, #ffe9b3 100%);
+        background: linear-gradient(135deg, #fff8e1 0%, #ffe7b8 100%);
         border-radius: 16px;
         border-left: 6px solid #ffc107;
-        box-shadow: 0 4px 18px rgba(255,193,7,0.25);
+        box-shadow: 0 4px 18px rgba(255,193,7,0.28);
         display: flex;
         flex-direction: column;
-        justify-content: flex-start; /* make content start at top */
-        height: 100%;
     }
 
-    .announcement-banner-header { display:flex; align-items:center; gap:12px; margin-bottom:15px; }
-    .announcement-icon { width:42px; height:42px; border-radius:12px; background:#ffc107; color:#fff; display:flex; align-items:center; justify-content:center; }
-    .announcement-content { font-size:1rem; color:#5d4037; line-height:1.7; white-space: pre-line; flex-grow:1; }
-    .announcement-content p { margin-bottom:12px; }
-    .announcement-content li { list-style:none; padding-left:22px; margin-bottom:6px; position:relative; }
-    .announcement-content li::before { content:"✔"; position:absolute; left:0; top:0; color:#36489e; font-weight:bold; }
-    .announcement-date { margin-top:15px; font-size:0.86rem; color:#8d6e63; }
+    .announcement-banner-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
 
-    /* ---------- Quick Actions (right) ---------- */
+    .announcement-icon {
+        width: 42px;
+        height: 42px;
+        background: #ffc107;
+        border-radius: 12px;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .announcement-content {
+        flex-grow: 1;
+        white-space: pre-line;
+        font-size: 1rem;
+        color: #5d4037;
+        line-height: 1.7;
+    }
+
+    .announcement-date {
+        font-size: .86rem;
+        color: #8d6e63;
+        margin-top: 15px;
+    }
+
+    /* =====================================================================
+       QUICK ACTIONS (same card style as main menu)
+    ===================================================================== */
     .quick-wrapper {
-        display:flex;
+        display: flex;
         flex-direction: column;
-        height: 100%;
-        justify-content: flex-start;
     }
-    .quick-wrapper h3 { margin:0 0 10px 0; color:#2c3e50; }
-    .quick-wrapper p { margin:0 0 18px 0; color:#6c757d; }
 
     .main-menu-grid {
-        display:grid;
-        grid-template-columns: repeat(2, 1fr);
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
         gap: 22px;
-        align-items: start;
-        flex-grow:1;
+        flex-grow: 1;
     }
 
-    /* ---------- Cards (bigger text like main menu) ---------- */
     .main-card {
-        background: #fff;
+        background: white;
         padding: 30px 28px;
         border-radius: 12px;
         border: 2px solid #e8ecf4;
-        text-decoration: none;
-        transition: .2s;
         box-shadow: 0 3px 12px rgba(0,0,0,0.05);
-        font-size: 1.08rem;
+        text-decoration: none;
         font-weight: 600;
-        color: #2c3e50;
-        display:flex;
-        flex-direction: column;
-        justify-content: center;
-        min-height: 110px;
+        color: #36489e;
+        transition: .2s;
     }
-    .main-card:hover { transform: translateY(-4px); border-color: #c82333; }
+    .main-card:hover {
+        transform: translateY(-4px);
+        border-color: #dc3545;
+    }
 
-    .main-card-header { display:flex; gap:15px; align-items:center; margin-bottom:8px; }
+    .main-card-header {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+
     .main-card-icon {
-        width: 65px; height: 65px; border-radius: 12px;
-        background: #fde7e8; color: #c82333; display:flex; align-items:center; justify-content:center;
-        font-size: 1.8rem; flex: 0 0 65px;
+        width: 65px;
+        height: 65px;
+        background: #fde7e7;
+        border-radius: 12px;
+        color: #c82333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
     }
-    .main-card-title { margin:0; font-size:1.35rem; font-weight:800; color:#2c3e50; }
-    .main-card-description { margin:6px 0 16px; color:#6c757d; font-size:1.05rem; line-height:1.55; }
 
-    /* inline action link under card */
-    .card-action { margin-top:8px; color:#c82333; font-weight:700; text-decoration:none; display:inline-block; }
+    .main-card-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #2c3e50;
+    }
 
-    /* ---------- Utilities & margin resets (to guarantee alignment) ---------- */
-    .left-column h2, .left-column h3, .right-column h2, .right-column h3 { margin-top: 0; }
-    .left-column p, .right-column p, .announcement-banner p { margin-top: 0; }
+    .main-card-description {
+        color: #6c757d;
+        margin: 6px 0 16px;
+        font-size: 1.05rem;
+    }
 
-    /* ---------- Responsive ---------- */
+    /* =====================================================================
+       RESPONSIVE (exact same breakpoints as main_menu)
+    ===================================================================== */
     @media (max-width: 1100px) {
-        .content-wrapper { grid-template-columns: 1fr; }
-        .main-menu-grid { grid-template-columns: 1fr; }
-        .main-content { padding: 20px; }
-        .main-header { padding: 20px; }
+        .content-wrapper {
+            grid-template-columns: 1fr;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .main-header {
+            padding: 25px 30px;
+        }
+        .main-menu-grid {
+            grid-template-columns: 1fr;
+        }
     }
+
+    @media (max-width: 600px) {
+        .main-header {
+            padding: 22px;
+            flex-direction: column;
+            text-align: center;
+            gap: 12px;
+        }
+        .logo-section img {
+            width: 150px;
+        }
+    }
+
 </style>
 
 <div class="main-container">
@@ -212,7 +305,7 @@
     <header class="main-header">
         <div class="header-left">
             <div class="logo-section">
-                <img src="{% static 'img/MediServe.png' %}" alt="MediServe Logo">
+                <img src="{% static 'img/MediServe.png' %}">
             </div>
 
             <div>
@@ -227,14 +320,16 @@
 
     <!-- MAIN CONTENT -->
     <div class="main-content">
+
         <div class="welcome-section">
-            <h2><i class="fas fa-hand-wave"></i> Welcome Back, Administrator</h2>
-            <p>Here are your management tools and system insights.</p>
+            <h2><i class="fas fa-hand-wave"></i> Welcome Back, Admin</h2>
+            <p>Manage system operations, distributions, announcements, and analytics.</p>
         </div>
 
         <div class="content-wrapper">
-            <!-- Left column (announcement) -->
-            <div class="left-column">
+
+            <!-- ADMIN ANNOUNCEMENT -->
+            <div>
                 <div class="announcement-banner">
                     <div class="announcement-banner-header">
                         <div class="announcement-icon"><i class="fas fa-bullhorn"></i></div>
@@ -246,86 +341,87 @@
                     </div>
 
                     <div class="announcement-date">
-                        <i class="fas fa-calendar-alt"></i> Updated today
+                        <i class="fas fa-calendar-alt"></i> Updated Today
                     </div>
                 </div>
             </div>
 
-            <!-- Right column (quick actions) -->
-            <div class="right-column">
-                <div class="quick-wrapper">
-                    <h3>Quick Actions</h3>
-                    <p>Select a task to manage</p>
+            <!-- QUICK ACTIONS -->
+            <div class="quick-wrapper">
+                <h3 style="margin-bottom: 10px;">Quick Actions</h3>
+                <p style="margin-bottom: 18px; color:#6c757d;">Choose an operation</p>
 
-                    <div class="main-menu-grid">
-                        <a href="{% url 'medicine_stock' %}" class="main-card">
-                            <div class="main-card-header">
-                                <div class="main-card-icon"><i class="fas fa-box"></i></div>
-                                <div>
-                                    <div class="main-card-title">Manage Stock</div>
-                                    <div class="main-card-description">Update and monitor inventory</div>
-                                </div>
-                            </div>
-                            <span class="card-action">Go to Stock →</span>
-                        </a>
+                <div class="main-menu-grid">
 
-                        <a href="{% url 'delivery_page' %}" class="main-card">
-                            <div class="main-card-header">
-                                <div class="main-card-icon"><i class="fas fa-truck"></i></div>
-                                <div>
-                                    <div class="main-card-title">Fulfill Orders</div>
-                                    <div class="main-card-description">Process deliveries and requests</div>
-                                </div>
+                    <a href="{% url 'medicine_stock' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-box"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Manage Stock</h3>
+                                <p class="main-card-description">Update and track inventory</p>
                             </div>
-                            <span class="card-action">View Orders →</span>
-                        </a>
+                        </div>
+                        Manage Stock →
+                    </a>
 
-                        <a href="{% url 'announcements' %}" class="main-card">
-                            <div class="main-card-header">
-                                <div class="main-card-icon"><i class="fas fa-bullhorn"></i></div>
-                                <div>
-                                    <div class="main-card-title">Announcements</div>
-                                    <div class="main-card-description">Post system-wide updates</div>
-                                </div>
+                    <a href="{% url 'delivery_page' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-truck"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Deliver Orders</h3>
+                                <p class="main-card-description">Process and dispatch orders</p>
                             </div>
-                            <span class="card-action">Manage Posts →</span>
-                        </a>
+                        </div>
+                        View Orders →
+                    </a>
 
-                        <a href="{% url 'medicine_distribution_history' %}" class="main-card">
-                            <div class="main-card-header">
-                                <div class="main-card-icon"><i class="fas fa-history"></i></div>
-                                <div>
-                                    <div class="main-card-title">History Records</div>
-                                    <div class="main-card-description">Review logs and distributions</div>
-                                </div>
+                    <a href="{% url 'announcements' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-bullhorn"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Announcements</h3>
+                                <p class="main-card-description">Create and manage notices</p>
                             </div>
-                            <span class="card-action">View History →</span>
-                        </a>
+                        </div>
+                        Manage Posts →
+                    </a>
 
-                        <a href="{% url 'analytics' %}" class="main-card">
-                            <div class="main-card-header">
-                                <div class="main-card-icon"><i class="fas fa-chart-line"></i></div>
-                                <div>
-                                    <div class="main-card-title">Analytics</div>
-                                    <div class="main-card-description">See performance insights</div>
-                                </div>
+                    <a href="{% url 'medicine_distribution_history' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-history"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Distribution History</h3>
+                                <p class="main-card-description">Monitor issued supplies</p>
                             </div>
-                            <span class="card-action">View Analytics →</span>
-                        </a>
+                        </div>
+                        View Logs →
+                    </a>
 
-                        <a href="{% url 'admin_profile' %}" class="main-card">
-                            <div class="main-card-header">
-                                <div class="main-card-icon"><i class="fas fa-user-shield"></i></div>
-                                <div>
-                                    <div class="main-card-title">Admin Profile</div>
-                                    <div class="main-card-description">Manage account settings</div>
-                                </div>
+                    <a href="{% url 'analytics' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-chart-line"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Analytics</h3>
+                                <p class="main-card-description">View usage & performance</p>
                             </div>
-                            <span class="card-action">Edit Profile →</span>
-                        </a>
-                    </div>
+                        </div>
+                        View Analytics →
+                    </a>
+
+                    <a href="{% url 'admin_profile' %}" class="main-card">
+                        <div class="main-card-header">
+                            <div class="main-card-icon"><i class="fas fa-user-shield"></i></div>
+                            <div>
+                                <h3 class="main-card-title">Admin Profile</h3>
+                                <p class="main-card-description">Manage admin settings</p>
+                            </div>
+                        </div>
+                        Edit Profile →
+                    </a>
+
                 </div>
             </div>
+
         </div>
     </div>
 </div>
