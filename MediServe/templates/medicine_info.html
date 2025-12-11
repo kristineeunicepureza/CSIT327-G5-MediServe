@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ medicine.name }} Info{% endblock %}
+{% block title %}{{ medicine.name }} - Medicine Details{% endblock %}
 
 {% block content %}
 <style>
@@ -12,57 +12,33 @@
     }
 
     body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #f5f7fa;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: #f8f9fc;
         min-height: 100vh;
-        padding: 0;
     }
 
     .page-container {
         width: 100%;
-        margin: 0 auto;
-        background-color: #FFFFFF;
         min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+        background-color: #f8f9fc;
     }
 
-    /* Header */
+    /* Enhanced Header with Gradient */
     .page-header {
-        padding: 35px 55px;
-        background: linear-gradient(135deg, #36489e 0%, #4a5fb8 100%);
+        padding: 28px 50px;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
         display: flex;
         align-items: center;
-        gap: 20px;
-        position: relative;
-        overflow: hidden;
-        box-sizing: border-box;
-    }
-
-    .page-header::before {
-        content: '';
-        position: absolute;
-        top: -40%;
-        right: -10%;
-        width: 450px;
-        height: 450px;
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 50%;
-    }
-
-    .page-header::after {
-        content: '';
-        position: absolute;
-        bottom: -25%;
-        left: -10%;
-        width: 300px;
-        height: 300px;
-        background: rgba(255, 255, 255, 0.07);
-        border-radius: 50%;
+        gap: 18px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(54, 72, 158, 0.15);
     }
 
     .btn-back {
-        background-color: rgba(255, 255, 255, 0.18);
+        background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
         color: #FFFFFF;
         border-radius: 12px;
         width: 48px;
@@ -70,45 +46,41 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 2px solid rgba(255, 255, 255, 0.35);
-        transition: all 0.2s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
         text-decoration: none;
         cursor: pointer;
-        z-index: 2;
-        font-size: 1.2em;
+        font-size: 1.1em;
     }
 
     .btn-back:hover {
-        background-color: rgba(255, 255, 255, 0.3);
-        transform: translateY(-2px);
+        background-color: rgba(255, 255, 255, 0.4);
+        transform: translateX(-5px) scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .page-title {
-        font-size: 2.1rem;
+        font-size: 1.6em;
         color: #FFFFFF;
-        font-weight: 800;
-        z-index: 2;
+        font-weight: 700;
+        letter-spacing: -0.5px;
     }
 
-    /* Main Content */
+    /* Main Content with Better Spacing */
     .main-content {
-        flex: 1;
-        padding: 48px;
-        background: #ffffff;
-    }
-
-    .content-wrapper {
-        width: 100%;
+        max-width: 1400px;
         margin: 0 auto;
+        padding: 40px 50px 60px;
     }
 
-    /* Medicine Header */
+    /* Enhanced Medicine Header Card */
     .medicine-header {
-        background: white;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
         padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-        margin-bottom: 32px;
+        border-radius: 24px;
+        margin-bottom: 35px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(54, 72, 158, 0.08);
         position: relative;
         overflow: hidden;
     }
@@ -116,20 +88,23 @@
     .medicine-header::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-        background: #36489e;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(92, 116, 227, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
     }
 
     .medicine-name {
         color: #1a202c;
-        font-size: 2.75em;
+        font-size: 2.8em;
         font-weight: 800;
-        margin-bottom: 24px;
+        margin-bottom: 22px;
         line-height: 1.2;
         letter-spacing: -1px;
+        position: relative;
     }
 
     .tags-row {
@@ -137,20 +112,33 @@
         gap: 12px;
         flex-wrap: wrap;
         align-items: center;
-        margin-bottom: 24px;
+        margin-bottom: 22px;
+        position: relative;
     }
 
+    /* Enhanced Tags with Better Design */
     .free-tag {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         padding: 10px 18px;
-        background: #d4edda;
-        border-radius: 10px;
-        font-size: 0.9em;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border-radius: 12px;
+        font-size: 0.85em;
         color: #155724;
         font-weight: 700;
-        border: 1px solid #b1dfbb;
+        border: 2px solid #28a745;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .free-tag:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.25);
+    }
+
+    .free-tag i {
+        font-size: 1.1em;
     }
 
     .info-badge {
@@ -158,16 +146,25 @@
         align-items: center;
         gap: 8px;
         padding: 10px 18px;
-        border-radius: 10px;
-        font-size: 0.9em;
+        border-radius: 12px;
+        font-size: 0.88em;
         font-weight: 600;
-        background: #f8f9fc;
+        background: #ffffff;
         color: #374151;
-        border: 1px solid #d9e2ec;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .info-badge:hover {
+        border-color: #36489e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.15);
     }
 
     .info-badge i {
         color: #36489e;
+        font-size: 1em;
     }
 
     .limit-badge {
@@ -175,75 +172,86 @@
         align-items: center;
         gap: 8px;
         padding: 10px 18px;
-        border-radius: 10px;
-        font-size: 0.9em;
+        border-radius: 12px;
+        font-size: 0.88em;
         font-weight: 700;
-        background: #fff3cd;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
         color: #856404;
-        border: 1px solid #ffd93d;
+        border: 2px solid #ffc107;
         cursor: pointer;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.15);
     }
 
     .limit-badge:hover {
-        background: #ffeaa7;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
     }
 
+    /* Enhanced Stock Status Badges */
     .stock-status {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        padding: 12px 24px;
-        border-radius: 12px;
+        padding: 14px 24px;
+        border-radius: 14px;
         font-weight: 700;
         font-size: 1em;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        position: relative;
     }
 
     .stock-available {
-        background: #d4edda;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
         color: #155724;
-        border: 1px solid #b1dfbb;
+        border: 2px solid #28a745;
+    }
+
+    .stock-available i {
+        font-size: 1.2em;
+        animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
     }
 
     .stock-warning {
-        background: #fff3cd;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
         color: #856404;
-        border: 1px solid #ffd93d;
+        border: 2px solid #ffc107;
     }
 
     .stock-unavailable {
-        background: #f8d7da;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
         color: #721c24;
-        border: 1px solid #f1aeb5;
+        border: 2px solid #dc3545;
     }
 
     /* Two Column Layout */
     .content-grid {
         display: grid;
-        grid-template-columns: 1fr 450px;
-        gap: 32px;
+        grid-template-columns: 1fr 520px;
+        gap: 35px;
+        margin-top: 35px;
     }
 
-    /* Information Sections */
-    .info-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-    }
-
+    /* Enhanced Information Sections */
     .info-section {
-        background: white;
-        padding: 32px;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        margin-bottom: 25px;
+        background: #ffffff;
+        padding: 28px;
+        border-radius: 20px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(54, 72, 158, 0.08);
         transition: all 0.3s ease;
     }
 
     .info-section:hover {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
     .info-section-title {
@@ -254,55 +262,76 @@
         font-weight: 700;
         font-size: 1.15em;
         margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f4f8;
     }
 
     .info-section-title i {
         color: #36489e;
         font-size: 1.3em;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e8ecf5 0%, #dce3f5 100%);
+        border-radius: 10px;
     }
 
     .info-section-content {
         color: #4b5563;
-        font-size: 1em;
+        font-size: 0.98em;
         line-height: 1.8;
     }
 
-    /* Order Form */
+    /* Enhanced Order Form with Glassmorphism */
     .order-form-section {
-        background: white;
-        padding: 40px;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        padding: 35px;
+        border-radius: 24px;
+        border: 2px solid rgba(54, 72, 158, 0.12);
+        box-shadow: 0 10px 40px rgba(54, 72, 158, 0.12);
         position: sticky;
-        top: 32px;
-        height: fit-content;
+        top: 120px;
+        backdrop-filter: blur(10px);
     }
 
     .form-title {
         color: #1a202c;
-        font-size: 1.5em;
+        font-size: 1.4em;
         font-weight: 800;
-        margin-bottom: 32px;
+        margin-bottom: 30px;
         display: flex;
         align-items: center;
         gap: 12px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e5e7eb;
     }
 
     .form-title i {
         color: #36489e;
         font-size: 1.2em;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.25);
     }
 
     .order-form {
         display: flex;
         flex-direction: column;
-        gap: 28px;
+        gap: 25px;
     }
 
     .form-field {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
     }
 
     .form-field label {
@@ -316,7 +345,7 @@
 
     .form-field label i {
         color: #36489e;
-        font-size: 1.1em;
+        font-size: 1em;
     }
 
     .form-input {
@@ -324,26 +353,30 @@
         padding: 14px 18px;
         border: 2px solid #e5e7eb;
         border-radius: 12px;
-        font-size: 1em;
+        font-size: 0.98em;
         transition: all 0.3s ease;
         background-color: #ffffff;
+        font-family: inherit;
+    }
+
+    .form-input:hover {
+        border-color: #cbd5e0;
     }
 
     .form-input:focus {
         outline: none;
         border-color: #36489e;
         box-shadow: 0 0 0 4px rgba(54, 72, 158, 0.1);
-    }
-
-    .form-input:disabled {
-        background-color: #f3f4f6;
-        cursor: not-allowed;
+        transform: translateY(-1px);
     }
 
     .form-textarea {
         resize: vertical;
-        min-height: 100px;
-        font-family: inherit;
+        min-height: 110px;
+    }
+
+    .quantity-input-container {
+        position: relative;
     }
 
     .quantity-limit-hint {
@@ -354,38 +387,43 @@
         align-items: center;
         gap: 8px;
         flex-wrap: wrap;
-        padding: 12px;
-        background: #f9fafb;
-        border-radius: 8px;
+        padding: 10px 14px;
+        background: #fef3c7;
+        border-radius: 10px;
+        border: 1px solid #fde68a;
     }
 
     .quantity-limit-hint i {
-        color: #36489e;
+        color: #f59e0b;
+        font-size: 1.1em;
     }
 
-    .quantity-limit-hint button {
+    .why-link {
         background: none;
         border: none;
-        color: #36489e;
+        color: #f59e0b;
         cursor: pointer;
         text-decoration: underline;
-        font-size: 0.95em;
-        font-weight: 700;
+        font-size: 1em;
         padding: 0;
-        transition: color 0.3s ease;
+        margin-left: 4px;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
 
-    .quantity-limit-hint button:hover {
-        color: #2d3a82;
+    .why-link:hover {
+        color: #d97706;
+        transform: scale(1.05);
     }
 
+    /* Enhanced Submit Button */
     .submit-btn {
         width: 100%;
-        padding: 18px 32px;
+        padding: 16px 28px;
         border: none;
-        border-radius: 12px;
+        border-radius: 14px;
         color: white;
-        font-size: 1.1em;
+        font-size: 1.08em;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -393,25 +431,45 @@
         align-items: center;
         justify-content: center;
         gap: 12px;
-        margin-top: 16px;
-        background: #36489e;
-        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.25);
+        margin-top: 10px;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
+        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .submit-btn:hover:not(:disabled)::before {
+        left: 100%;
     }
 
     .submit-btn:hover:not(:disabled) {
-        background: #2d3a82;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.35);
+        background: linear-gradient(135deg, #2d3a82 0%, #36489e 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(54, 72, 158, 0.4);
+    }
+
+    .submit-btn:active:not(:disabled) {
+        transform: translateY(-1px);
     }
 
     .submit-btn:disabled {
-        background: #9ca3af;
+        opacity: 0.6;
         cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
+        background: #9ca3af;
     }
 
-    /* Modal */
+    /* Enhanced Modal with Better Animation */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -420,12 +478,11 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
         justify-content: center;
         align-items: center;
         z-index: 1000;
         animation: fadeIn 0.3s ease-out;
-        padding: 20px;
-        backdrop-filter: blur(4px);
     }
 
     .modal-overlay.show {
@@ -440,64 +497,63 @@
     @keyframes scaleIn {
         from {
             opacity: 0;
-            transform: scale(0.95);
+            transform: scale(0.9) translateY(20px);
         }
         to {
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1) translateY(0);
         }
     }
 
     .modal-content {
-        background: white;
-        padding: 48px;
-        border-radius: 24px;
-        width: 600px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        padding: 40px;
+        border-radius: 28px;
+        width: 550px;
         max-width: 90%;
-        box-shadow: 0 24px 72px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
         position: relative;
-        animation: scaleIn 0.3s ease-out;
-        max-height: 90vh;
-        overflow-y: auto;
+        animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 2px solid rgba(54, 72, 158, 0.1);
     }
 
     .modal-header {
         display: flex;
         align-items: center;
-        gap: 16px;
-        margin-bottom: 32px;
-        padding-bottom: 24px;
-        border-bottom: 2px solid #f3f4f6;
+        gap: 15px;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e5e7eb;
     }
 
     .modal-icon {
-        width: 64px;
-        height: 64px;
-        background: #f59e0b;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 1.8em;
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        flex-shrink: 0;
+        font-size: 1.6em;
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
     }
 
     .modal-title {
-        font-size: 1.75em;
+        font-size: 1.5em;
         color: #1a202c;
         margin: 0;
         font-weight: 800;
+        letter-spacing: -0.5px;
     }
 
     .modal-close {
         position: absolute;
-        top: 24px;
-        right: 24px;
+        top: 20px;
+        right: 25px;
         background: #f3f4f6;
         border: none;
-        font-size: 1.5em;
+        font-size: 1.6em;
         color: #6b7280;
         cursor: pointer;
         width: 40px;
@@ -505,40 +561,37 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 10px;
+        border-radius: 12px;
         transition: all 0.3s ease;
     }
 
     .modal-close:hover {
-        background-color: #ef4444;
-        color: white;
+        background-color: #fee2e2;
+        color: #dc2626;
         transform: rotate(90deg);
     }
 
     .modal-body {
         color: #4b5563;
-        line-height: 1.8;
-        margin-bottom: 32px;
+        line-height: 1.7;
+        margin-bottom: 28px;
         font-size: 1em;
     }
 
-    .modal-body p {
-        margin-bottom: 20px;
-    }
-
     .limit-info-card {
-        background: #fef3c7;
-        padding: 32px;
-        border-radius: 16px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        padding: 25px;
+        border-radius: 18px;
         border: 2px solid #f59e0b;
-        margin: 28px 0;
+        margin: 25px 0;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15);
     }
 
     .limit-title {
-        font-size: 1.25em;
+        font-size: 1.15em;
         font-weight: 800;
         color: #92400e;
-        margin-bottom: 24px;
+        margin-bottom: 18px;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -547,78 +600,82 @@
     .limit-details {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 24px;
+        gap: 18px;
     }
 
     .limit-item {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.6);
+        padding: 15px;
+        border-radius: 12px;
     }
 
     .limit-label {
-        font-size: 0.85em;
+        font-size: 0.82em;
         color: #92400e;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
     }
 
     .limit-value {
-        font-size: 1.5em;
+        font-size: 1.4em;
         color: #451a03;
         font-weight: 800;
     }
 
     .limit-explanation {
         background: rgba(255, 255, 255, 0.9);
-        padding: 20px;
+        padding: 18px;
         border-radius: 12px;
-        margin-top: 20px;
+        margin-top: 18px;
         color: #6b4423;
-        font-size: 0.95em;
+        font-size: 0.92em;
         display: flex;
         align-items: flex-start;
         gap: 12px;
-        line-height: 1.7;
+        line-height: 1.6;
     }
 
     .limit-explanation i {
-        color: #f59e0b;
+        color: #d97706;
         font-size: 1.3em;
         margin-top: 2px;
-        flex-shrink: 0;
     }
 
     .modal-actions {
         display: flex;
         justify-content: flex-end;
-        padding-top: 24px;
-        border-top: 2px solid #f3f4f6;
+        gap: 15px;
+        margin-top: 28px;
+        padding-top: 25px;
+        border-top: 2px solid #e5e7eb;
     }
 
     .btn-modal-close {
-        background: #36489e;
+        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
         color: white;
         border: none;
-        padding: 16px 32px;
+        padding: 14px 28px;
         border-radius: 12px;
-        font-size: 1.05em;
+        font-size: 1em;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
         gap: 10px;
-        box-shadow: 0 4px 15px rgba(54, 72, 158, 0.25);
+        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.3);
     }
 
     .btn-modal-close:hover {
-        background: #2d3a82;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(54, 72, 158, 0.35);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(54, 72, 158, 0.4);
     }
 
+    /* Responsive Design */
     @media (max-width: 1024px) {
         .content-grid {
             grid-template-columns: 1fr;
@@ -626,167 +683,183 @@
 
         .order-form-section {
             position: static;
+            top: auto;
         }
     }
 
     @media (max-width: 768px) {
-        .page-header {
-            padding: 25px 30px;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-        }
-
         .main-content {
-            padding: 24px;
+            padding: 25px 20px 40px;
+        }
+
+        .page-header {
+            padding: 20px 25px;
         }
 
         .medicine-header {
-            padding: 24px;
+            padding: 30px 25px;
         }
 
         .medicine-name {
             font-size: 2em;
         }
 
+        .order-form-section {
+            padding: 28px 22px;
+        }
+
         .modal-content {
-            padding: 32px 24px;
+            width: 95%;
+            padding: 30px 25px;
         }
 
         .limit-details {
             grid-template-columns: 1fr;
         }
     }
+
+    /* Loading Animation for Smooth Experience */
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
 </style>
 
 <div class="page-container">
     <div class="page-header">
-        <a href="{% url 'medicine_list' %}" class="btn-back">
+        <button class="btn-back" onclick="goBack()" type="button">
             <i class="fas fa-arrow-left"></i>
-        </a>
+        </button>
         <h1 class="page-title">Medicine Details</h1>
     </div>
 
     <div class="main-content">
-        <div class="content-wrapper">
-            <div class="medicine-header">
-                <h2 class="medicine-name">{{ medicine.name }}</h2>
+        <div class="medicine-header">
+            <h2 class="medicine-name">{{ medicine.name }}</h2>
 
-                <div class="tags-row">
-                    <div class="free-tag">
-                        <i class="fas fa-gift"></i> Free Medicine
-                    </div>
-
-                    {% if medicine.brand %}
-                        <span class="info-badge"><i class="fas fa-tag"></i> {{ medicine.brand }}</span>
-                    {% endif %}
-                    {% if medicine.category %}
-                        <span class="info-badge"><i class="fas fa-folder"></i> {{ medicine.category }}</span>
-                    {% endif %}
-
-                    {% if medicine.max_order_quantity %}
-                        <span class="limit-badge" onclick="showOrderLimitModal()">
-                            <i class="fas fa-clock"></i> Max {{ medicine.max_order_quantity }} units
-                        </span>
-                    {% endif %}
+            <div class="tags-row">
+                {% if medicine.prescription_type == 'non_prescription' %}
+                <div class="free-tag">
+                    <i class="fas fa-gift"></i> Free Medicine
                 </div>
+                {% endif %}
 
-                {% with stock=medicine.total_stock %}
-                    <div class="stock-status {% if stock == 0 %}stock-unavailable{% elif stock <= 10 %}stock-warning{% else %}stock-available{% endif %}">
-                        {% if stock == 0 %}
-                            <i class="fas fa-times-circle"></i> Out of Stock
-                        {% elif stock <= 10 %}
-                            <i class="fas fa-exclamation-circle"></i> {{ stock }} units left
-                        {% else %}
-                            <i class="fas fa-check-circle"></i> {{ stock }} units available
-                        {% endif %}
-                    </div>
-                {% endwith %}
+                {% if medicine.brand %}
+                <span class="info-badge"><i class="fas fa-tag"></i> {{ medicine.brand }}</span>
+                {% endif %}
+
+                {% if medicine.category %}
+                <span class="info-badge"><i class="fas fa-folder"></i> {{ medicine.category }}</span>
+                {% endif %}
+
+                <span class="limit-badge" onclick="showOrderLimitModal()" title="Click to learn more about order limits">
+                    <i class="fas fa-clock"></i> Max {{ medicine.get_max_order_quantity }} units
+                </span>
             </div>
 
-            <div class="content-grid">
-                <div class="info-panel">
-                    {% if medicine.dosage %}
-                        <div class="info-section">
-                            <div class="info-section-title">
-                                <i class="fas fa-prescription-bottle"></i> Dosage Information
-                            </div>
-                            <div class="info-section-content">{{ medicine.dosage }}</div>
-                        </div>
-                    {% endif %}
+            {% if medicine.total_stock > 10 %}
+            <div class="stock-status stock-available">
+                <i class="fas fa-check-circle"></i> {{ medicine.total_stock }} units available
+            </div>
+            {% elif medicine.total_stock > 0 %}
+            <div class="stock-status stock-warning">
+                <i class="fas fa-exclamation-triangle"></i> Low stock: {{ medicine.total_stock }} units remaining
+            </div>
+            {% else %}
+            <div class="stock-status stock-unavailable">
+                <i class="fas fa-times-circle"></i> Out of stock
+            </div>
+            {% endif %}
+        </div>
 
-                    {% if medicine.description %}
-                        <div class="info-section">
-                            <div class="info-section-title">
-                                <i class="fas fa-info-circle"></i> Description
-                            </div>
-                            <div class="info-section-content">{{ medicine.description }}</div>
-                        </div>
-                    {% endif %}
+        <div class="content-grid">
+            <div class="info-sections">
+                {% if medicine.description %}
+                <div class="info-section">
+                    <div class="info-section-title">
+                        <i class="fas fa-info-circle"></i> Description
+                    </div>
+                    <div class="info-section-content">
+                        {{ medicine.description }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="info-section">
+                    <div class="info-section-title">
+                        <i class="fas fa-prescription-bottle"></i> Dosage Information
+                    </div>
+                    <div class="info-section-content">
+                        Please follow the dosage instructions on the package or consult with our healthcare staff for proper dosing guidelines. Always read the label carefully and do not exceed the recommended dosage.
+                    </div>
                 </div>
 
-                <div class="order-form-section">
-                    <div class="form-title">
-                        <i class="fas fa-hand-holding-medical"></i> Request Medicine
+                <div class="info-section">
+                    <div class="info-section-title">
+                        <i class="fas fa-shield-alt"></i> Safety Information
                     </div>
+                    <div class="info-section-content">
+                        Keep out of reach of children. Store in a cool, dry place. If symptoms persist, consult a healthcare professional. Read all warnings and precautions before use.
+                    </div>
+                </div>
+            </div>
 
-                    <form method="POST" action="{% url 'add_to_order' medicine_id=medicine.id %}" class="order-form" id="orderForm">
-                        {% csrf_token %}
-                        <div class="form-field">
-                            <label for="quantity">
-                                <i class="fas fa-sort-numeric-up"></i>
-                                Quantity
-                            </label>
-                            <input type="number" id="quantity" name="quantity" min="1"
-                                   max="{% if medicine.max_order_quantity %}{{ medicine.max_order_quantity }}{% else %}{{ medicine.total_stock }}{% endif %}"
-                                   value="1" class="form-input"
-                                   {% if medicine.total_stock == 0 %}disabled{% endif %}
-                                   data-max-order="{{ medicine.max_order_quantity|default:'9999' }}"
-                                   data-total-stock="{{ medicine.total_stock }}"
+            <div class="order-form-section">
+                <div class="form-title">
+                    <i class="fas fa-hand-holding-medical"></i> Request Medicine
+                </div>
+
+                <form class="order-form" id="orderForm" method="post" action="{% url 'add_to_order' medicine.id %}">
+                    {% csrf_token %}
+
+                    <div class="form-field">
+                        <label for="quantity">
+                            <i class="fas fa-sort-numeric-up"></i>
+                            Quantity
+                        </label>
+                        <div class="quantity-input-container">
+                            <input type="number"
+                                   id="quantity"
+                                   name="quantity"
+                                   min="1"
+                                   max="{{ medicine.get_max_order_quantity }}"
+                                   value="1"
+                                   class="form-input"
                                    required>
                             <div class="quantity-limit-hint">
                                 <i class="fas fa-info-circle"></i>
-                                Stock: {{ medicine.total_stock }} units
-                                {% if medicine.max_order_quantity %}
-                                    | <strong>Limit: {{ medicine.max_order_quantity }} units max</strong>
-                                    <button type="button" onclick="showOrderLimitModal()">
-                                        Why?
-                                    </button>
-                                {% endif %}
+                                <span>Stock: <strong>{{ medicine.total_stock }}</strong> units | Limit: <strong>{{ medicine.get_max_order_quantity }}</strong> units max</span>
+                                <button type="button" onclick="showOrderLimitModal()" class="why-link">
+                                    Why?
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="form-field">
-                            <label for="specialRequest">
-                                <i class="fas fa-comment-dots"></i> Special Request (Optional)
-                            </label>
-                            <textarea id="specialRequest" name="special_request" class="form-input form-textarea"
-                                      placeholder="e.g., Request specific brand or add any special notes"
-                                      {% if medicine.total_stock == 0 %}disabled{% endif %}></textarea>
-                        </div>
+                    <div class="form-field">
+                        <label for="specialRequest">
+                            <i class="fas fa-comment-dots"></i> Special Request (Optional)
+                        </label>
+                        <textarea id="specialRequest"
+                                  name="special_request"
+                                  class="form-input form-textarea"
+                                  placeholder="Add any special notes or requests here..."></textarea>
+                    </div>
 
-                        <button type="submit" class="submit-btn" {% if medicine.total_stock == 0 %}disabled{% endif %}>
-                            {% if medicine.total_stock == 0 %}
-                                <i class="fas fa-ban"></i> Out of Stock
-                            {% else %}
-                                <i class="fas fa-paper-plane"></i> Submit Request
-                            {% endif %}
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" class="submit-btn" {% if medicine.total_stock == 0 %}disabled{% endif %}>
+                        <i class="fas fa-{% if medicine.total_stock == 0 %}ban{% else %}paper-plane{% endif %}"></i>
+                        {% if medicine.total_stock == 0 %}Out of Stock{% else %}Add to Cart{% endif %}
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
-{% if medicine.max_order_quantity %}
-<div id="orderLimitModal" class="modal-overlay">
+<!-- ORDER LIMIT MODAL -->
+<div id="orderLimitModal" class="modal-overlay" onclick="handleModalClick(event)">
     <div class="modal-content">
-        <button type="button" onclick="closeOrderLimitModal()" class="modal-close">
-            ×
-        </button>
+        <button type="button" onclick="closeOrderLimitModal()" class="modal-close">×</button>
 
         <div class="modal-header">
             <div class="modal-icon">
@@ -807,11 +880,11 @@
                 <div class="limit-details">
                     <div class="limit-item">
                         <div class="limit-label">Maximum Quantity</div>
-                        <div class="limit-value">{{ medicine.max_order_quantity }} units</div>
+                        <div class="limit-value">{{ medicine.get_max_order_quantity }} units</div>
                     </div>
                     <div class="limit-item">
                         <div class="limit-label">Supply Duration</div>
-                        <div class="limit-value">{{ medicine.order_limit_duration|default:"1 Week" }}</div>
+                        <div class="limit-value">{{ medicine.get_order_limit_display }}</div>
                     </div>
                 </div>
 
@@ -823,8 +896,8 @@
                 </div>
             </div>
 
-            <p><strong>Stock Available:</strong> {{ medicine.total_stock }} units</p>
-            <p><strong>Your Order Limit:</strong> Up to {{ medicine.max_order_quantity }} units per order</p>
+            <p style="font-weight: 600; margin-top: 15px;"><i class="fas fa-box" style="color: #36489e; margin-right: 8px;"></i><strong>Stock Available:</strong> {{ medicine.total_stock }} units</p>
+            <p style="font-weight: 600; margin-top: 8px;"><i class="fas fa-check-circle" style="color: #28a745; margin-right: 8px;"></i><strong>Your Order Limit:</strong> Up to {{ medicine.get_max_order_quantity }} units per order</p>
         </div>
 
         <div class="modal-actions">
@@ -834,73 +907,74 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 <script>
-    function showOrderLimitModal() {
-        const modal = document.getElementById('orderLimitModal');
-        if (modal) {
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = "{% url 'medicine_list' %}";
         }
+    }
+
+    function showOrderLimitModal() {
+        document.getElementById('orderLimitModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeOrderLimitModal() {
-        const modal = document.getElementById('orderLimitModal');
-        if (modal) {
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
+        document.getElementById('orderLimitModal').classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+
+    function handleModalClick(event) {
+        if (event.target.id === 'orderLimitModal') {
+            closeOrderLimitModal();
         }
     }
 
-    window.onclick = function(event) {
-        const modal = document.getElementById('orderLimitModal');
-        if (modal && event.target === modal) {
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
             closeOrderLimitModal();
         }
-    };
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         const quantityInput = document.getElementById('quantity');
-        if (!quantityInput) return;
-
-        const maxOrderQuantity = parseInt(quantityInput.getAttribute('data-max-order')) || 9999;
-        const totalStock = parseInt(quantityInput.getAttribute('data-total-stock')) || 0;
+        const maxOrderQuantity = {{ medicine.get_max_order_quantity }};
+        const totalStock = {{ medicine.total_stock }};
 
         quantityInput.addEventListener('input', function() {
             const value = parseInt(this.value) || 0;
-            const actualMax = Math.min(maxOrderQuantity, totalStock);
 
-            if (maxOrderQuantity !== 9999 && value > maxOrderQuantity) {
+            if (value > maxOrderQuantity) {
                 this.value = maxOrderQuantity;
                 showOrderLimitModal();
             } else if (value > totalStock) {
                 this.value = totalStock;
                 alert(`Only ${totalStock} units available in stock.`);
+            } else if (value < 1) {
+                this.value = 1;
             }
         });
 
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeOrderLimitModal();
-            }
-        });
-    });
-
-    // Form submission validation
-    const orderForm = document.getElementById('orderForm');
-    if (orderForm) {
+        const orderForm = document.getElementById('orderForm');
         orderForm.addEventListener('submit', function(e) {
-            const quantityInput = document.getElementById('quantity');
-            const quantity = parseInt(quantityInput.value) || 0;
-            const maxOrderQuantity = parseInt(quantityInput.getAttribute('data-max-order')) || 9999;
+            const quantity = parseInt(quantityInput.value);
 
-            if (maxOrderQuantity !== 9999 && quantity > maxOrderQuantity) {
+            if (quantity > maxOrderQuantity) {
                 e.preventDefault();
                 showOrderLimitModal();
                 return false;
             }
+
+            if (quantity > totalStock) {
+                e.preventDefault();
+                alert(`Only ${totalStock} units available in stock.`);
+                return false;
+            }
         });
-    }
+    });
 </script>
+
 {% endblock %}
