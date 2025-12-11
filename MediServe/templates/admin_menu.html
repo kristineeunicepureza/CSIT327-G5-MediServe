@@ -5,971 +5,329 @@
 
 {% block content %}
 <style>
-    /* Keyframe Animations */
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
-        }
-        50% {
-            transform: scale(1.05);
-            box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
-        }
-    }
+    /* ---------- Reset & base ---------- */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; background: #ffffff; -webkit-font-smoothing:antialiased; }
+    a { color: inherit; }
 
-    @keyframes shimmer {
-        0% {
-            background-position: -1000px 0;
-        }
-        100% {
-            background-position: 1000px 0;
-        }
-    }
-
-    @keyframes float {
-        0%, 100% {
-            transform: translateY(0px);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-
-    body {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        min-height: 100vh;
+    /* ---------- Page container & header (match main menu style but red) ---------- */
+    .main-container {
+        width: 100%;
+        max-width: 100%;
         margin: 0;
         padding: 0;
+        background: transparent;
     }
 
-    .admin-container {
+    .main-header {
         width: 100%;
-        max-width: 100vw;
-        margin: 0;
-        animation: fadeInUp 0.6s ease-out;
-        box-shadow: none;
-        border-radius: 0;
-        overflow: hidden;
-        background: #ffffff;
-        position: relative;
-        min-height: 100vh;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .admin-header {
+        /* exact admin gradient you used */
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        padding: 25px 30px;
+        padding: 35px 55px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 8px 32px rgba(220, 53, 69, 0.25);
         position: relative;
+        box-sizing: border-box;
         overflow: hidden;
-        backdrop-filter: blur(10px);
-    }
-
-    .admin-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 500px;
-        height: 500px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-    }
-
-    .admin-header::after {
-        content: '';
-        position: absolute;
-        bottom: -30%;
-        left: -5%;
-        width: 350px;
-        height: 350px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 50%;
-    }
-
-    .header-left {
-        position: relative;
-        z-index: 1;
-    }
-
-    .header-badge {
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.2);
-        color: #ffffff;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .admin-header h1 {
-        font-size: 2.4em;
-        color: #FFFFFF;
-        margin: 0 0 10px 0;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-        line-height: 1.2;
-    }
-
-    .admin-subtitle {
-        color: rgba(255, 255, 255, 0.95);
-        font-size: 1.08em;
+        /* ensure header touches top, no white gap */
         margin: 0;
-        font-weight: 400;
-        line-height: 1.5;
-        letter-spacing: 0.3px;
+        border-radius: 0;
+        box-shadow: 0 4px 18px rgba(200,20,30,0.08);
     }
 
-    .btn-admin-logout {
-        background: rgba(255, 255, 255, 0.15);
-        color: #FFFFFF;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        padding: 14px 28px;
-        font-weight: 600;
-        border-radius: 12px;
+    /* same decorative circles used on main header */
+    .main-header::before{
+        content:"";
+        position:absolute;
+        top:-40%;
+        right:-10%;
+        width:450px; height:450px;
+        background: rgba(255,255,255,0.12);
+        border-radius:50%;
+    }
+    .main-header::after{
+        content:"";
+        position:absolute;
+        bottom:-25%;
+        left:-10%;
+        width:300px; height:300px;
+        background: rgba(255,255,255,0.07);
+        border-radius:50%;
+    }
+
+    .header-left { display:flex; gap:18px; align-items:center; z-index:2; }
+    .logo-section img { width:180px; height:auto; filter: drop-shadow(0 3px 6px rgba(255,255,255,0.2)); }
+    .header-badge {
+        display:inline-block;
+        padding:6px 14px;
+        border-radius:18px;
+        background: rgba(255,255,255,0.20);
+        border: 1px solid rgba(255,255,255,0.35);
+        color:#fff;
+        font-weight:600;
+        font-size:.85rem;
+    }
+    .main-header h1 { margin:0; color:#fff; font-size:1.9rem; font-weight:800; }
+    .main-subtitle { margin:0; color: rgba(255,255,255,0.9); font-size:.95rem; }
+
+    .btn-logout {
+        background: rgba(255,255,255,0.18);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.28);
         text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        position: relative;
-        z-index: 1;
-        font-size: 1em;
-        backdrop-filter: blur(10px);
+        font-weight:600;
+        z-index:2;
     }
+    .btn-logout:hover { transform: translateY(-2px); background: rgba(255,255,255,0.28); }
 
-    .btn-admin-logout:hover {
-        background: rgba(255, 255, 255, 0.25);
-        border-color: rgba(255, 255, 255, 0.5);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .admin-content {
-        padding: 30px 30px 60px 30px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        min-height: calc(100vh - 180px);
-        overflow-y: auto;
-    }
-
-    /* Scrollbar Styling */
-    .admin-content::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    .admin-content::-webkit-scrollbar-track {
-        background: #f1f3f5;
-        border-radius: 10px;
-    }
-
-    .admin-content::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        border-radius: 10px;
-    }
-
-    .admin-content::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    /* ---------- Main content (spacing like main menu) ---------- */
+    .main-content {
+        width: 100%;
+        padding: 30px 50px;
+        box-sizing: border-box;
     }
 
     .welcome-section {
-        margin-bottom: 20px;
-        padding: 20px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        border-left: 6px solid #dc3545;
-        animation: slideIn 0.5s ease-out;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .welcome-section h2 {
-        color: #2c3e50;
-        font-size: 1.5em;
-        margin: 0 0 6px 0;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .welcome-section h2 i {
-        color: #dc3545;
-        font-size: 0.9em;
-    }
-
-    .welcome-section p {
-        color: #6c757d;
-        font-size: 0.95em;
-        margin: 0;
-    }
-
-    .announcement-banner {
-        border: none;
-        padding: 20px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
-        border-left: 6px solid #ffc107;
-        animation: slideIn 0.6s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .announcement-banner::before {
-        content: '';
-        position: absolute;
-        top: -20px;
-        right: -20px;
-        width: 150px;
-        height: 150px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-    }
-
-    .announcement-banner-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .announcement-icon {
-        width: 40px;
-        height: 40px;
-        background: #ffc107;
-        color: #ffffff;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2em;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-    }
-
-    .announcement-banner strong {
-        color: #f57c00;
-        font-size: 1.15em;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .announcement-banner p {
-        font-size: 0.95em;
-        color: #5d4037;
-        margin: 0;
-        line-height: 1.6;
-        padding-left: 52px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .section-header {
-        margin-bottom: 20px;
-    }
-
-    .section-title {
-        color: #2c3e50;
-        font-size: 1.3em;
-        margin: 0 0 5px 0;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .section-title i {
-        color: #dc3545;
-    }
-
-    .section-subtitle {
-        color: #6c757d;
-        font-size: 0.95em;
-        margin: 0;
-    }
-
-    .admin-menu-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 18px;
-        max-width: 100%;
-        padding: 0 30px 30px 30px;
-    }
-
-    .admin-card {
-        background: #ffffff;
-        padding: 20px 18px;
-        border-radius: 16px;
-        text-decoration: none;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        display: block;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
-        border: 2px solid transparent;
-        position: relative;
-        animation: scaleIn 0.4s ease-out;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    @keyframes scaleIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-
-    .admin-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
-        border-color: currentColor;
-    }
-
-    .admin-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 100%);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        pointer-events: none;
-    }
-
-    .admin-card:hover::before {
-        opacity: 1;
-    }
-
-    .admin-card-header {
-        display: flex;
-        align-items: center;
-        gap: 15px;
         width: 100%;
-        margin-bottom: 15px;
-    }
-
-    .admin-card-icon {
-        width: 55px;
-        height: 55px;
+        background: #fff;
+        padding: 25px;
         border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.6em;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-        flex-shrink: 0;
-        position: relative;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+        border-left: 5px solid #dc3545;
+        margin-bottom: 25px;
     }
+    .welcome-section h2 { margin:0; font-size:1.4rem; font-weight:800; color:#2c3e50; display:flex; gap:10px; align-items:center; }
+    .welcome-section p { margin:8px 0 0; color:#6c757d; }
 
-    .admin-card:hover .admin-card-icon {
-        transform: scale(1.15) rotate(5deg);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-    }
-
-    .admin-card-header-text {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .admin-card-title {
-        font-size: 1.18em;
-        font-weight: 700;
-        margin: 0 0 4px 0;
-        color: #2c3e50;
-        line-height: 1.3;
-        letter-spacing: -0.2px;
-    }
-
-    .admin-card-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.7em;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        opacity: 0.9;
-    }
-
-    .admin-card-description {
-        font-size: 0.88em;
-        color: #6c757d;
-        margin: 0 0 12px 0;
-        line-height: 1.6;
-        letter-spacing: 0.2px;
-    }
-
-    .admin-card-footer {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #6c757d;
-        font-size: 0.85em;
-        font-weight: 600;
-    }
-
-    .admin-card:hover .admin-card-footer {
-        color: currentColor;
-    }
-
-    .admin-card-footer i {
-        transition: transform 0.3s ease;
-    }
-
-    .admin-card:hover .admin-card-footer i {
-        transform: translateX(4px);
-    }
-
-    /* --- CARD THEMES ------------------------------------------------- */
-
-    /* Stock */
-    .card-stock {
-        color: #ffc107;
-    }
-    .card-stock .admin-card-icon {
-        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-        color: #f57f17;
-    }
-    .card-stock .admin-card-badge {
-        background: #fff8e1;
-        color: #f57f17;
-    }
-    .card-stock:hover {
-        box-shadow: 0 8px 30px rgba(255, 193, 7, 0.22);
-    }
-
-    /* Delivery */
-    .card-delivery {
-        color: #28a745;
-    }
-    .card-delivery .admin-card-icon {
-        background: linear-gradient(135deg, #e6ffea 0%, #c8e6c9 100%);
-        color: #2e7d32;
-    }
-    .card-delivery .admin-card-badge {
-        background: #e6ffea;
-        color: #2e7d32;
-    }
-    .card-delivery:hover {
-        box-shadow: 0 8px 30px rgba(40, 167, 69, 0.22);
-    }
-
-    /* Announcements */
-    .card-announcements {
-        color: #007bff;
-    }
-    .card-announcements .admin-card-icon {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        color: #1565c0;
-    }
-    .card-announcements .admin-card-badge {
-        background: #e3f2fd;
-        color: #1565c0;
-    }
-    .card-announcements:hover {
-        box-shadow: 0 8px 30px rgba(0, 123, 255, 0.22);
-    }
-
-    /* History */
-    .card-history {
-        color: #6f42c1;
-    }
-    .card-history .admin-card-icon {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-        color: #6a1b9a;
-    }
-    .card-history .admin-card-badge {
-        background: #f3e5f5;
-        color: #6a1b9a;
-    }
-    .card-history:hover {
-        box-shadow: 0 8px 30px rgba(111, 66, 193, 0.22);
-    }
-
-    /* Admin Profile */
-    .card-profile {
-        color: #dc3545;
-    }
-    .card-profile .admin-card-icon {
-        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-        color: #c62828;
-    }
-    .card-profile .admin-card-badge {
-        background: #ffebee;
-        color: #c62828;
-    }
-    .card-profile:hover {
-        box-shadow: 0 8px 30px rgba(220, 53, 69, 0.22);
-    }
-
-    /* Analytics */
-    .card-analytics {
-        color: #17a2b8;
-    }
-    .card-analytics .admin-card-icon {
-        background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
-        color: #00838f;
-    }
-    .card-analytics .admin-card-badge {
-        background: #e0f7fa;
-        color: #00838f;
-    }
-    .card-analytics:hover {
-        box-shadow: 0 8px 30px rgba(23, 162, 184, 0.22);
-    }
-
-    /* Loading Screen Styles */
-    .loading-screen {
-        position: absolute;
-        top: 0;
-        left: 0;
+    /* ---------- Content wrapper: left (announcement) + right (quick actions) ----------
+       We ensure the two columns start at the same top baseline and stretch evenly.
+    */
+    .content-wrapper {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 30px;
         width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 100;
-        flex-direction: column;
-        border-radius: 20px;
+        align-items: start;    /* crucial to align both columns' top */
     }
 
-    .loading-screen.active {
+    /* prevent default top margins inside each column from shifting layout */
+    .content-wrapper > div { margin: 0; padding: 0; }
+
+    .left-column, .right-column {
         display: flex;
+        flex-direction: column;
+        gap: 0;
+        min-height: 0; /* allow correct stretching in grid */
     }
 
-    .medicine-loader {
-        position: relative;
-        width: 120px;
-        height: 120px;
-        margin-bottom: 30px;
-    }
-
-    /* Pill Animation */
-    .pill {
-        position: absolute;
-        width: 80px;
-        height: 40px;
-        border-radius: 20px;
-        background: linear-gradient(90deg, #dc3545 50%, #ffffff 50%);
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        animation: rotatePill 2s ease-in-out infinite;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .pill::before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 0;
-        width: 2px;
+    /* ---------- Announcement (left) ---------- */
+    .announcement-banner {
+        padding: 25px;
+        background: linear-gradient(135deg, #fff8e1 0%, #ffe9b3 100%);
+        border-radius: 16px;
+        border-left: 6px solid #ffc107;
+        box-shadow: 0 4px 18px rgba(255,193,7,0.25);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* make content start at top */
         height: 100%;
-        background: rgba(0, 0, 0, 0.1);
-        transform: translateX(-50%);
     }
 
-    @keyframes rotatePill {
-        0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-        25% { transform: translate(-50%, -50%) rotate(90deg) scale(1.1); }
-        50% { transform: translate(-50%, -50%) rotate(180deg) scale(1); }
-        75% { transform: translate(-50%, -50%) rotate(270deg) scale(1.1); }
+    .announcement-banner-header { display:flex; align-items:center; gap:12px; margin-bottom:15px; }
+    .announcement-icon { width:42px; height:42px; border-radius:12px; background:#ffc107; color:#fff; display:flex; align-items:center; justify-content:center; }
+    .announcement-content { font-size:1rem; color:#5d4037; line-height:1.7; white-space: pre-line; flex-grow:1; }
+    .announcement-content p { margin-bottom:12px; }
+    .announcement-content li { list-style:none; padding-left:22px; margin-bottom:6px; position:relative; }
+    .announcement-content li::before { content:"✔"; position:absolute; left:0; top:0; color:#36489e; font-weight:bold; }
+    .announcement-date { margin-top:15px; font-size:0.86rem; color:#8d6e63; }
+
+    /* ---------- Quick Actions (right) ---------- */
+    .quick-wrapper {
+        display:flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: flex-start;
+    }
+    .quick-wrapper h3 { margin:0 0 10px 0; color:#2c3e50; }
+    .quick-wrapper p { margin:0 0 18px 0; color:#6c757d; }
+
+    .main-menu-grid {
+        display:grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+        align-items: start;
+        flex-grow:1;
     }
 
-    /* Floating Pills */
-    .floating-pills {
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .floating-pill {
-        position: absolute;
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        opacity: 0.6;
-        animation: float 3s ease-in-out infinite;
-    }
-
-    .floating-pill:nth-child(1) {
-        background: #4ecdc4;
-        top: 0;
-        left: 50%;
-        animation-delay: 0s;
-    }
-
-    .floating-pill:nth-child(2) {
-        background: #ff6b6b;
-        top: 50%;
-        right: 0;
-        animation-delay: 0.5s;
-    }
-
-    .floating-pill:nth-child(3) {
-        background: #ffe66d;
-        bottom: 0;
-        left: 50%;
-        animation-delay: 1s;
-    }
-
-    .floating-pill:nth-child(4) {
-        background: #95e1d3;
-        top: 50%;
-        left: 0;
-        animation-delay: 1.5s;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-        50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
-    }
-
-    .loading-text {
-        color: #dc3545;
-        font-size: 1.5em;
+    /* ---------- Cards (bigger text like main menu) ---------- */
+    .main-card {
+        background: #fff;
+        padding: 30px 28px;
+        border-radius: 12px;
+        border: 2px solid #e8ecf4;
+        text-decoration: none;
+        transition: .2s;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        font-size: 1.08rem;
         font-weight: 600;
-        margin-bottom: 15px;
-        animation: fadeInOut 1.5s ease-in-out infinite;
+        color: #2c3e50;
+        display:flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 110px;
     }
+    .main-card:hover { transform: translateY(-4px); border-color: #c82333; }
 
-    .loading-subtext {
-        color: #6c757d;
-        font-size: 1em;
+    .main-card-header { display:flex; gap:15px; align-items:center; margin-bottom:8px; }
+    .main-card-icon {
+        width: 65px; height: 65px; border-radius: 12px;
+        background: #fde7e8; color: #c82333; display:flex; align-items:center; justify-content:center;
+        font-size: 1.8rem; flex: 0 0 65px;
     }
+    .main-card-title { margin:0; font-size:1.35rem; font-weight:800; color:#2c3e50; }
+    .main-card-description { margin:6px 0 16px; color:#6c757d; font-size:1.05rem; line-height:1.55; }
 
-    @keyframes fadeInOut {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
-    }
+    /* inline action link under card */
+    .card-action { margin-top:8px; color:#c82333; font-weight:700; text-decoration:none; display:inline-block; }
 
-    /* Progress Bar */
-    .progress-bar-container {
-        width: 250px;
-        height: 6px;
-        background: rgba(220, 53, 69, 0.2);
-        border-radius: 10px;
-        margin-top: 20px;
-        overflow: hidden;
-    }
+    /* ---------- Utilities & margin resets (to guarantee alignment) ---------- */
+    .left-column h2, .left-column h3, .right-column h2, .right-column h3 { margin-top: 0; }
+    .left-column p, .right-column p, .announcement-banner p { margin-top: 0; }
 
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #dc3545, #c82333);
-        border-radius: 10px;
-        animation: loadProgress 2s ease-in-out infinite;
-    }
-
-    @keyframes loadProgress {
-        0% { width: 0%; }
-        50% { width: 70%; }
-        100% { width: 100%; }
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1200px) {
-        .admin-menu-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 768px) {
-        .admin-container {
-            margin: 20px;
-            border-radius: 15px;
-        }
-
-        .admin-header {
-            padding: 25px;
-            flex-direction: column;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        .admin-header h1 {
-            font-size: 1.6em;
-        }
-
-        .btn-admin-logout {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .admin-content {
-            padding: 25px 25px 60px 25px;
-        }
-
-        .welcome-section {
-            padding: 20px;
-        }
-
-        .announcement-banner {
-            padding: 20px;
-        }
-
-        .announcement-banner p {
-            padding-left: 0;
-        }
-
-        .admin-menu-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .admin-card {
-            padding: 25px 20px;
-        }
-
-        .medicine-loader {
-            width: 100px;
-            height: 100px;
-        }
-
-        .pill {
-            width: 60px;
-            height: 30px;
-        }
-
-        .loading-text {
-            font-size: 1.2em;
-        }
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1100px) {
+        .content-wrapper { grid-template-columns: 1fr; }
+        .main-menu-grid { grid-template-columns: 1fr; }
+        .main-content { padding: 20px; }
+        .main-header { padding: 20px; }
     }
 </style>
 
-<div class="admin-container">
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="medicine-loader">
-            <div class="floating-pills">
-                <div class="floating-pill"></div>
-                <div class="floating-pill"></div>
-                <div class="floating-pill"></div>
-                <div class="floating-pill"></div>
-            </div>
-            <div class="pill"></div>
-        </div>
-        <div class="loading-text">
-            <i class="fas fa-heartbeat"></i> Loading...
-        </div>
-        <div class="loading-subtext">Please wait</div>
-        <div class="progress-bar-container">
-            <div class="progress-bar"></div>
-        </div>
-    </div>
+<div class="main-container">
 
-    <!-- HEADER BAR -->
-    <header class="admin-header">
+    <!-- HEADER -->
+    <header class="main-header">
         <div class="header-left">
-            <span class="header-badge">
-                <i class="fas fa-shield-alt"></i> Administrator
-            </span>
-            <h1>Dashboard</h1>
-            <p class="admin-subtitle">Manage your pharmacy operations efficiently</p>
+            <div class="logo-section">
+                <img src="{% static 'img/MediServe.png' %}" alt="MediServe Logo">
+            </div>
+
+            <div>
+                <span class="header-badge"><i class="fas fa-shield-alt"></i> Admin Portal</span>
+                <h1>Admin Dashboard</h1>
+                <p class="main-subtitle">Manage your operations efficiently</p>
+            </div>
         </div>
 
-        <a href="{% url 'logout' %}" class="btn-admin-logout">
-            <i class="fas fa-sign-out-alt"></i> Log Out
-        </a>
+        <a href="{% url 'logout' %}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Log Out</a>
     </header>
 
-    <div class="admin-content">
-        <!-- WELCOME SECTION -->
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
         <div class="welcome-section">
-            <h2>
-                <i class="fas fa-hand-wave"></i>
-                Welcome Back, Administrator
-            </h2>
-            <p>Here's what's happening with your pharmacy system today.</p>
+            <h2><i class="fas fa-hand-wave"></i> Welcome Back, Administrator</h2>
+            <p>Here are your management tools and system insights.</p>
         </div>
 
-        <!-- ANNOUNCEMENT BANNER -->
-        <div class="announcement-banner">
-            <div class="announcement-banner-header">
-                <div class="announcement-icon">
-                    <i class="fas fa-bullhorn"></i>
+        <div class="content-wrapper">
+            <!-- Left column (announcement) -->
+            <div class="left-column">
+                <div class="announcement-banner">
+                    <div class="announcement-banner-header">
+                        <div class="announcement-icon"><i class="fas fa-bullhorn"></i></div>
+                        <strong>Latest Announcement</strong>
+                    </div>
+
+                    <div class="announcement-content">
+                        {{ recent_announcement|default:"No announcements available." }}
+                    </div>
+
+                    <div class="announcement-date">
+                        <i class="fas fa-calendar-alt"></i> Updated today
+                    </div>
                 </div>
-                <strong>Latest Announcement</strong>
             </div>
-            <p>{{ recent_announcement }}</p>
-        </div>
 
-        <!-- SECTION HEADER -->
-        <div class="section-header">
-            <h3 class="section-title">
-                <i class="fas fa-th-large"></i>
-                Quick Actions
-            </h3>
-            <p class="section-subtitle">Access key features and management tools</p>
-        </div>
+            <!-- Right column (quick actions) -->
+            <div class="right-column">
+                <div class="quick-wrapper">
+                    <h3>Quick Actions</h3>
+                    <p>Select a task to manage</p>
 
-        <!-- ADMIN MENU GRID -->
-        <div class="admin-menu-grid">
+                    <div class="main-menu-grid">
+                        <a href="{% url 'medicine_stock' %}" class="main-card">
+                            <div class="main-card-header">
+                                <div class="main-card-icon"><i class="fas fa-box"></i></div>
+                                <div>
+                                    <div class="main-card-title">Manage Stock</div>
+                                    <div class="main-card-description">Update and monitor inventory</div>
+                                </div>
+                            </div>
+                            <span class="card-action">Go to Stock →</span>
+                        </a>
 
-            <!-- 1. Manage Stock -->
-            <a href="{% url 'medicine_stock' %}" class="admin-card card-stock">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-box"></i>
-                    </div>
-                    <div class="admin-card-header-text">
-                        <h3 class="admin-card-title">Manage Stock</h3>
-                        <span class="admin-card-badge">Inventory</span>
-                    </div>
-                </div>
-                <p class="admin-card-description">Track, update, and monitor medicine inventory levels in real-time</p>
-                <div class="admin-card-footer">
-                    <span>Go to Stock</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+                        <a href="{% url 'delivery_page' %}" class="main-card">
+                            <div class="main-card-header">
+                                <div class="main-card-icon"><i class="fas fa-truck"></i></div>
+                                <div>
+                                    <div class="main-card-title">Fulfill Orders</div>
+                                    <div class="main-card-description">Process deliveries and requests</div>
+                                </div>
+                            </div>
+                            <span class="card-action">View Orders →</span>
+                        </a>
 
-            <!-- 2. Fulfill Orders -->
-            <a href="{% url 'delivery_page' %}" class="admin-card card-delivery">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <div class="admin-card-header-text">
-                        <h3 class="admin-card-title">Fulfill Orders</h3>
-                        <span class="admin-card-badge">Delivery</span>
-                    </div>
-                </div>
-                <p class="admin-card-description">Process delivery requests and manage order fulfillment</p>
-                <div class="admin-card-footer">
-                    <span>View Orders</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+                        <a href="{% url 'announcements' %}" class="main-card">
+                            <div class="main-card-header">
+                                <div class="main-card-icon"><i class="fas fa-bullhorn"></i></div>
+                                <div>
+                                    <div class="main-card-title">Announcements</div>
+                                    <div class="main-card-description">Post system-wide updates</div>
+                                </div>
+                            </div>
+                            <span class="card-action">Manage Posts →</span>
+                        </a>
 
-            <!-- 3. Announcements -->
-            <a href="{% url 'announcements' %}" class="admin-card card-announcements">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <div class="admin-card-header-text">
-                        <h3 class="admin-card-title">Announcements</h3>
-                        <span class="admin-card-badge">Updates</span>
-                    </div>
-                </div>
-                <p class="admin-card-description">Create and publish important system announcements</p>
-                <div class="admin-card-footer">
-                    <span>Manage Posts</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+                        <a href="{% url 'medicine_distribution_history' %}" class="main-card">
+                            <div class="main-card-header">
+                                <div class="main-card-icon"><i class="fas fa-history"></i></div>
+                                <div>
+                                    <div class="main-card-title">History Records</div>
+                                    <div class="main-card-description">Review logs and distributions</div>
+                                </div>
+                            </div>
+                            <span class="card-action">View History →</span>
+                        </a>
 
-            <!-- 4. Analytics Dashboard -->
-            <a href="{% url 'analytics' %}" class="admin-card card-analytics">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="admin-card-header-text">
-                        <h3 class="admin-card-title">Analytics</h3>
-                        <span class="admin-card-badge">Insights</span>
-                    </div>
-                </div>
-                <p class="admin-card-description">View system trends, statistics, and performance metrics</p>
-                <div class="admin-card-footer">
-                    <span>View Analytics</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+                        <a href="{% url 'analytics' %}" class="main-card">
+                            <div class="main-card-header">
+                                <div class="main-card-icon"><i class="fas fa-chart-line"></i></div>
+                                <div>
+                                    <div class="main-card-title">Analytics</div>
+                                    <div class="main-card-description">See performance insights</div>
+                                </div>
+                            </div>
+                            <span class="card-action">View Analytics →</span>
+                        </a>
 
-            <!-- 5. Medicine History -->
-            <a href="{% url 'medicine_distribution_history' %}" class="admin-card card-history">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-history"></i>
-                    </div>
-                    <div class="admin-card-header-text">
-                        <h3 class="admin-card-title">Medicine History</h3>
-                        <span class="admin-card-badge">Records</span>
-                    </div>
-                </div>
-                <p class="admin-card-description">View complete logs and records of medicine distribution</p>
-                <div class="admin-card-footer">
-                    <span>View History</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <!-- 6. Admin Profile -->
-            <a href="{% url 'admin_profile' %}" class="admin-card card-profile">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                    <div class="admin-card-header-text">
-                        <h3 class="admin-card-title">Admin Profile</h3>
-                        <span class="admin-card-badge">Account</span>
+                        <a href="{% url 'admin_profile' %}" class="main-card">
+                            <div class="main-card-header">
+                                <div class="main-card-icon"><i class="fas fa-user-shield"></i></div>
+                                <div>
+                                    <div class="main-card-title">Admin Profile</div>
+                                    <div class="main-card-description">Manage account settings</div>
+                                </div>
+                            </div>
+                            <span class="card-action">Edit Profile →</span>
+                        </a>
                     </div>
                 </div>
-                <p class="admin-card-description">Update your administrator account and security settings</p>
-                <div class="admin-card-footer">
-                    <span>Edit Profile</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
+            </div>
         </div>
     </div>
 </div>
-
-<script>
-    // Add click event to all admin-card links
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.admin-card');
-        const loadingScreen = document.getElementById('loadingScreen');
-
-        cards.forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Show loading screen
-                loadingScreen.classList.add('active');
-            });
-        });
-    });
-</script>
 
 {% endblock %}

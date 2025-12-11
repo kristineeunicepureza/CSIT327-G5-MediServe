@@ -3,10 +3,20 @@
 
 {% block content %}
 <style>
+    /* --- Centering Wrapper --- */
+    .login-page-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 80px); /* adjusts for navbar */
+        width: 100%;
+        padding: 20px;
+    }
+
+    /* --- Login Card --- */
     .login-container {
         width: 100%;
         max-width: 900px;
-        margin: 60px auto;
         background-color: #FFFFFF;
         border-radius: 20px;
         box-shadow: 0 20px 60px rgba(54, 72, 158, 0.15);
@@ -15,6 +25,7 @@
         min-height: 550px;
     }
 
+    /* Left Section */
     .login-form-section {
         flex: 0.6;
         background-color: #FFFFFF;
@@ -34,6 +45,7 @@
         letter-spacing: 0.5px;
     }
 
+    /* Messages */
     .message-box {
         border-radius: 10px;
         padding: 14px 18px;
@@ -46,24 +58,11 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    .message-success {
-        background-color: #e6ffed;
-        color: #1b7f36;
-        border: 2px solid #1b7f36;
-    }
+    .message-success { background-color: #e6ffed; color: #1b7f36; border: 2px solid #1b7f36; }
+    .message-error { background-color: #ffe6e6; color: #d93025; border: 2px solid #d93025; }
+    .message-default { background-color: #f7f9fa; color: #333; border: 2px solid #ccc; }
 
-    .message-error {
-        background-color: #ffe6e6;
-        color: #d93025;
-        border: 2px solid #d93025;
-    }
-
-    .message-default {
-        background-color: #f7f9fa;
-        color: #333;
-        border: 2px solid #ccc;
-    }
-
+    /* Form */
     .login-form {
         width: 100%;
         max-width: 350px;
@@ -111,6 +110,7 @@
         box-shadow: 0 6px 20px rgba(54, 72, 158, 0.4);
     }
 
+    /* Right Section */
     .signup-section {
         flex: 0.4;
         background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
@@ -142,20 +142,19 @@
     }
 
     .signup-section h2 {
-        color: #FFFFFF;
+        color: #ffffff; /* pure white */
+        font-weight: 700;
         margin-bottom: 15px;
         font-size: 1.8em;
-        font-weight: 700;
-        position: relative;
         z-index: 1;
     }
 
     .signup-section p {
-        color: #E3EBEE;
         margin-bottom: 30px;
         line-height: 1.6;
         font-size: 1em;
-        position: relative;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
         z-index: 1;
     }
 
@@ -165,274 +164,78 @@
         padding: 14px 30px;
         border: none;
         border-radius: 10px;
-        text-decoration: none;
         font-weight: bold;
         font-size: 1.05em;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        position: relative;
         z-index: 1;
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        text-decoration: none;
     }
 
     .btn-signup:hover {
         background-color: #BFB9FA;
-        color: #36489e;
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(191, 185, 250, 0.4);
     }
 
-    /* Loading Screen Styles */
-    .loading-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #36489e 0%, #5c74e3 100%);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        flex-direction: column;
-    }
-
-    .loading-screen.active {
-        display: flex;
-    }
-
-    .medicine-loader {
-        position: relative;
-        width: 120px;
-        height: 120px;
-        margin-bottom: 30px;
-    }
-
-    /* Pill Animation */
-    .pill {
-        position: absolute;
-        width: 80px;
-        height: 40px;
-        border-radius: 20px;
-        background: linear-gradient(90deg, #ff6b6b 50%, #ffffff 50%);
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        animation: rotatePill 2s ease-in-out infinite;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .pill::before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 0;
-        width: 2px;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.1);
-        transform: translateX(-50%);
-    }
-
-    @keyframes rotatePill {
-        0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-        25% { transform: translate(-50%, -50%) rotate(90deg) scale(1.1); }
-        50% { transform: translate(-50%, -50%) rotate(180deg) scale(1); }
-        75% { transform: translate(-50%, -50%) rotate(270deg) scale(1.1); }
-    }
-
-    /* Floating Pills */
-    .floating-pills {
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .floating-pill {
-        position: absolute;
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        opacity: 0.6;
-        animation: float 3s ease-in-out infinite;
-    }
-
-    .floating-pill:nth-child(1) {
-        background: #4ecdc4;
-        top: 0;
-        left: 50%;
-        animation-delay: 0s;
-    }
-
-    .floating-pill:nth-child(2) {
-        background: #ff6b6b;
-        top: 50%;
-        right: 0;
-        animation-delay: 0.5s;
-    }
-
-    .floating-pill:nth-child(3) {
-        background: #ffe66d;
-        bottom: 0;
-        left: 50%;
-        animation-delay: 1s;
-    }
-
-    .floating-pill:nth-child(4) {
-        background: #95e1d3;
-        top: 50%;
-        left: 0;
-        animation-delay: 1.5s;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-        50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
-    }
-
-    .loading-text {
-        color: #FFFFFF;
-        font-size: 1.5em;
-        font-weight: 600;
-        margin-bottom: 15px;
-        animation: fadeInOut 1.5s ease-in-out infinite;
-    }
-
-    .loading-subtext {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 1em;
-    }
-
-    @keyframes fadeInOut {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
-    }
-
-    /* Progress Bar */
-    .progress-bar-container {
-        width: 250px;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        margin-top: 20px;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #ffffff, #BFB9FA);
-        border-radius: 10px;
-        animation: loadProgress 2s ease-in-out infinite;
-    }
-
-    @keyframes loadProgress {
-        0% { width: 0%; }
-        50% { width: 70%; }
-        100% { width: 100%; }
-    }
-
+    /* Responsive */
     @media (max-width: 768px) {
         .login-container {
             flex-direction: column;
-            margin: 30px 20px;
         }
-
-        .login-form-section, .signup-section {
-            flex: 1;
+        .login-form-section,
+        .signup-section {
             padding: 40px 30px;
-        }
-
-        .medicine-loader {
-            width: 100px;
-            height: 100px;
-        }
-
-        .pill {
-            width: 60px;
-            height: 30px;
-        }
-
-        .loading-text {
-            font-size: 1.2em;
         }
     }
 </style>
 
-<!-- Loading Screen -->
-<div class="loading-screen" id="loadingScreen">
-    <div class="medicine-loader">
-        <div class="floating-pills">
-            <div class="floating-pill"></div>
-            <div class="floating-pill"></div>
-            <div class="floating-pill"></div>
-            <div class="floating-pill"></div>
+<!-- Centering Wrapper -->
+<div class="login-page-wrapper">
+
+    <div class="login-container">
+
+        <!-- Left: Login Form -->
+        <div class="login-form-section">
+            <h2>Login</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message-box {% if 'success' in message.tags %}message-success{% elif 'error' in message.tags %}message-error{% else %}message-default{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" class="login-form" id="loginForm">
+                {% csrf_token %}
+
+                <input type="email" name="username" placeholder="Email"
+                       value="{{ form.username.value|default_if_none:'' }}" required class="form-input">
+
+                <input type="password" name="password" placeholder="Password" required class="form-input">
+
+                <button class="btn-login" type="submit">
+                    <i class="fas fa-sign-in-alt"></i> Log In
+                </button>
+            </form>
         </div>
-        <div class="pill"></div>
-    </div>
-    <div class="loading-text">
-        <i class="fas fa-heartbeat"></i> Loading MediServe
-    </div>
-    <div class="loading-subtext">Please wait while we prepare your dashboard...</div>
-    <div class="progress-bar-container">
-        <div class="progress-bar"></div>
-    </div>
-</div>
 
-<div class="login-container">
+        <!-- Right: Signup Section -->
+        <div class="signup-section">
+            <h2>New to MediServe?</h2>
+            <p>Enter your personal details to get started with our system.</p>
 
-    <div class="login-form-section">
-        <h2>Login</h2>
+            <a href="{% url 'signup' %}" class="btn-signup">
+                <i class="fas fa-user-plus"></i> Sign Up
+            </a>
+        </div>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="message-box {% if 'success' in message.tags %}message-success{% elif 'error' in message.tags %}message-error{% else %}message-default{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post" class="login-form" id="loginForm">
-            {% csrf_token %}
-
-            <input type="email" name="username" placeholder="Email" value="{{ form.username.value|default_if_none:'' }}" required class="form-input">
-
-            <input type="password" name="password" placeholder="Password" required class="form-input">
-
-            <button class="btn-login" type="submit">
-                <i class="fas fa-sign-in-alt"></i> Log In
-            </button>
-        </form>
-    </div>
-
-    <div class="signup-section">
-        <h2>New to MediServe?</h2>
-
-        <p>Enter your personal details to get started with our system.</p>
-
-        <a href="{% url 'signup' %}" class="btn-signup">
-            <i class="fas fa-user-plus"></i> Sign Up
-        </a>
     </div>
 
 </div>
-
-<script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        // Show loading screen when form is submitted
-        document.getElementById('loadingScreen').classList.add('active');
-    });
-
-    // Hide loading screen if there are error messages (page reloads with errors)
-    window.addEventListener('load', function() {
-        const hasErrors = document.querySelector('.message-error');
-        if (hasErrors) {
-            document.getElementById('loadingScreen').classList.remove('active');
-        }
-    });
-</script>
 
 {% endblock %}
