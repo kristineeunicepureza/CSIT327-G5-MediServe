@@ -1,3 +1,4 @@
+
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date
@@ -9,7 +10,7 @@ class MedicineForm(forms.ModelForm):
 
     class Meta:
         model = Medicine
-        fields = ['name', 'brand', 'category', 'description']
+        fields = ['name', 'brand', 'category', 'description', 'prescription_type', 'order_limit']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-input',
@@ -28,6 +29,12 @@ class MedicineForm(forms.ModelForm):
                 'class': 'form-textarea',
                 'placeholder': 'Enter description',
                 'rows': 3,
+            }),
+            'prescription_type': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+            'order_limit': forms.Select(attrs={
+                'class': 'form-select',
             }),
         }
 

@@ -4,6 +4,18 @@ from datetime import date
 
 
 class Medicine(models.Model):
+    # Medicine Types
+    PRESCRIPTION_TYPE_CHOICES = [
+        ('non_prescription', 'Non-Prescription (Over-the-Counter)'),
+        ('prescription', 'Prescription Required'),
+    ]
+
+    # Order Limit Types
+    ORDER_LIMIT_CHOICES = [
+        ('3_days', '3 Days Supply'),
+        ('1_week', '1 Week Supply'),
+    ]
+
     # Existing fields
     name = models.CharField(max_length=255)
     brand = models.CharField(max_length=255, null=True, blank=True)
@@ -12,7 +24,25 @@ class Medicine(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # NEW: Archive fields
+    # NEW: Prescription and ordering restrictions
+    prescription_type = models.CharField(
+        max_length=20,
+        choices=PRESCRIPTION_TYPE_CHOICES,
+        default='non_prescription',
+        help_text='Specify if this medicine requires a prescription'
+    )
+    order_limit = models.CharField(
+        max_length=10,
+        choices=ORDER_LIMIT_CHOICES,
+        default='1_week',
+        help_text='Maximum supply duration that can be ordered at once'
+    )
+    is_orderable = models.BooleanField(
+        default=True,
+        help_text='Only non-prescription medicines can be ordered online'
+    )
+
+    # Existing archive fields
     status = models.CharField(
         max_length=20,
         choices=[('active', 'Active'), ('archived', 'Archived')],
@@ -26,6 +56,24 @@ class Medicine(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        """Override save to automatically set is_orderable based on prescription_type"""
+        # Only non-prescription medicines can be ordered online
+        self.is_orderable = (self.prescription_type == 'non_prescription')
+        super().save(*args, **kwargs)
+
+    def get_max_order_quantity(self):
+        """Get maximum quantity that can be ordered based on order_limit"""
+        if self.order_limit == '3_days':
+            return 3  # 3 days supply
+        elif self.order_limit == '1_week':
+            return 7  # 7 days supply (1 week)
+        return 7  # default to 1 week
+
+    def can_be_ordered(self):
+        """Check if this medicine can be ordered online"""
+        return self.is_orderable and self.prescription_type == 'non_prescription' and self.status == 'active'
 
     @property
     def total_stock(self):
