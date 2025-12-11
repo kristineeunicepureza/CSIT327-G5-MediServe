@@ -9,19 +9,46 @@ from apps.orders.models import Order, OrderItem
 from apps.medicine.models import Medicine
 
 
-# 🟢 Add medicine to order
+# 🟢 Add medicine to order - UPDATED with prescription and limit validation
 @login_required
 def add_to_order(request, medicine_id):
     medicine = get_object_or_404(Medicine, id=medicine_id)
+
+    # ✅ NEW: Check if medicine can be ordered (non-prescription only)
+    if not medicine.can_be_ordered():
+        if medicine.prescription_type == 'prescription':
+            messages.error(
+                request,
+                f"❌ {medicine.name} requires a prescription and cannot be ordered online. "
+                f"Please consult with healthcare staff at the health center."
+            )
+        elif medicine.status != 'active':
+            messages.error(request, f"❌ {medicine.name} is not currently available for ordering.")
+        else:
+            messages.error(request, f"❌ {medicine.name} cannot be ordered online.")
+        return redirect("medicine_catalog")
 
     if request.method == "POST":
         quantity = int(request.POST.get("quantity", 1))
         special_request = request.POST.get("special_request", "")
 
+        # ✅ NEW: Validate order quantity limits
+        max_quantity = medicine.get_max_order_quantity()
+        if quantity > max_quantity:
+            limit_text = "3 days" if medicine.order_limit == '3_days' else "1 week"
+            messages.warning(
+                request,
+                f"⚠️ Order limit exceeded! {medicine.name} can only be ordered for {limit_text} supply "
+                f"(maximum {max_quantity} units per order)."
+            )
+            return redirect("medicine_info", medicine_id=medicine.id)
+
+        # Existing stock validation
         if quantity > medicine.total_stock:
             messages.warning(request, f"⚠️ Only {medicine.total_stock} available in stock.")
             return redirect("medicine_info", medicine_id=medicine.id)
 
+        # Check for existing pending order with same medicine
         order, created = Order.objects.get_or_create(
             user=request.user,
             status="Pending",
@@ -31,6 +58,17 @@ def add_to_order(request, medicine_id):
         # Check if item already exists
         try:
             item = OrderItem.objects.get(order=order, medicine=medicine)
+            # ✅ NEW: Validate total quantity (existing + new) doesn't exceed limits
+            total_quantity = item.quantity + quantity
+            if total_quantity > max_quantity:
+                limit_text = "3 days" if medicine.order_limit == '3_days' else "1 week"
+                messages.warning(
+                    request,
+                    f"⚠️ Total order limit exceeded! You already have {item.quantity} units of {medicine.name} "
+                    f"in your cart. Maximum allowed is {max_quantity} units ({limit_text} supply)."
+                )
+                return redirect("medicine_info", medicine_id=medicine.id)
+
             # Item exists, increment quantity
             item.quantity += quantity
             if special_request:
@@ -47,7 +85,11 @@ def add_to_order(request, medicine_id):
             )
             item_created = True
 
-        messages.success(request, f"✅ Added {quantity} × {medicine.name} to your order.")
+        limit_text = "3 days" if medicine.order_limit == '3_days' else "1 week"
+        messages.success(
+            request,
+            f"✅ Added {quantity} × {medicine.name} to your order ({limit_text} supply limit)."
+        )
         return redirect("order_list")
 
     return redirect("medicine_info", medicine_id=medicine.id)
@@ -73,9 +115,10 @@ def order_checkout(request):
     try:
         order = Order.objects.get(user=request.user, status="Pending")
 
-        # Check stock availability
+        # Check stock availability and order limits
         can_checkout = True
         for item in order.items.all():
+            # Check stock
             if item.quantity > item.medicine.total_stock:
                 can_checkout = False
                 messages.warning(
@@ -83,18 +126,37 @@ def order_checkout(request):
                     f"⚠️ Not enough stock for {item.medicine.name}. "
                     f"Available: {item.medicine.total_stock}, In cart: {item.quantity}"
                 )
+
+            # ✅ NEW: Check order limits
+            max_quantity = item.medicine.get_max_order_quantity()
+            if item.quantity > max_quantity:
+                can_checkout = False
+                limit_text = "3 days" if item.medicine.order_limit == '3_days' else "1 week"
+                messages.warning(
+                    request,
+                    f"⚠️ Order limit exceeded for {item.medicine.name}. "
+                    f"Maximum allowed: {max_quantity} units ({limit_text} supply)"
+                )
+
+            # ✅ NEW: Check if medicine is still orderable
+            if not item.medicine.can_be_ordered():
+                can_checkout = False
+                messages.error(
+                    request,
+                    f"❌ {item.medicine.name} is no longer available for ordering (prescription required)."
+                )
+
         if not can_checkout:
             return redirect("order_list")
 
         # IMPORTANT: Assign queue number FIRST while status is still "Pending"
-        # This way the order is included in the queue properly
         order.assign_queue_number()
 
         # THEN change status to Processing
         order.status = "Processing"
         order.save()
 
-        # Show priority message if applicable (green for positive messages)
+        # Show priority message if applicable
         if order.is_priority_user():
             messages.success(
                 request,
@@ -324,12 +386,12 @@ def delivery_page(request):
         is_archived=False,
         queue_number__isnull=False
     ).select_related('user').order_by('queue_number')
-    
+
     orders_without_queue = Order.objects.filter(
         is_archived=False,
         queue_number__isnull=True
     ).select_related('user').order_by('-created_at')
-    
+
     # Combine: queued orders first, then non-queued
     orders = list(orders_with_queue) + list(orders_without_queue)
 
@@ -375,9 +437,19 @@ def update_order_item(request, item_id):
         elif quantity > item.medicine.total_stock:
             messages.warning(request, f"⚠️ Only {item.medicine.total_stock} available in stock.")
         else:
-            item.quantity = quantity
-            item.save()
-            messages.success(request, f"📝 {item.medicine.name} quantity updated to {quantity}.")
+            # ✅ NEW: Check order limits when updating quantity
+            max_quantity = item.medicine.get_max_order_quantity()
+            if quantity > max_quantity:
+                limit_text = "3 days" if item.medicine.order_limit == '3_days' else "1 week"
+                messages.warning(
+                    request,
+                    f"⚠️ Order limit exceeded! {item.medicine.name} can only be ordered for {limit_text} supply "
+                    f"(maximum {max_quantity} units per order)."
+                )
+            else:
+                item.quantity = quantity
+                item.save()
+                messages.success(request, f"📝 {item.medicine.name} quantity updated to {quantity}.")
 
     return redirect("order_list")
 

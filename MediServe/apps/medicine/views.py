@@ -10,6 +10,72 @@ from .forms import MedicineForm, MedicineBatchEditForm
 
 
 # -------------------------------------------------------------------
+# UPDATED: Medicine Catalog - Filter out prescription medicines
+# -------------------------------------------------------------------
+@login_required
+def medicine_catalog(request):
+    """
+    Display medicine catalog for users.
+    UPDATED: Only show non-prescription medicines that can be ordered online.
+    """
+
+    # ✅ NEW: Only show non-prescription, orderable medicines
+    medicines = Medicine.objects.filter(
+        status='active',
+        prescription_type='non_prescription',  # Only non-prescription medicines
+        is_orderable=True  # Only orderable medicines
+    ).order_by('name')
+
+    # Get unique categories for filter dropdown (only from orderable medicines)
+    categories = Medicine.objects.filter(
+        status='active',
+        prescription_type='non_prescription',
+        is_orderable=True
+    ).values_list('category', flat=True).distinct().order_by('category')
+
+    # Search and filtering
+    search_query = request.GET.get('search', '')
+    category_filter = request.GET.get('category', '')
+    stock_filter = request.GET.get('stock', '')
+
+    if search_query:
+        medicines = medicines.filter(
+            Q(name__icontains=search_query) |
+            Q(brand__icontains=search_query) |
+            Q(category__icontains=search_query)
+        )
+
+    if category_filter:
+        medicines = medicines.filter(category=category_filter)
+
+    if stock_filter:
+        if stock_filter == 'available':
+            medicines = [m for m in medicines if m.total_stock > 0]
+        elif stock_filter == 'low':
+            medicines = [m for m in medicines if 0 < m.total_stock <= 10]
+        elif stock_filter == 'out':
+            medicines = [m for m in medicines if m.total_stock == 0]
+
+    # Add prescription info message
+    prescription_count = Medicine.objects.filter(
+        status='active',
+        prescription_type='prescription'
+    ).count()
+
+    context = {
+        'medicines': medicines,
+        'categories': categories,
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'stock_filter': stock_filter,
+        'prescription_count': prescription_count,  # Show how many prescription meds are hidden
+        'total_orderable': len(medicines),
+    }
+
+    return render(request, 'medicine_catalog.html', context)
+
+
+# -------------------------------------------------------------------
 # UPDATED: Get Next Batch ID - EXCLUDES ARCHIVED BATCHES
 # -------------------------------------------------------------------
 @login_required
@@ -17,16 +83,12 @@ def get_next_batch_id(request):
     """
     Return the next available batch ID in sequence.
     EXCLUDES ARCHIVED BATCHES - archived batch numbers cannot be reused.
-
-    Example: If BATCH-007 is archived, the next batch will be BATCH-008
     """
-    # Check if there are ANY batches (including archived) to continue numbering
     all_batches_ever = MedicineBatch.objects.filter(
         batch_id__startswith='BATCH-'
     ).values_list('batch_id', flat=True)
 
     if all_batches_ever:
-        # Extract numbers from ALL batches (active + archived)
         numbers = []
         for batch in all_batches_ever:
             try:
@@ -36,7 +98,6 @@ def get_next_batch_id(request):
                 continue
 
         if numbers:
-            # Next batch ID is max + 1 (includes archived in the count)
             next_number = max(numbers) + 1
         else:
             next_number = 1
@@ -48,15 +109,13 @@ def get_next_batch_id(request):
 
 
 # -------------------------------------------------------------------
-# Admin: Medicine Stock (FEFO Batch View) - UPDATED BATCH ID GENERATION
+# UPDATED: Admin Medicine Stock - Include prescription fields
 # -------------------------------------------------------------------
 @login_required
 def medicine_stock(request):
     """
-    Medicine stock management (FEFO batch view) with archive system.
+    Medicine stock management with prescription type and order limits.
     Shows only ACTIVE batches.
-
-    UPDATED: Batch ID generation excludes archived batches
     """
 
     # Get all ACTIVE batches sorted by expiry date (FEFO)
@@ -91,30 +150,24 @@ def medicine_stock(request):
         elif stock_filter == 'high':
             batches = batches.filter(quantity_available__gt=50)
 
-    # Get unique categories for filter dropdown (from active medicines)
+    # Get unique categories for filter dropdown
     categories = Medicine.objects.filter(
         status='active'
     ).values_list('category', flat=True).distinct()
 
-    # Count archived batches for header button
+    # Count archived batches
     archived_count_display = MedicineBatch.objects.filter(status='archived').count()
-
-    # Add today's date for expired badge check
     today = date.today()
 
     # Handle POST - Add New Batch
     if request.method == 'POST':
         try:
-            # ✅ UPDATED: AUTO-GENERATE BATCH ID - Continues numbering after archived batches
-            # Example: If BATCH-007 is archived, next will be BATCH-008
-
-            # Get ALL batch IDs (including archived ones)
+            # Auto-generate batch ID
             all_batches_ever = MedicineBatch.objects.filter(
                 batch_id__startswith='BATCH-'
             ).values_list('batch_id', flat=True)
 
             if all_batches_ever:
-                # Extract numbers from ALL batches (active + archived)
                 numbers = []
                 for batch in all_batches_ever:
                     try:
@@ -124,7 +177,6 @@ def medicine_stock(request):
                         continue
 
                 if numbers:
-                    # Next batch ID is max + 1 (includes archived in the count)
                     next_number = max(numbers) + 1
                 else:
                     next_number = 1
@@ -142,21 +194,13 @@ def medicine_stock(request):
             description = request.POST.get('description', '').strip()
             quantity_str = request.POST.get('quantity', '').strip()
 
+            # ✅ NEW: Get prescription and order limit fields
+            prescription_type = request.POST.get('prescription_type', 'non_prescription')
+            order_limit = request.POST.get('order_limit', '1_week')
+
             # Validation
-            if not date_received_str:
-                messages.error(request, '❌ Date Received is required!')
-                return redirect('medicine_stock')
-
-            if not expiry_date_str:
-                messages.error(request, '❌ Expiry Date is required!')
-                return redirect('medicine_stock')
-
-            if not medicine_name:
-                messages.error(request, '❌ Medicine Name is required!')
-                return redirect('medicine_stock')
-
-            if not quantity_str:
-                messages.error(request, '❌ Quantity is required!')
+            if not all([date_received_str, expiry_date_str, medicine_name, quantity_str]):
+                messages.error(request, '❌ All required fields must be filled!')
                 return redirect('medicine_stock')
 
             # Convert dates
@@ -164,29 +208,20 @@ def medicine_stock(request):
                 expiry_date = datetime.strptime(expiry_date_str, '%Y-%m-%d').date()
                 date_received = datetime.strptime(date_received_str, '%Y-%m-%d').date()
             except ValueError:
-                messages.error(request, '❌ Invalid date format! Please use the date picker.')
+                messages.error(request, '❌ Invalid date format!')
                 return redirect('medicine_stock')
 
             # Date validation
             if date_received > today:
-                messages.error(
-                    request,
-                    f'❌ Date Received cannot be in the future! You entered: {date_received.strftime("%B %d, %Y")} but today is {today.strftime("%B %d, %Y")}.'
-                )
+                messages.error(request, '❌ Date Received cannot be in the future!')
                 return redirect('medicine_stock')
 
             if expiry_date <= today:
-                messages.error(
-                    request,
-                    f'❌ Expiry Date must be in the future! You entered: {expiry_date.strftime("%B %d, %Y")} but today is {today.strftime("%B %d, %Y")}.'
-                )
+                messages.error(request, '❌ Expiry Date must be in the future!')
                 return redirect('medicine_stock')
 
             if expiry_date <= date_received:
-                messages.error(
-                    request,
-                    f'❌ Expiry Date ({expiry_date.strftime("%B %d, %Y")}) must be after Date Received ({date_received.strftime("%B %d, %Y")})!'
-                )
+                messages.error(request, '❌ Expiry Date must be after Date Received!')
                 return redirect('medicine_stock')
 
             # Validate quantity
@@ -196,51 +231,54 @@ def medicine_stock(request):
                     messages.error(request, '❌ Quantity must be greater than 0!')
                     return redirect('medicine_stock')
             except ValueError:
-                messages.error(request, '❌ Invalid quantity! Please enter a valid number.')
+                messages.error(request, '❌ Invalid quantity!')
                 return redirect('medicine_stock')
 
             # Create batch with transaction
             with transaction.atomic():
-                # Get or create medicine (case-insensitive check)
+                # Get or create medicine
                 medicine = Medicine.objects.filter(
                     name__iexact=medicine_name,
                     status='active'
                 ).first()
 
                 if medicine:
-                    # Medicine exists - update info if new data provided
+                    # Update existing medicine
                     updated_fields = []
-
                     if brand and brand != medicine.brand:
                         medicine.brand = brand
                         updated_fields.append('brand')
-
                     if category and category != medicine.category:
                         medicine.category = category
                         updated_fields.append('category')
-
                     if description and description != medicine.description:
                         medicine.description = description
                         updated_fields.append('description')
+                    if prescription_type != medicine.prescription_type:
+                        medicine.prescription_type = prescription_type
+                        updated_fields.append('prescription_type')
+                    if order_limit != medicine.order_limit:
+                        medicine.order_limit = order_limit
+                        updated_fields.append('order_limit')
 
                     if updated_fields:
-                        medicine.save()
-                        messages.info(
-                            request,
-                            f'ℹ️ Updated {", ".join(updated_fields)} for existing medicine "{medicine.name}".'
-                        )
+                        medicine.save()  # This will auto-set is_orderable
+                        messages.info(request, f'ℹ️ Updated {", ".join(updated_fields)} for "{medicine.name}".')
                 else:
-                    # Create new medicine (automatically active)
+                    # Create new medicine
                     medicine = Medicine.objects.create(
                         name=medicine_name,
                         brand=brand if brand else None,
                         category=category if category else None,
                         description=description if description else None,
+                        prescription_type=prescription_type,
+                        order_limit=order_limit,
                         status='active'
                     )
-                    messages.info(request, f'ℹ️ New medicine "{medicine.name}" created.')
+                    order_status = "✅ Can be ordered online" if medicine.can_be_ordered() else "❌ Prescription required"
+                    messages.info(request, f'ℹ️ New medicine "{medicine.name}" created. {order_status}')
 
-                # Create batch entry (automatically active)
+                # Create batch entry
                 new_batch = MedicineBatch.objects.create(
                     batch_id=batch_id,
                     medicine=medicine,
@@ -252,21 +290,23 @@ def medicine_stock(request):
                     status='active'
                 )
 
+                limit_text = "3 days" if medicine.order_limit == '3_days' else "1 week"
+                prescription_status = "Non-prescription" if medicine.prescription_type == 'non_prescription' else "Prescription required"
+
                 messages.success(
                     request,
                     f'✅ Batch "{batch_id}" added successfully!\n'
-                    f'Medicine: {medicine.name}\n'
-                    f'Quantity: {quantity} units\n'
-                    f'Expiry: {expiry_date.strftime("%B %d, %Y")}'
+                    f'Medicine: {medicine.name} ({prescription_status})\n'
+                    f'Order Limit: {limit_text} supply\n'
+                    f'Quantity: {quantity} units'
                 )
 
         except Exception as e:
             messages.error(request, f'❌ Unexpected error: {str(e)}')
-            print(f"Error in medicine_stock POST: {e}")
 
         return redirect('medicine_stock')
 
-    # GET request - render the page
+    # GET request
     return render(request, 'medicine_stock.html', {
         'batches': batches,
         'all_medicines': all_medicines,
@@ -277,6 +317,9 @@ def medicine_stock(request):
         'archived_count': archived_count_display,
         'today': today,
     })
+
+
+# ... [Keep all other existing views like archived_medicines, archive_batch, etc.] ...
 
 
 # -------------------------------------------------------------------
@@ -763,13 +806,40 @@ def add_to_order(request, medicine_id):
 # -------------------------------------------------------------------
 # Medicine History and Records (Placeholder views)
 # -------------------------------------------------------------------
+
+# -------------------------------------------------------------------
+# Medicine History and Records (Placeholder views)
+# -------------------------------------------------------------------
 @login_required
 def medicine_history(request):
-    """Medicine history page."""
-    return render(request, 'medicine_history.html')
+    """Medicine history page - show user's completed orders."""
+    from apps.orders.models import Order
+
+    # Get user's completed orders
+    past_orders = Order.objects.filter(
+        user=request.user,
+        status='Completed'
+    ).order_by('-completed_at', '-created_at')
+
+    context = {
+        'past_orders': past_orders,
+    }
+
+    return render(request, 'medicine_history.html', context)
 
 
 @login_required
 def medicine_records(request):
     """Medicine records page."""
-    return render(request, 'medicine_records.html')
+    # Get transaction records for the logged-in user
+    from apps.orders.models import Order
+
+    records = Order.objects.filter(
+        user=request.user
+    ).exclude(status='Pending').order_by('-created_at')
+
+    context = {
+        'records': records,
+    }
+
+    return render(request, 'medicine_records.html', context)
