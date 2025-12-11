@@ -890,3 +890,27 @@ def medicine_records(request):
     }
 
     return render(request, 'medicine_records.html', context)
+
+
+def exclude_antibiotics(queryset):
+    """
+    Filter out any medicines with 'antibiotic' in name, category, or description.
+    Works with both Medicine and MedicineBatch querysets.
+    """
+    # Check if this is a MedicineBatch queryset or Medicine queryset
+    model_name = queryset.model.__name__
+
+    if model_name == 'MedicineBatch':
+        # For MedicineBatch, use medicine__ prefix to access related Medicine fields
+        return queryset.exclude(
+            Q(medicine__name__icontains='antibiotic') |
+            Q(medicine__category__icontains='antibiotic') |
+            Q(medicine__description__icontains='antibiotic')
+        )
+    else:
+        # For Medicine, access fields directly
+        return queryset.exclude(
+            Q(name__icontains='antibiotic') |
+            Q(category__icontains='antibiotic') |
+            Q(description__icontains='antibiotic')
+        )
