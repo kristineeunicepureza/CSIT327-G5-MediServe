@@ -159,16 +159,13 @@ class Order(models.Model):
         has_pwd_id = bool(self.user.pwd_id and self.user.pwd_id.name)
         return has_senior_id or has_pwd_id
 
-    # ... existing code ...
-
-    class Order(models.Model):
-        # ... existing fields ...
-
-        def get_total_quantity(self):
-            """Get total quantity of all items in this order"""
-            return sum(item.quantity for item in self.items.all())
-
-        # ... rest of existing code ...
+    def get_total_quantity(self):
+        """Get total quantity of all items in this order"""
+        try:
+            total = sum(item.quantity for item in self.items.all())
+            return total if total > 0 else 0
+        except:
+            return 0
 
 
 class OrderItem(models.Model):
