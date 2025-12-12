@@ -82,12 +82,14 @@
         padding: 40px 50px;
     }
 
-    /* CHANGED: Side-by-side layout for sections */
+    /* CHANGED: Centered single column layout */
     .sections-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
+        display: flex;
+        justify-content: center;
         margin-bottom: 35px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .section-title {
@@ -103,16 +105,17 @@
     }
 
     .form-section {
-        margin-bottom: 0;  /* CHANGED: Removed bottom margin for side-by-side */
+        margin-bottom: 0;
         padding: 25px;
         background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
         border-radius: 12px;
         border: 2px solid #e8ecf4;
+        width: 100%;
     }
 
     .form-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 20px;
         margin-bottom: 20px;
     }
@@ -305,14 +308,6 @@
         <form method="post" id="editForm">
             {% csrf_token %}
 
-            <!-- BATCH ID DISPLAY -->
-            <div class="batch-info">
-                <span class="batch-info-label">
-                    <i class="fas fa-barcode"></i> Batch ID:
-                </span>
-                <span class="batch-info-value">{{ batch.batch_id }}</span>
-            </div>
-
             <!-- SIDE-BY-SIDE SECTIONS -->
             <div class="sections-container">
                 <!-- MEDICINE INFORMATION (LEFT) -->
@@ -376,93 +371,6 @@
                                   placeholder="Medicine description, usage, side effects...">{{ medicine.description|default:'' }}</textarea>
                     </div>
                 </div>
-
-                <!-- BATCH INFORMATION (RIGHT) -->
-                <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-box"></i> Batch Information
-                    </h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-calendar-plus"></i> Date Received <span class="required">*</span>
-                            </label>
-                            <input type="date"
-                                   name="date_received"
-                                   id="date_received"
-                                   value="{{ batch.date_received|date:'Y-m-d' }}"
-                                   required
-                                   class="form-input">
-                            <div class="field-hint">
-                                <i class="fas fa-info-circle"></i>
-                                Cannot be in the future
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-calendar-times"></i> Expiry Date <span class="required">*</span>
-                            </label>
-                            <input type="date"
-                                   name="expiry_date"
-                                   id="expiry_date"
-                                   value="{{ batch.expiry_date|date:'Y-m-d' }}"
-                                   required
-                                   class="form-input">
-                            <div class="field-hint">
-                                <i class="fas fa-info-circle"></i>
-                                Must be in the future and after date received
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-boxes"></i> Quantity Received <span class="required">*</span>
-                            </label>
-                            <input type="number"
-                                   name="quantity_received"
-                                   id="quantity_received"
-                                   value="{{ batch.quantity_received }}"
-                                   min="1"
-                                   required
-                                   class="form-input">
-                            <div class="field-hint">
-                                <i class="fas fa-info-circle"></i>
-                                Total quantity received in this batch
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-box-open"></i> Quantity Available <span class="required">*</span>
-                            </label>
-                            <input type="number"
-                                   name="quantity_available"
-                                   id="quantity_available"
-                                   value="{{ batch.quantity_available }}"
-                                   min="0"
-                                   required
-                                   class="form-input">
-                            <div class="field-hint">
-                                <i class="fas fa-info-circle"></i>
-                                Current available quantity (cannot exceed received)
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dispensed Quantity Display (Read-only info) -->
-                    <div class="batch-info" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border-color: #ffc107;">
-                        <span class="batch-info-label" style="color: #856404;">
-                            <i class="fas fa-hand-holding-medical"></i> Quantity Dispensed:
-                        </span>
-                        <span class="batch-info-value" style="color: #856404; border-color: #ffc107;">
-                            {{ batch.quantity_dispensed }} units
-                        </span>
-                    </div>
-                </div>
             </div>
 
             <!-- ACTION BUTTONS -->
@@ -481,92 +389,7 @@
 <script>
 // DATE VALIDATION
 document.addEventListener('DOMContentLoaded', function() {
-    const today = new Date();
-    const dateReceivedInput = document.getElementById('date_received');
-    const expiryDateInput = document.getElementById('expiry_date');
-    const quantityReceivedInput = document.getElementById('quantity_received');
-    const quantityAvailableInput = document.getElementById('quantity_available');
-
-    // Format date as YYYY-MM-DD
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    // Set max for date_received to today
-    if (dateReceivedInput) {
-        dateReceivedInput.setAttribute('max', formatDate(today));
-    }
-
-    // Validate date_received on change
-    if (dateReceivedInput) {
-        dateReceivedInput.addEventListener('change', function() {
-            const selectedDate = new Date(this.value);
-            const todayCopy = new Date();
-            todayCopy.setHours(0, 0, 0, 0);
-            selectedDate.setHours(0, 0, 0, 0);
-
-            if (selectedDate > todayCopy) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Date',
-                    text: 'Date Received cannot be in the future!',
-                    confirmButtonColor: '#dc3545'
-                });
-                this.value = '';
-            }
-        });
-    }
-
-    // Validate expiry_date on change
-    if (expiryDateInput) {
-        expiryDateInput.addEventListener('change', function() {
-            const expiryDate = new Date(this.value);
-            const dateReceived = new Date(dateReceivedInput.value);
-            const todayCopy = new Date();
-            todayCopy.setHours(0, 0, 0, 0);
-            expiryDate.setHours(0, 0, 0, 0);
-            dateReceived.setHours(0, 0, 0, 0);
-
-            if (expiryDate <= todayCopy) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Expiry Date',
-                    text: 'Expiry Date must be in the future!',
-                    confirmButtonColor: '#dc3545'
-                });
-                this.value = '';
-            } else if (dateReceivedInput.value && expiryDate <= dateReceived) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Expiry Date',
-                    text: 'Expiry Date must be after Date Received!',
-                    confirmButtonColor: '#dc3545'
-                });
-                this.value = '';
-            }
-        });
-    }
-
-    // Validate quantity_available
-    if (quantityAvailableInput && quantityReceivedInput) {
-        quantityAvailableInput.addEventListener('change', function() {
-            const available = parseInt(this.value);
-            const received = parseInt(quantityReceivedInput.value);
-
-            if (available > received) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Quantity',
-                    text: 'Available quantity cannot exceed received quantity!',
-                    confirmButtonColor: '#dc3545'
-                });
-                this.value = received;
-            }
-        });
-    }
+    // Form submission confirmation only
 });
 
 // FORM SUBMISSION CONFIRMATION
@@ -588,6 +411,7 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
         }
     });
 });
+
 </script>
 
 {% endblock %}

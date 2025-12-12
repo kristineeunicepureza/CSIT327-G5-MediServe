@@ -624,7 +624,7 @@ def medicine_distribution_history(request):
         status='Completed',
         user__is_staff=False,
         user__is_superuser=False
-    ).select_related('user').prefetch_related('items__medicine').order_by('-completed_at')
+    ).select_related('user').prefetch_related('items', 'items__medicine').order_by('-completed_at')
 
     # Apply filters
     search_query = request.GET.get('search', '')
